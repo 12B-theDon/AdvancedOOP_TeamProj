@@ -41,11 +41,13 @@ Qt Widgets로 화면을 구성한다. 그래프는 SVG를 직접 생성하므로
 |---|---|
 | 1. DB | 세 Built-in tile 또는 External folder를 선택한다. Hover는 기본 Resolution을 보여준다. 선택 후 TIFF 총수와 Resolution별 수를 표시한다. |
 | 2. Enrollment | Single 또는 Ctrl/Shift 기반 Multiple selection이다. 각 Image가 별도 Template을 만든다. |
-| 3. Templates | Weight folder와 네 Model checkbox를 확인한다. Built-in은 해당 Model 하나, External은 네 개가 기본 선택된다. `Create enrollment templates`를 눌러야 Comparison 실행이 활성화된다. |
+| 3. Templates | 학습을 완료했거나 공유받은 Fine-tuned Weight 폴더와 Model을 선택한다. Built-in은 해당 모델 하나, External은 네 개가 기본 선택된다. `Create enrollment templates`로 Template을 생성한다. |
 | 4. Comparison type | Genuine, Impostor, Both 중 하나를 선택한다. 선택 전에는 Next가 비활성화된다. |
 | 5. Comparison rules | 선택한 Type의 Rule만 표시한다. Both는 Genuine/Impostor를 각각 설정한다. Pair 수만 표시하며 결과 표는 아직 보여주지 않는다. |
 | 6. Run | 선택 Type·Rule·Pair 수를 확인하고 `Run selected comparisons`를 누른다. 선택한 Type만 한 번에 실행한다. 실행 전에는 Results로 넘어갈 수 없다. |
 | 7. Results | 선택 Type의 결과 Tab과 Metrics and report Tab을 표시한다. 선택 Metric만 화면·HTML에 표시한다. 저장은 전체 Metric CSV·선택 Comparison의 Raw CSV·필요한 SVG를 포함한다. |
+
+GUI는 `models/pretrained/deepprint.bin`을 비교용 모델로 사용하지 않는다. Clone 직후에는 Fine-tuning을 먼저 실행하거나 학습된 모델을 별도로 받아야 한다. Root의 `models/run_01`은 학습 명령의 출력 예시이며, GUI에서는 실제 네 `.bin`이 생성된 폴더를 선택한다.
 
 DB의 바로 아래 `.tif`·`.tiff`를 읽으며 Subfolder는 재귀 탐색하지 않는다. 총수 표시는 TIFF 파일 기준이고 선택 List에는 Decode 가능한 이미지만 넣는다. 이름이 `finger_capture`이면 Known ID로 해석한다. 그 외 파일명도 Enrollment는 가능하지만 자동 Genuine/Impostor 후보에서는 제외한다. 이 경우 해당 Type의 Rule에서 CSV로 Label을 지정한다.
 

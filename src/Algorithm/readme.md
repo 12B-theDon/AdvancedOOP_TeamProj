@@ -210,9 +210,9 @@ Engine은 Image buffer를 전달하고 Algorithm은 Model별 Template·Score·Er
 
 ### 초기 Weight 준비
 
-학습 초기값인 `models/pretrained/deepprint.bin`과 정보 파일 `deepprint.json`은 저장소에 포함한다. Git LFS를 설치한 뒤 Clone하면 받으며, 빠졌다면 Project root에서 `git lfs pull`을 실행한다. 이 파일을 사용하면 아래 Python 변환 과정은 생략한다. C++ 프로그램은 Archive에 포함된 Encoder와 전처리를 사용한다.
+학습 초기값인 `models/pretrained/deepprint.bin`과 정보 파일 `deepprint.json`은 저장소에 포함한다. Git LFS를 설치한 뒤 Clone하면 받으며, 빠졌다면 Project root에서 `git lfs pull`을 실행한다. Clone한 사전학습 파일로 바로 Fine-tuning할 수 있으며 아래 Python 변환 과정은 필요하지 않다. C++ 프로그램은 Archive에 포함된 Encoder와 전처리를 사용한다. 이 초기 모델은 `model_id=pretrained`이므로 GUI의 비교용 모델 목록에는 해당하지 않는다.
 
-직접 변환하려면 [공개 원본 Weight](https://drive.google.com/file/d/1R9v73hFBuy0iihz7v8eDlBcGrMDmQ9TH/view)를 내려받아 `models/pretrained/best_model.pyt`에 둔다. 위 Provenance 표의 SHA-256으로 파일을 구분할 수 있다. 원본 `.pyt`는 C++에서 직접 읽는 형식이 아니다.
+아래 과정은 원본 checkpoint를 **직접 다시 변환할 때만** 사용한다. 직접 변환하려면 [공개 원본 Weight](https://drive.google.com/file/d/1R9v73hFBuy0iihz7v8eDlBcGrMDmQ9TH/view)를 내려받아 `models/pretrained/best_model.pyt`에 둔다. 위 Provenance 표의 SHA-256으로 파일을 구분할 수 있다. 원본 `.pyt`는 C++에서 직접 읽는 형식이 아니다.
 
 Project root에서 Submodule을 받고 Patch를 **한 번만** 적용한다. 이미 적용한 작업 폴더라면 두 `apply` 명령은 생략한다.
 
@@ -250,13 +250,13 @@ TorchScript는 Deprecated/Legacy API지만 현재 C++ 학습·재로딩 경로�
 
 ### C++ 증강·학습·추론
 
-Build 후 [Root 실행 순서](../../readme.md)를 따른다. 초기 입력 파일명은 모든 명령에서 `models/pretrained/deepprint.bin`으로 통일한다.
+Build 후 [Root 실행 순서](../../readme.md)를 따른다. 학습 입력은 Clone에 포함된 `models/pretrained/deepprint.bin`이다. 출력 폴더는 학습 명령이 자동 생성하며, 학습 완료 후 생성된 네 Fine-tuned 모델을 GUI에서 사용한다. 이 출력 폴더는 Clone에 포함되지 않는다.
 
 | 실행 | 입력과 결과 |
 |---|---|
 | `FingerprintTrain data/original models/pretrained/deepprint.bin models/retrain_01 --augment-only` | 원본을 보존하면서 증강만 준비한다. |
 | `FingerprintTrain data/original models/pretrained/deepprint.bin models/retrain_01` | 증강을 생성하거나 재사용한 뒤 네 모델을 독립 학습하고 재로딩·추론을 검증한다. |
-| `FingerprintGUI` | GUI에서 `models/retrain_01`을 선택해 새 Weight로 비교한다. |
+| `FingerprintGUI` | 위 학습을 완료했다면 `models/retrain_01`을 선택한다. 다른 출력 경로를 사용했다면 실제 모델 폴더를 선택한다. |
 
 위 표의 실행 파일은 macOS/Linux에서 `./build/`, Windows에서 `.\build-vs\Release\` 아래에 있다. Windows 파일명에는 `.exe`를 붙인다. 출력 폴더에 네 `.bin` 중 하나라도 있으면 기존 결과를 보호하기 위해 중단한다. 재학습은 새로운 폴더명으로 실행한다.
 

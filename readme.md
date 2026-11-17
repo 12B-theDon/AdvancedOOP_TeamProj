@@ -4,6 +4,8 @@
 
 [![Project overview](docs/diagrams/overview.png)](docs/diagrams/overview.svg)
 
+![GUI demo](demo.gif)
+
 ## GUI Flow
 
 **1. DB 선택 → 2. 등록 이미지 선택 → 3. Template 생성 → 4. 비교 종류 선택 → 5. 비교 규칙 선택 → 6. 실행 → 7. 결과 확인**
@@ -44,13 +46,15 @@ copy /Y "C:\deps\libtorch\lib\*.dll" "build-vs\Release\" && "C:\deps\Qt\msvc2022
 
 #### 3. Training
 
-사전학습 파일 **`models/pretrained/deepprint.bin`**은 Git LFS를 통해 Clone할 때 함께 받습니다. 파일이 내려오지 않았다면 프로젝트 폴더에서 `git lfs pull`을 실행합니다. 원본 checkpoint를 직접 변환하는 방법은 [Algorithm README](src/Algorithm/readme.md#conversion--offline-run)에 있습니다.
+사전학습 파일 **`models/pretrained/deepprint.bin`**과 정보 파일 `deepprint.json`은 Clone할 때 함께 받습니다. 모델이 내려오지 않았다면 프로젝트 폴더에서 `git lfs pull`을 실행합니다. Python 변환은 필요하지 않습니다. [사전학습 파일 안내](src/Algorithm/readme.md#conversion--offline-run)
+
+**Clone 직후에는 `models/run_01`이 없습니다.** 아래 명령을 실행하면 출력 폴더가 자동 생성되고, 학습이 완료되면 GUI에서 사용할 네 모델이 저장됩니다. `deepprint.bin`은 학습 초기값이며 GUI에서 직접 선택하는 비교용 모델은 아닙니다.
 
 ```bat
 build-vs\Release\FingerprintTrain.exe data\original models\pretrained\deepprint.bin models\run_01
 ```
 
-증강 데이터 생성 후 세 DB의 개별 모델과 통합 모델을 학습해 `models/run_01`에 저장합니다. 재학습할 때는 `run_02`처럼 **새 출력 폴더명**을 사용합니다. 이미 학습된 모델이 있으면 이 단계는 생략합니다. [IDE에서 학습하기](src/Algorithm/readme.md#windows--visual-studio)
+세 DB의 개별 모델과 통합 모델을 각각 학습합니다. 재학습에는 `run_02`처럼 **새 출력 폴더명**을 사용합니다. 이미 학습된 네 모델을 별도로 받은 경우에는 이 단계를 생략할 수 있습니다. [IDE에서 학습하기](src/Algorithm/readme.md#windows--visual-studio)
 
 #### 4. Inference
 
@@ -58,7 +62,9 @@ build-vs\Release\FingerprintTrain.exe data\original models\pretrained\deepprint.
 build-vs\Release\FingerprintGUI.exe
 ```
 
-GUI의 Step 3에서 `Select weights folder...`를 눌러 `models/run_01`을 선택합니다. IDE에서는 **FingerprintGUI → Set as Startup Project → Ctrl+F5**로 실행합니다. 새 Command Prompt를 열었다면 Step 2의 `set` 두 줄을 다시 실행합니다.
+GUI의 Step 3에서 `Select weights folder...`를 누르고 **학습이 완료된 모델 폴더**를 선택합니다. 위 Training 명령을 완료했다면 `models/run_01`, 다른 경로로 학습했거나 모델을 공유받았다면 해당 폴더를 선택합니다. Clone만 한 상태에서는 학습을 먼저 완료해야 비교할 수 있습니다.
+
+IDE에서는 **FingerprintGUI → Set as Startup Project → Ctrl+F5**로 실행합니다. 새 Command Prompt를 열었다면 Step 2의 `set` 두 줄을 다시 실행합니다.
 
 ## macOS / Linux
 
@@ -86,13 +92,15 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH="/usr;/opt/libtorch" -DCMAKE_BUILD_TYPE=
 
 #### 3. Training
 
-`models/pretrained/deepprint.bin`은 Git LFS로 함께 받습니다. 파일이 없다면 `git lfs pull`을 실행한 뒤 학습합니다. [사전학습 파일 안내](src/Algorithm/readme.md#conversion--offline-run)
+`models/pretrained/deepprint.bin`은 Git LFS로 함께 받습니다. 파일이 없다면 `git lfs pull`을 실행합니다. Python 변환 없이 아래 명령으로 학습할 수 있습니다. [사전학습 파일 안내](src/Algorithm/readme.md#conversion--offline-run)
+
+**`models/run_01`은 Clone에 포함된 폴더가 아니라 학습 명령이 생성하는 출력 폴더입니다.**
 
 ```sh
 ./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01
 ```
 
-증강부터 네 모델의 학습까지 순서대로 진행합니다. 결과는 `models/run_01`에 저장하며, 재학습에는 새 출력 폴더명을 사용합니다. 증강만 실행하려면 명령 끝에 `--augment-only`를 붙입니다.
+증강부터 네 모델의 학습까지 순서대로 진행합니다. 학습이 완료되면 출력 폴더에 GUI용 모델이 저장됩니다. 재학습에는 새 출력 폴더명을 사용합니다. `--augment-only`를 붙이면 증강만 생성하며, GUI용 모델은 생성하지 않습니다.
 
 #### 4. Inference
 
@@ -100,7 +108,7 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH="/usr;/opt/libtorch" -DCMAKE_BUILD_TYPE=
 ./build/FingerprintGUI
 ```
 
-Step 3에서 `models/run_01`을 선택합니다. 이미 학습한 모델이 있으면 재빌드·재학습 없이 이 명령으로 실행합니다. Linux에서는 GUI를 표시할 데스크톱 세션이 필요합니다.
+Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명령으로 학습했다면 `models/run_01`입니다. 학습을 생략하려면 별도로 받은 Fine-tuned 모델 폴더가 필요하며, `models/pretrained`는 GUI 비교용 폴더가 아닙니다. Linux에서는 GUI를 표시할 데스크톱 세션이 필요합니다.
 
 ## DLL / Algorithm Replacement
 
@@ -150,7 +158,7 @@ Step 3에서 `models/run_01`을 선택합니다. 이미 학습한 모델이 있�
 |---|---|
 | 1. DB | 제공 DB 3개 중 하나를 선택하거나 `Load external DB...`로 TIFF 폴더를 불러옵니다. |
 | 2. Enrollment | 등록할 이미지 한 장 또는 여러 장을 선택합니다. 각 이미지는 별도의 Template이 됩니다. |
-| 3. Template | Weight 폴더와 사용할 모델을 선택하고 Template을 생성합니다. 제공 DB는 해당 모델이 기본 선택되며, 통합 모델도 선택할 수 있습니다. |
+| 3. Template | 학습이 완료된 Weight 폴더와 사용할 모델을 선택해 Template을 생성합니다. 제공 DB는 해당 개별 모델이 기본값이며, 통합 모델도 선택할 수 있습니다. |
 | 4. Comparison type | 같은 손가락은 `Genuine`, 다른 손가락은 `Impostor`, 모두 비교하려면 `Both`를 선택합니다. |
 | 5. Comparison rules | 전체 이미지, 손가락당 한 장, 지정 촬영 번호, 무작위 개수, CSV 중 비교 대상을 고르는 방법을 선택합니다. 무작위 선택에만 Seed를 사용합니다. |
 | 6. Run | 비교 개수를 확인하고 `Run selected comparisons`를 누릅니다. |
