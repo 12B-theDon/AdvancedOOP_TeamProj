@@ -5,7 +5,7 @@ Branch: `main`.
 
 ## Clone / Dependencies
 
-Use `git clone --recurse-submodules` to include the external encoder source.
+Install Git LFS and run `git lfs install` before `git clone --recurse-submodules`. The clone includes the external encoder source and the pretrained encoder. Run `git lfs pull` in the project if the weight was not downloaded.
 
 | Item | Value |
 |---|---|
@@ -21,16 +21,17 @@ Before one-time checkpoint conversion, apply the tracked patch with
 previous import cleanup and constant-image normalization. Keep the patch in the
 main repository; do not commit it to the upstream project.
 
-Qt and LibTorch are installed separately. The whole `models` directory, including
-pretrained checkpoints and fine-tuned weights, is excluded. Prepare checkpoints
-using the [Algorithm instructions](../src/Algorithm/readme.md#conversion--offline-run).
+Qt and LibTorch are installed separately. Only `models/pretrained/deepprint.bin`
+(Git LFS) and `deepprint.json` are included. Original checkpoints and fine-tuned
+weights are excluded. Optional checkpoint conversion is described in the
+[Algorithm instructions](../src/Algorithm/readme.md#conversion--offline-run).
 
 ## Included / Excluded
 
-- Included: source, CMake, original TIFF DBs, diagrams, GUI_flows, and Report_example.
-- Excluded: `build*`, `out`, `data/augmented`, `model`, `models`, IDE and Python caches.
+- Included: source, CMake, original TIFF DBs, pretrained encoder, diagrams, GUI_flows, and Report_example.
+- Excluded: `build*`, `out`, `data/augmented`, `model`, other `models` contents, IDE and Python caches.
 - Report template binaries are small output feature vectors, not encoder weights.
-- Local models and augmented data remain on the working machine.
+- Fine-tuned models and augmented data remain on the working machine.
 
 ## Examples / Validation
 

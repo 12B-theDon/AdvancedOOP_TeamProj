@@ -2,11 +2,13 @@
 
 [Root](../../readme.md) · [Engine](../Engine/readme.md) · [GUI](../GUI/readme.md)
 
-Source diagram: [SVG](../../docs/diagrams/algorithm.svg) · [PNG](../../docs/diagrams/algorithm.png). Offline 학습과 Runtime API의 호출·데이터·Config 연결을 구분한다.
+Source diagram: [SVG](../../docs/diagrams/algorithm.svg) · [PNG](../../docs/diagrams/algorithm.png). 증강·학습 과정과 실행 중 특징을 추출하는 경로를 함께 보여준다.
+
+![Algorithm structure](../../docs/diagrams/algorithm.png)
 
 ## Responsibility / Files
 
-지문 이미지에서 Feature vector를 만들고 `(cosine + 1) / 2`로 정규화한 `[0,1]` Similarity를 계산한다. Calibration한 확률은 아니다. Augmentation과 Fine-tuning은 별도 CLI에서만 수행한다.
+지문 이미지의 전처리와 특징 추출을 담당한다. Enrollment와 Attempt에 같은 처리를 적용하고, 두 벡터의 Cosine을 `(cosine + 1) / 2`로 바꿔 0~1 유사도로 반환한다. 이 값은 동일 지문일 확률이 아니다. 증강과 Fine-tuning은 GUI 추론과 분리된 C++ 프로그램 `FingerprintTrain`에서 수행한다.
 
 | 파일 | 역할 |
 |---|---|
@@ -102,9 +104,9 @@ Upstream의 Constant-image normalization을 `torch.where`로 바꾸고 불필요
 
 ## Fine-tuning / Data Split
 
-원본은 [data/original](../../data/original)에 보존한다. 각 DB는 10 fingers × 8 captures = 80장이다. 먼저 Capture ID 1–6을 Training, 7–8을 Validation으로 나눈다. 모든 Augmentation은 원본의 Split을 상속한다. Validation에는 원본만 사용한다.
+원본은 [data/original](../../data/original)에 보존한다. 각 DB는 10 fingers × 8 captures = 80장이다. 먼저 Capture ID 1–6을 Training, 7–8을 Validation으로 나눈다. 모든 Augmentation은 원본의 Split을 상속한다. Validation에는 원본만 사용한다. 같은 손가락의 촬영본을 나누는 방식이며, 손가락 ID를 분리한 학습이나 별도 Test split은 없다.
 
-기존 네 Fine-tuned Weight는 재학습 준비를 위해 삭제했다. 아래 표와 CSV·Verification은 이전 실행 기록이며, 재학습 결과는 새 출력 폴더에 저장한다. Pretrained checkpoint와 원본 DB는 유지한다.
+재학습 결과는 새 폴더 `models/retrain_날짜_시간`에 저장한다. 개발 PC에서 확인한 Run은 `models/retrain_20261117_235258`이다. 모델·Metadata·학습 CSV는 Git에 포함하지 않으므로 Clone 후 직접 준비해야 한다.
 
 | 모델 | Classes | Training originals | 사용 Augmentation | Training 합계 | Validation originals |
 |---|---:|---:|---:|---:|---:|
@@ -167,7 +169,7 @@ Architecture·Preprocessing을 바꾸면 Checkpoint 호환성과 재변환 여�
 
 변형 적용 여부는 독립적으로 추첨한다. Rotation·Scale을 합성한 뒤 Brightness gain·Gaussian noise·Gray8 clamp를 적용한다. Foreground 검사는 Threshold 기반 근사이며 정밀 Segmentation은 아니다.
 
-재학습 준비를 위해 기존 Cache의 PNG 2,880장과 Manifest를 삭제했다. 현재 `data/augmented`는 비어 있고 다음 Training에서 `12_per_image_seed42/manifest.json`과 이미지를 재생성한다. `models/augmentation_check.json`는 이전 실행의 검증 기록이다. Manifest에는 설정, 원본/결과 SHA-256, Split, 실제 변형값을 남긴다. 같은 설정·원본이면 결과 Hash를 확인해 재사용한다. 기존 Weight의 Embedded metadata와 Sidecar에는 이전 Cache 경로가 기록돼 있으며 현재 Cache의 존재를 뜻하지 않는다.
+증강 결과는 `data/augmented/12_per_image_seed42`처럼 설정을 알아볼 수 있는 폴더에 저장한다. 없으면 생성하고, 같은 설정과 원본으로 완성된 Cache가 있으면 Hash를 확인해 재사용한다. Manifest에는 설정, 원본·결과의 SHA-256, split, 실제 변형값을 기록한다. 설정이 달라지면 다른 번호의 폴더를 사용한다. 이 폴더는 Git에서 제외되며 추론 중에는 읽지 않는다.
 
 ### Local Resource / Results
 
@@ -187,7 +189,7 @@ Architecture·Preprocessing을 바꾸면 Checkpoint 호환성과 재변환 여�
 | FVC2004 | 0.506177 | 95% | `models/fvc2004_db1_training.csv` |
 | Combined | 0.247110 | 98.3333% | `models/combined_training.csv` |
 
-이는 작은 FVC_B Validation의 Classification 결과다. 독립 Finger/Sensor Test의 FAR·FRR·EER를 뜻하지 않는다. 저장된 모델의 파라미터가 서로 다른 Score 분포를 가질 수 있으며 Calibration은 미구현이다.
+표의 수치는 이전 실행 기록이며, 작은 FVC_B Validation에서 임시 Classifier를 평가한 결과다. 독립 Finger/Sensor Test의 FAR·FRR·EER를 뜻하지 않는다. 저장된 모델의 파라미터가 서로 다른 Score 분포를 가질 수 있으며 Calibration은 미구현이다.
 
 ## API / Data Exchange
 
@@ -206,28 +208,77 @@ Engine은 Image buffer를 전달하고 Algorithm은 Model별 Template·Score·Er
 
 ## Conversion / Offline Run
 
-먼저 `git submodule update --init --recursive`로 원본을 받고, Checkpoint 변환 전에 `git -C third_party/deepprint apply ../deepprint.patch`를 한 번 적용한다. Submodule은 고정 Commit을 유지하고 로컬 수정은 별도 Patch로 재현한다.
+### 초기 Weight 준비
 
-아래 명령은 Project root 기준이다. Python은 Conversion에만 필요하다. Runtime C++는 Python interpreter·OpenCV·Qt Charts에 의존하지 않는다.
+학습 초기값인 `models/pretrained/deepprint.bin`과 정보 파일 `deepprint.json`은 저장소에 포함한다. Git LFS를 설치한 뒤 Clone하면 받으며, 빠졌다면 Project root에서 `git lfs pull`을 실행한다. 이 파일을 사용하면 아래 Python 변환 과정은 생략한다. C++ 프로그램은 Archive에 포함된 Encoder와 전처리를 사용한다.
+
+직접 변환하려면 [공개 원본 Weight](https://drive.google.com/file/d/1R9v73hFBuy0iihz7v8eDlBcGrMDmQ9TH/view)를 내려받아 `models/pretrained/best_model.pyt`에 둔다. 위 Provenance 표의 SHA-256으로 파일을 구분할 수 있다. 원본 `.pyt`는 C++에서 직접 읽는 형식이 아니다.
+
+Project root에서 Submodule을 받고 Patch를 **한 번만** 적용한다. 이미 적용한 작업 폴더라면 두 `apply` 명령은 생략한다.
+
+```sh
+git submodule update --init --recursive
+git -C third_party/deepprint apply --check ../deepprint.patch
+git -C third_party/deepprint apply ../deepprint.patch
+```
+
+Patch는 사용하지 않는 Display·Device import를 제거하고 상수 이미지의 정규화를 안전하게 처리한다. 고정된 Submodule commit은 유지하며, 이 로컬 수정을 외부 저장소에 Commit하지 않는다.
+
+### macOS / Linux 변환
+
+Python 3.12에서 확인한 변환 환경이다. 아래 명령은 Project root에서 실행한다. Linux에서의 실제 변환은 아직 확인하지 않았다.
 
 ```sh
 python3.12 -m venv .venv-conversion
-.venv-conversion/bin/python -m pip install torch==2.15.0 torchvision==0.29.2 numpy==2.5.5
-.venv-conversion/bin/python tools/prepare_deepprint.py models/pretrained/best_model.pyt models/pretrained/deepprint_reexport.bin
-./build/FingerprintTrain data/original models/pretrained/deepprint_reexport.bin models --augment-only
-./build/FingerprintTrain data/original models/pretrained/deepprint_reexport.bin models/run_02
+.venv-conversion/bin/python -m pip install torch==2.15.0 torchvision==0.29.2 numpy==2.5.5 pillow==13.0.0
+.venv-conversion/bin/python tools/prepare_deepprint.py models/pretrained/best_model.pyt models/pretrained/deepprint.bin
 ```
 
-위 예시는 기존 Weight를 보존하기 위해 `deepprint_reexport.bin`과 `models/run_02`를 사용한다. 이미 존재하면 다른 새 이름을 선택한다. Fine-tuning Output에 네 `.bin` 중 하나라도 있으면 보존을 위해 중단한다. Windows의 Python 경로·Build 경로는 해당 환경에 맞게 바꿔야 하며 이 명령의 Windows 실행은 미확인이다.
+### Windows 변환
 
-원본 `.pyt`는 C++에서 직접 읽는 형식이 아니다. Converter는 `weights_only=True`로 읽고 Architecture를 Strict load한다. 원본/Wrapper 출력, Batch 1·2·4, Preprocessing, Gradient와 Save/Reload를 검사한다. 결과는 `metadata.json`을 포함한 TorchScript Archive다. TorchScript는 Deprecated/Legacy API지만 현재 C++ 학습·Reload 경로에서 동작을 확인했다. Python 3.14의 JIT 지원 경고가 있어 준비 절차는 Python 3.12 기준으로 적었다.
+Python 3.12를 설치한 뒤 PowerShell에서 실행한다. `best_model.pyt`의 위치와 Patch 적용 여부는 위와 같다. Windows 변환은 아직 실행 검증하지 않았다.
 
-각 Fine-tuned Weight에는 같은 정보의 JSON Sidecar와 Training CSV를 둔다. Encoder와 Preprocessing은 Archive에 포함하지만 임시 Classifier·Optimizer state는 포함하지 않는다.
+```powershell
+py -3.12 -m venv .venv-conversion
+& ".\.venv-conversion\Scripts\python.exe" -m pip install torch==2.15.0 torchvision==0.29.2 numpy==2.5.5 pillow==13.0.0
+& ".\.venv-conversion\Scripts\python.exe" tools/prepare_deepprint.py models/pretrained/best_model.pyt models/pretrained/deepprint.bin
+```
+
+Converter는 `weights_only=True`로 읽고 Architecture를 Strict load한다. 원본·Wrapper 출력, Batch 1·2·4, 전처리, Gradient, Save/Reload가 맞는지 확인한다. 출력은 `metadata.json`을 포함한 TorchScript Archive이며 같은 이름의 `.json`도 저장한다. 출력 `.bin`이 이미 있으면 덮어쓰지 않고 중단하므로, 준비된 파일이 있다면 변환을 반복하지 않는다.
+
+TorchScript는 Deprecated/Legacy API지만 현재 C++ 학습·재로딩 경로에서 동작을 확인했다. Python 3.14의 JIT 경고 때문에 변환 안내는 확인한 3.12 기준으로 작성했다. 변환한 PyTorch와 실행할 LibTorch의 호환성도 확인해야 한다.
+
+### C++ 증강·학습·추론
+
+Build 후 [Root 실행 순서](../../readme.md)를 따른다. 초기 입력 파일명은 모든 명령에서 `models/pretrained/deepprint.bin`으로 통일한다.
+
+| 실행 | 입력과 결과 |
+|---|---|
+| `FingerprintTrain data/original models/pretrained/deepprint.bin models/retrain_01 --augment-only` | 원본을 보존하면서 증강만 준비한다. |
+| `FingerprintTrain data/original models/pretrained/deepprint.bin models/retrain_01` | 증강을 생성하거나 재사용한 뒤 네 모델을 독립 학습하고 재로딩·추론을 검증한다. |
+| `FingerprintGUI` | GUI에서 `models/retrain_01`을 선택해 새 Weight로 비교한다. |
+
+위 표의 실행 파일은 macOS/Linux에서 `./build/`, Windows에서 `.\build-vs\Release\` 아래에 있다. Windows 파일명에는 `.exe`를 붙인다. 출력 폴더에 네 `.bin` 중 하나라도 있으면 기존 결과를 보호하기 위해 중단한다. 재학습은 새로운 폴더명으로 실행한다.
+
+Fine-tuned Weight에는 Encoder·전처리와 Metadata가 들어가며 `.json`과 학습 CSV를 함께 저장한다. 임시 Classifier와 Optimizer state는 저장하지 않으므로 중간 학습을 이어가는 Resume 기능은 없다. Python은 최초 변환에만 필요하고, 증강·학습·추론은 C++로 실행한다.
+
+## Windows / Visual Studio
+
+Visual Studio에서 `build-vs/FingerprintEvaluator.sln`을 열고 **Release / x64**를 선택한다. `FingerprintTrain`을 Startup Project로 설정한 뒤 **Properties → Debugging**에서 다음 값을 지정한다.
+
+| 항목 | 설정 |
+|---|---|
+| Working Directory | Clone한 Project root의 절대 경로 |
+| Command Arguments | `"data\original" "models\pretrained\deepprint.bin" "models\retrain_vs_01"` |
+| Environment | 설치한 Qt `bin`·LibTorch `lib`를 PATH에 추가하고 `QT_PLUGIN_PATH`를 Qt의 `plugins`로 지정 |
+| 실행 | Ctrl+F5. 다음 학습에는 새 출력 폴더명을 사용 |
+
+DLL과 TIFF plugin 준비는 [Root의 Windows Build](../../readme.md#windows--visual-studio)를 따른다. GUI만 실행하려면 Startup Project를 `FingerprintGUI`로 바꾼다.
 
 ## License / Status
 
-Source License는 [LGPL-3.0](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/LICENSE), Inception Source는 [BSD-3-Clause](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/flx/models/InceptionV4.py)다. 공개 Checkpoint의 별도 License는 확인되지 않았다. 외부 Library는 [Root Dependencies](../../readme.md#dependencies--license)를 참고한다.
+Source License는 [LGPL-3.0](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/LICENSE), Inception Source는 [BSD-3-Clause](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/flx/models/InceptionV4.py)다. 공개 Checkpoint의 별도 License는 확인되지 않았다. 외부 Library는 [Root License](../../readme.md#license--submodule)를 참고한다.
 
 기본 Projection Fine-tuning·네 모델 Reload·Inference는 확인했다. 다른 Trainable layer 범위·SGD 학습·Windows 배포·새 GPU 실행은 미확인이다. Checkpoint 작성자의 정확한 Data manifest·학습 장비별 사용량은 제공 근거가 없어 미확인으로 남긴다.
 
-새 실행의 Verification은 `self_score`, `genuine_score`, `impostor_score`와 `score_type`을 기록한다. 기존 Verification의 `*_cosine` 값은 과거 기록으로 보존한다. 기존 Fine-tuned Weight 파일은 삭제한 상태다.
+새 실행의 Verification은 `self_score`, `genuine_score`, `impostor_score`와 `score_type`을 기록한다. 기존 Verification의 `*_cosine` 값은 과거 기록으로 보존한다. 이전 Root Weight 대신 새 Run 폴더에 재학습 결과를 보관한다. Fine-tuned Weight는 Git에서 제외하며, 초기 사전학습 Weight만 Git LFS로 관리한다.

@@ -2,11 +2,13 @@
 
 [Root](../../readme.md) · [Algorithm](../Algorithm/readme.md) · [Engine](../Engine/readme.md)
 
-Source diagram: [SVG](../../docs/diagrams/gui.svg) · [PNG](../../docs/diagrams/gui.png). Page Event·Engine 요청·Snapshot·Metric·Report의 연결을 표시한다.
+Source diagram: [SVG](../../docs/diagrams/gui.svg) · [PNG](../../docs/diagrams/gui.png). 화면 입력이 Engine 호출과 결과·지표·리포트로 이어지는 흐름을 보여준다.
+
+![GUI and report structure](../../docs/diagrams/gui.png)
 
 ## Responsibility / Files
 
-화면과 선택 상태를 관리한다. Model 추론·원시 저장은 Engine에 맡긴다. Report 함수는 Widget을 읽지 않고 `EvaluationRun`을 입력받는다.
+사용자가 DB와 등록 이미지를 고르고, 비교 규칙을 설정해 결과를 확인하는 화면이다. 추론과 원시 결과 저장은 Engine에 요청한다. Report는 화면 Widget 대신 `EvaluationRun`을 받아 지표·그래프·HTML을 만든다.
 
 | 파일 | 역할 |
 |---|---|
@@ -31,7 +33,7 @@ Source diagram: [SVG](../../docs/diagrams/gui.svg) · [PNG](../../docs/diagrams/
 | report.cpp의 `QDir`, `QFile`, `cmath`, `limits` | Report 파일과 Rate·Finite·관측 Threshold 계산을 처리한다. |
 | `QStringList`, `vector` | Metric name/value와 Selection flag를 전달한다. |
 
-Qt Widgets를 연결하며 별도 Chart/PDF Library는 없다. Graph는 SVG XML을 직접 생성한다. License와 확인 Version은 [Root Dependencies](../../readme.md#dependencies--license)를 참고한다.
+Qt Widgets로 화면을 구성한다. 그래프는 SVG를 직접 생성하므로 별도의 Chart/PDF Library를 연결하지 않는다. 사용하는 Library와 License는 [Root README](../../readme.md#libraries--headers)를 참고한다.
 
 ## Pages / Actual Flow
 
@@ -49,7 +51,7 @@ DB의 바로 아래 `.tif`·`.tiff`를 읽으며 Subfolder는 재귀 탐색하�
 
 모델을 하나 선택하면 `Model / Score`, 두 개 이상 선택하면 `Best model / Best score / Worst model / Worst score`를 표시한다. Best/Worst는 성공한 모델의 최고/최저 유사도다. 성공 모델이 하나뿐이면 Worst는 비워 둔다. `#`는 각 비교 종류에서 1부터 Pair 수까지 증가한다. 화면의 값은 중앙 정렬하며, 모든 모델별 점수·오류는 Result Tooltip과 원시 CSV에 남긴다. Metric과 Report는 Best score를 사용한다.
 
-각 결과 Tab의 Threshold 입력 범위는 `[0,1]`, 기본값은 `0.75`다. 실제 비교 종류와 Best score를 함께 판정한다. Genuine은 기준 이상 PASS·연한 초록색, 미만 MISS·연한 빨간색이다. Impostor는 기준 미만 REJ·연한 파란색, 이상 FA·연한 주황색이다. 추론 실패는 Score 없이 ERR·회색으로 표시한다. Threshold 변경은 Cache에만 적용하며 추론을 다시 실행하지 않는다. Genuine/Impostor 기준은 독립적이다. PASS/REJ는 올바른 판정이며 MISS/FA는 False rejection/False acceptance다. 같은 인물이 아닌 같은 손가락 ID 여부를 기준으로 한다. Unknown ID의 CSV 비교는 사용자가 지정한 Group label을 Ground truth로 사용한다. Save all 버튼은 Metrics and report Tab에서만 활성화된다.
+각 결과 탭의 Threshold 입력 범위는 `[0,1]`, 기본값은 `0.75`다. Genuine·Impostor 기준은 각각 조절할 수 있으며, [판정과 색상](#result-labels--thresholds)은 실제 손가락 ID와 Best score로 결정한다. Unknown ID의 CSV 비교는 사용자가 지정한 Group label을 Ground truth로 사용한다. Save all 버튼은 Metrics and report 탭에서만 활성화된다. 동일 이미지의 비교 제외와 점수 집계는 Engine 규칙을 따른다.
 
 Comparison selection은 비교 대상을 고르는 기준이다. All eligible images는 조건에 맞는 전체 이미지, One image per finger는 손가락당 첫 Capture, Selected capture numbers는 지정 번호, Random images per enrollment는 지정 개수, Comparison pairs from CSV는 저장된 Pair 순서다. Self-image 제외 규칙은 모든 선택에 적용한다. 한 장 등록한 Built-in DB에서 Impostor의 All eligible images는 72쌍, One image per finger는 9쌍이다.
 
@@ -83,6 +85,20 @@ Pair CSV는 `enrollment,attempt`, 선택적 `type`을 지원한다. 파일명은
 | `GraphFiles / GraphTitle` | Metric selection, File name | 선택에 맞는 SVG 파일명과 Title을 반환한다. |
 | `WriteGraphs` | ReportData, Folder | Score histogram·Error rate curve·Linear trade-off SVG를 저장한다. |
 | `Save` | ReportData, Folder | `metrics.csv` 전체, `report.html` 선택 항목, 관련 SVG를 저장한다. |
+
+## Result Labels / Thresholds
+
+Genuine은 같은 손가락, Impostor는 다른 손가락이라는 실제 Group label을 뜻한다. 단순히 점수가 높다고 모든 비교에 PASS를 붙이지 않는다. GUI와 CSV는 `Engine::ClassifyComparison`을 함께 사용한다.
+
+| 실제 Group | Best score | 표시 / 색상 |
+|---|---|---|
+| Genuine | Threshold 이상 | PASS / 연한 초록 — 올바르게 수락 |
+| Genuine | Threshold 미만 | MISS / 연한 빨강 — 본인을 잘못 거절 |
+| Impostor | Threshold 미만 | REJ / 연한 파랑 — 타인을 올바르게 거절 |
+| Impostor | Threshold 이상 | FA / 연한 주황 — 타인을 잘못 수락 |
+| 어느 Group이든 추론 실패 | 유효한 점수 없음 | ERR / 회색 |
+
+Threshold를 바꾸면 저장된 점수로 다시 판정하고 색상·요약·FMR/FNMR을 갱신한다. Encoder를 다시 실행하지는 않는다. Metrics의 `REJ genuine/impostor`는 계산 실패율이며, 위 표의 올바른 타인 거절 `REJ`와 다른 항목이다.
 
 ## Metrics / Interpretation
 
@@ -131,4 +147,4 @@ macOS Offscreen GUI에서 Built-in 기본 Model, Combined 선택, External 네 M
 
 7단계 순서, 세 Comparison type, 비활성 Type 제외, 입력 변경 후 결과 초기화, Rule 오류 차단, 실제 Model의 Template·Score·선택 Pair 저장을 Offscreen GUI에서 확인했다.
 
-현재 Progress는 Page counter이며 실행 Pair별 Live progress가 아니다. Inference가 GUI thread에서 순차 실행되므로 실행 중 UI 응답·Cancel의 즉시 강제 종료는 지원하지 않는다. Exit 확인창과 Yes 후 종료는 구현돼 있다. Word/PDF Report, Normal-deviate DET, Metric 수식 선택 UI, KISA DLL 선택·호출, Windows 배포는 미구현 또는 실행 미확인이다. 기존 [GUI_flows](../../GUI_flows)·[Report_example](../../Report_example)은 과거 Capture/예시이며 현재 UI와 완전히 같다고 보장하지 않는다.
+현재 Progress는 Page counter이며 실행 Pair별 Live progress가 아니다. Inference가 GUI thread에서 순차 실행되므로 실행 중 UI 응답·Cancel의 즉시 강제 종료는 지원하지 않는다. Exit 확인창과 Yes 후 종료는 구현돼 있다. Word/PDF Report, Normal-deviate DET, Metric 수식 선택 UI, KISA DLL 선택·호출, Windows 배포는 미구현 또는 실행 미확인이다. [GUI_flows](../../GUI_flows/readme.md)와 [Report_example](../../Report_example/readme.md)은 2026-11-18의 실제 재학습 Weight로 갱신한 예시다. 촬영 조건과 Threshold는 각 폴더 문서에 남겼으며, 독립 Test-set 성능을 의미하지 않는다.

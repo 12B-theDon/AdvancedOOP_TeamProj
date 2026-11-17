@@ -2,11 +2,13 @@
 
 [Root](../../readme.md) · [Algorithm](../Algorithm/readme.md) · [GUI](../GUI/readme.md)
 
-Source diagram: [SVG](../../docs/diagrams/engine.svg) · [PNG](../../docs/diagrams/engine.png). Plan·Model loading·Template·Comparison·Raw export의 연결을 표시한다.
+Source diagram: [SVG](../../docs/diagrams/engine.svg) · [PNG](../../docs/diagrams/engine.png). 비교 계획, 모델 로드, Template 생성, 비교와 원시 결과 저장의 연결을 보여준다.
+
+![Engine structure](../../docs/diagrams/engine.png)
 
 ## Responsibility / Files
 
-Comparison plan을 만들고 Algorithm을 호출한다. Model별 Template·Score·Time·Error를 모아 원시 파일로 저장한다. 화면이나 HTML을 직접 다루지 않는다.
+비교할 이미지쌍을 구성하고 Algorithm을 호출하는 실행부다. 모델별 Template과 점수·시간·오류를 모아 원시 파일로 저장한다. 화면은 GUI가, 지표와 HTML은 Report가 담당한다.
 
 | 파일 | 역할 |
 |---|---|
@@ -21,7 +23,6 @@ Comparison plan을 만들고 Algorithm을 호출한다. Model별 Template·Score
 | [Algorithm.h](../Algorithm/Algorithm.h) | Abstract API와 Pixel/Preprocessing buffer를 공유한다. |
 | `string`, `vector` | GUI widget과 독립적인 입력·계획·결과를 저장한다. |
 | `random` | `mt19937`, Uniform distribution으로 Fisher–Yates shuffle을 수행한다. |
-| `limits` | Model score가 Finite인지 확인한다. Negative score도 허용한다. |
 | `chrono` | `steady_clock`으로 경과 시간 [ms]를 측정한다. |
 | `QImage` | Image file을 Gray8 buffer로 읽는다. Qt TIFF plugin이 필요하다. |
 | `QDir`, `QFile` | CSV·Template·Settings 파일을 저장한다. |
@@ -63,7 +64,7 @@ GUI → Engine: Image list, 선택한 Enrollment, Model ID, ComparisonOptions, F
 
 Algorithm pointer는 Engine이 소유하지 않는다. [main.cpp](../main.cpp)의 Encoder가 Window보다 오래 살아 있도록 구성한다.
 
-`Compare`는 성공한 Model 중 가장 높은 Normalized score `[0,1]`를 선택한다. 동점이면 먼저 선택된 Model이다. 실패·Non-finite score는 제외한다. 모두 실패하면 Score를 성공값으로 표시하지 않는다. Enrollment와 Attempt는 같은 Model의 같은 Preprocessing을 사용한다. Model 간 Score calibration은 없다.
+`Compare`는 성공한 Model 중 가장 높은 Normalized score `[0,1]`를 선택한다. 동점이면 먼저 선택된 Model이다. 실패한 모델과 0~1 범위를 벗어난 점수는 제외한다. 범위 비교를 통과하지 못하는 NaN·Infinity도 실패로 처리한다. 모두 실패하면 Score를 성공값으로 표시하지 않는다. Enrollment와 Attempt는 같은 Model의 같은 Preprocessing을 사용한다. Model 간 Score calibration은 없다.
 
 Time은 Algorithm 호출 경로의 경과 시간이다. Enrollment는 Preprocessing+Encoding, Comparison은 Attempt Encoding+Cosine+Model 순회를 포함한다. `ReadImage`의 File decoding은 이 시간 밖에서 실행한다. Model Load 시간도 별도 Metric으로 수집하지 않는다.
 
@@ -109,6 +110,30 @@ Time은 Algorithm 호출 경로의 경과 시간이다. Enrollment는 Preprocess
 
 Metric CSV·HTML·SVG는 [Report](../GUI/report.cpp)가 저장한다. `Not run`과 실행 후 `Failed`는 구분한다. CSV의 문자열은 Quote escaping을 수행한다.
 
+## DLL Backend / Extension
+
+### 현재 지원 범위
+
+현재 실행 파일은 외부 알고리즘 DLL을 동적으로 로드하지 않는다. [CMakeLists.txt](../../CMakeLists.txt)는 Algorithm·Engine을 STATIC으로 연결하고, [main.cpp](../main.cpp)는 `FingerprintEncoder`를 생성해 GUI에 전달한다. GUI의 `.bin` 선택은 이 내장 Encoder가 읽는 Weight를 바꾸는 기능이다.
+
+| 교체 대상 | 현재 동작 |
+|---|---|
+| 호환되는 DeepPrint `.bin` | GUI에서 폴더와 모델을 선택하면 새 Weight를 로드한다. 기존 Template은 초기화한다. |
+| 다른 구조의 모델 Weight | Metadata·입력 크기·출력 차원 등이 맞지 않으면 로드를 거절한다. |
+| KISA 규격 알고리즘 DLL | 로딩·호출 Adapter와 GUI 선택 경로가 없어 현재 실행할 수 없다. |
+| Qt·LibTorch DLL | 프로그램의 실행 의존성이다. 이를 교체한다고 지문 알고리즘이 바뀌지는 않는다. |
+
+### DLL 연동 시 필요한 구현
+
+아래는 확장 지점이며 아직 구현된 사용 절차가 아니다.
+
+1. [Algorithm.h](../Algorithm/Algorithm.h)의 인터페이스를 구현하는 DLL Backend를 추가한다. Windows의 `LoadLibrary` 또는 Qt의 `QLibrary` 같은 로더와 KISA 함수 규격을 연결해야 한다.
+2. 이미지 버퍼·전처리·Template 형식과 메모리 소유권을 DLL 규약에 맞춘다. 반환 상태·점수 범위는 현재 Engine이 사용하는 성공/실패와 0~1 유사도로 변환한다.
+3. `.bin` 파일을 전제로 하는 현재 모델 선택 경로에 DLL 경로와 초기화 설정을 추가하고, GUI에서 Backend를 고를 수 있게 연결한다. 현재 `LoadModel` 호출을 DLL 함수에 그대로 전달할 수 있다고 가정하지 않는다.
+4. 같은 이미지쌍으로 현재 Backend와 DLL Backend의 등록·비교·저장을 검증한다. 알고리즘 Crash·Hard timeout을 격리하려면 별도 Worker process도 필요하다.
+
+DLL의 Export 함수·호출 규약·버퍼 규격이 없으면 파일만 바꿔 연결할 수 없다. Windows DLL을 macOS/Linux에서 그대로 로드하는 경로도 지원하지 않는다.
+
 ## Status
 
-기본 Model routing·실제 Inference·Raw export는 macOS에서 확인했다. 현재는 Synchronous runner로 GUI thread를 사용한다. Hard timeout, Worker process, 동시 실행, 실행 중 강제 중단, Crash isolation은 미구현이다. GUI의 Exit 확인창은 이 기능들을 대신하지 않는다. Windows/KISA DLL 경로도 아직 미확인·미구현이다. License는 [Root](../../readme.md#dependencies--license)를 따른다.
+기본 Model routing·실제 Inference·Raw export는 macOS에서 확인했다. 현재는 Synchronous runner로 GUI thread를 사용한다. Hard timeout, Worker process, 동시 실행, 실행 중 강제 중단, Crash isolation은 미구현이다. GUI의 Exit 확인창은 이 기능들을 대신하지 않는다. Windows/KISA DLL 경로도 아직 미확인·미구현이다. License는 [Root](../../readme.md#license--submodule)를 따른다.

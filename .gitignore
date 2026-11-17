@@ -5,10 +5,16 @@
 /.vscode/
 CMakeUserPresets.json
 
-# Generated data and all weights, including pretrained checkpoints.
+# Generated data and training outputs.
 /data/augmented/
-/models/
 /model/
+/models/*
+
+# Include only the pretrained encoder needed for team fine-tuning.
+!/models/pretrained/
+/models/pretrained/*
+!/models/pretrained/deepprint.bin
+!/models/pretrained/deepprint.json
 
 # External source contents belong to the registered Git submodule.
 # Only its pinned Git entry is tracked by this repository.

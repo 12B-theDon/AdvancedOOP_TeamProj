@@ -1,0 +1,16 @@
+{
+  "format": "deepprint-torchscript-v1",
+  "model_id": "pretrained",
+  "architecture": "DeepPrint_TexMinu_512",
+  "preprocessing": "gray01-white-square-aa299-gabor1.8-v1",
+  "embedding_size": 512,
+  "source_commit": "7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13",
+  "checkpoint_sha256": "2683a04427bacd54adc00cfdc97474625b1e11e5a9e6672c5129f033018f8a28",
+  "checkpoint_url": "https://drive.google.com/file/d/1R9v73hFBuy0iihz7v8eDlBcGrMDmQ9TH/view",
+  "source_license": "LGPL-3.0; InceptionV4 BSD-3-Clause; no separate checkpoint license supplied",
+  "torch_version": "2.15.0",
+  "strict_state_dict": true,
+  "upstream_classes": 8000,
+  "export_max_abs_error": 0.0,
+  "data_scope": "published pretrained checkpoint; no FVC fine-tuning"
+}
