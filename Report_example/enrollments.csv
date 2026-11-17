@@ -1,0 +1,2 @@
+image,model_id,status,template_bytes,template_file,stage,error,time_ms
+"102_6.tif","fvc2000_db3","OK",2048,"templates/13_fvc2000_db3.bin","","",190.734542

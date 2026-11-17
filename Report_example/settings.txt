@@ -1,0 +1,14 @@
+score_type=normalized_cosine_01
+score_range=[0,1]
+score_formula=(cosine+1)/2
+genuine_threshold=0.90000000000000002
+impostor_threshold=0.80000000000000004
+decision_rule=Genuine: score >= threshold -> PASS, below -> MISS; Impostor: score >= threshold -> FA, below -> REJ; inference failure -> ERR
+database=data/original/FVC2000_DB3_B
+weights_folder=models/retrain_20261117_235258
+timeout_ms=0
+concurrency=1
+comparison_type=Both
+report_metrics=FTE (%); FMR (%); FNMR (%); EER (%); Matching time (ms)
+genuine_rule=All eligible images
+impostor_rule=All eligible images

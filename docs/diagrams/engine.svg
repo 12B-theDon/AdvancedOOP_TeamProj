@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="178.153mm" height="117.828mm" viewBox="0 0 505 334" role="img">
+<title>Engine — Source graph</title>
+<desc>Content-fitted nodes. Black text. Rectangle: header. Ellipse: implementation. Straight or one-bend connectors.</desc>
+<rect width="505" height="334" fill="white"/>
+<text x="252.500" y="22.000" font-family="Apple SD Gothic Neo" font-size="18" font-weight="700" text-anchor="middle" fill="#000000">Engine</text>
+<line x1="232.5" y1="32" x2="272.5" y2="32" stroke="#21834d" stroke-width="1.5"/>
+<polyline points="188.860,80.580 149.000,80.580" fill="none" stroke="#81909b" stroke-width="1.1" stroke-dasharray="3 3"/>
+<polygon points="149.0,80.58 153.5,82.48 153.5,78.67999999999999" fill="#81909b"/>
+<polyline points="337.860,80.580 397.720,80.580" fill="none" stroke="#81909b" stroke-width="1.1" stroke-dasharray="3 3"/>
+<polygon points="397.72,80.58 393.22,78.67999999999999 393.22,82.48" fill="#81909b"/>
+<polyline points="263.360,136.160 263.360,113.580" fill="none" stroke="#81909b" stroke-width="1.1" stroke-dasharray="3 3"/>
+<polygon points="263.36,113.58 261.46000000000004,118.08 265.26,118.08" fill="#81909b"/>
+<polyline points="151.821,184.070 180.737,184.070" fill="none" stroke="#4f5b65" stroke-width="1.1"/>
+<polygon points="180.73658606296192,184.07000000000002 176.23658606296192,182.17000000000002 176.23658606296192,185.97000000000003" fill="#4f5b65"/>
+<polyline points="184.701,225.940 137.197,225.940" fill="none" stroke="#4f5b65" stroke-width="1.1"/>
+<polygon points="137.1968053903852,225.94 141.6968053903852,227.84 141.6968053903852,224.04" fill="#4f5b65"/>
+<polyline points="345.983,184.070 391.357,184.070" fill="none" stroke="#4f5b65" stroke-width="1.1"/>
+<polygon points="391.35677324034464,184.07000000000002 386.85677324034464,182.17000000000002 386.85677324034464,185.97000000000003" fill="#4f5b65"/>
+<polyline points="393.943,222.780 343.675,222.780" fill="none" stroke="#4f5b65" stroke-width="1.1"/>
+<polygon points="343.67487096960474,222.78 348.17487096960474,224.68 348.17487096960474,220.88" fill="#4f5b65"/>
+<polyline points="412.578,241.740 329.276,241.740" fill="none" stroke="#4f5b65" stroke-width="1.1"/>
+<polygon points="329.2759740801876,241.74 333.7759740801876,243.64000000000001 333.7759740801876,239.84" fill="#4f5b65"/>
+<polyline points="263.360,265.160 263.360,302.570 142.500,302.570" fill="none" stroke="#4f5b65" stroke-width="1.1"/>
+<polygon points="142.5,302.57 147.0,304.46999999999997 147.0,300.67" fill="#4f5b65"/>
+<polyline points="289.260,262.129 289.260,302.570 387.720,302.570" fill="none" stroke="#4f5b65" stroke-width="1.1"/>
+<polygon points="387.72,302.57 383.22,300.67 383.22,304.46999999999997" fill="#4f5b65"/>
+<g data-file="engineConfig.h" data-node="file" data-part="Engine">
+<rect x="24.0" y="47.58" width="125" height="66" rx="0" fill="#e8f6ec" stroke="#21834d" stroke-width="1.1"/>
+<text x="86.500" y="64.580" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">engineConfig.h</text>
+<line x1="49.0" y1="70.58" x2="124.0" y2="70.58" stroke="#21834d" stroke-width="0.5" opacity="0.35"/>
+<text x="86.500" y="81.580" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">ModelIds / WeightsFolder</text>
+<text x="86.500" y="93.580" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">Seed / DecisionThreshold</text>
+<text x="86.500" y="105.580" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">TimeoutMs / Concurrency</text>
+</g>
+<g data-file="Engine.h" data-node="file" data-part="Engine">
+<rect x="188.85999999999999" y="47.58" width="149" height="66" rx="0" fill="#e8f6ec" stroke="#21834d" stroke-width="1.1"/>
+<text x="263.360" y="64.580" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">Engine.h</text>
+<line x1="218.66" y1="70.58" x2="308.05999999999995" y2="70.58" stroke="#21834d" stroke-width="0.5" opacity="0.35"/>
+<text x="263.360" y="81.580" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">ImageInfo / ComparisonPair</text>
+<text x="263.360" y="93.580" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">EnrollmentTemplates</text>
+<text x="263.360" y="105.580" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">SimilarityResult / EvaluationRun</text>
+</g>
+<g data-file="Algorithm.h" data-node="file" data-part="Algorithm">
+<rect x="397.72" y="53.58" width="85" height="54" rx="0" fill="#eaf1ff" stroke="#2864b4" stroke-width="1.1"/>
+<text x="440.220" y="70.580" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">Algorithm.h</text>
+<line x1="414.72" y1="76.58" x2="465.72" y2="76.58" stroke="#2864b4" stroke-width="0.5" opacity="0.35"/>
+<text x="440.220" y="87.580" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">AlgorithmImage</text>
+<text x="440.220" y="99.580" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">PreparedImage</text>
+</g>
+<g data-file="GUI.cpp" data-node="file" data-part="GUI">
+<ellipse cx="86.5" cy="200.66" rx="74.5" ry="34.5" fill="#f1e8fc" stroke="#7c4db5" stroke-width="1.2"/>
+<text x="86.500" y="181.160" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">GUI.cpp</text>
+<line x1="41.800000000000004" y1="187.16" x2="131.2" y2="187.16" stroke="#7c4db5" stroke-width="0.5" opacity="0.35"/>
+<text x="86.500" y="200.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">ReloadModels()</text>
+<text x="86.500" y="212.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">CreateEnrollmentTemplates()</text>
+<text x="86.500" y="224.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">RunComparisons()</text>
+</g>
+<g data-file="Engine.cpp" data-node="file" data-part="Engine">
+<ellipse cx="263.36" cy="200.66" rx="85.5" ry="64.5" fill="#e8f6ec" stroke="#21834d" stroke-width="1.2"/>
+<text x="263.360" y="155.160" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">Engine.cpp</text>
+<line x1="212.06" y1="161.16" x2="314.65999999999997" y2="161.16" stroke="#21834d" stroke-width="0.5" opacity="0.35"/>
+<text x="263.360" y="174.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">PlanComparisons()</text>
+<text x="263.360" y="186.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">SelectModels()</text>
+<text x="263.360" y="198.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">LoadSelectedModels()</text>
+<text x="263.360" y="210.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">Enroll() / Compare()</text>
+<text x="263.360" y="222.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">Execute()</text>
+<text x="263.360" y="234.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">MakeTemplate() / ReadImage()</text>
+<text x="263.360" y="246.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">SaveRawResults()</text>
+</g>
+<g data-file="encoder.cpp" data-node="file" data-part="Algorithm">
+<ellipse cx="440.22" cy="200.66" rx="52.0" ry="48.5" fill="#eaf1ff" stroke="#2864b4" stroke-width="1.2"/>
+<text x="440.220" y="183.160" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">encoder.cpp</text>
+<line x1="409.02000000000004" y1="189.16" x2="471.42" y2="189.16" stroke="#2864b4" stroke-width="0.5" opacity="0.35"/>
+<text x="440.220" y="202.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">LoadModel()</text>
+<text x="440.220" y="214.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">Preprocess()</text>
+<text x="440.220" y="226.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">CreateTemplate()</text>
+<text x="440.220" y="238.160" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">Compare()</text>
+</g>
+<g data-file="comparisons.csv" data-node="file" data-part="Shared">
+<rect x="30.5" y="281.57" width="112" height="42" rx="3" fill="#f4f6f8" stroke="#73818d" stroke-width="1.1"/>
+<text x="86.500" y="298.570" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">comparisons.csv</text>
+<line x1="52.9" y1="304.57" x2="120.1" y2="304.57" stroke="#73818d" stroke-width="0.5" opacity="0.35"/>
+<text x="86.500" y="315.570" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">run.comparisons</text>
+</g>
+<g data-file="templates/*.bin" data-node="file" data-part="Shared">
+<rect x="387.72" y="282.57" width="105" height="40" rx="3" fill="#f4f6f8" stroke="#73818d" stroke-width="1.1"/>
+<text x="440.220" y="299.570" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">templates/*.bin</text>
+<line x1="408.72" y1="305.57" x2="471.72" y2="305.57" stroke="#73818d" stroke-width="0.5" opacity="0.35"/>
+<text x="440.220" y="316.570" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">data</text>
+</g>
+<rect x="266.26541503906253" y="122.93" width="34.149169921875" height="12" rx="1" fill="white" stroke="none"/>
+<text x="283.340" y="131.930" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">include</text>
+<rect x="157.2752197265625" y="165.96" width="24.049560546875" height="12" rx="1" fill="white" stroke="none"/>
+<text x="169.300" y="174.960" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">pairs</text>
+<rect x="155.3853271484375" y="232.74" width="31.829345703125" height="12" rx="1" fill="white" stroke="none"/>
+<text x="171.300" y="241.740" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">results</text>
+<rect x="345.64535156249997" y="165.96" width="29.029296875" height="12" rx="1" fill="white" stroke="none"/>
+<text x="360.160" y="174.960" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">image</text>
+<rect x="346.93514648437497" y="218.52" width="26.44970703125" height="12" rx="1" fill="white" stroke="none"/>
+<text x="360.160" y="227.520" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">score</text>
+<rect x="340.96505371093747" y="243.01000000000002" width="22.389892578125" height="12" rx="1" fill="white" stroke="none"/>
+<text x="352.160" y="252.010" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">data</text>
+<rect x="199.540185546875" y="288.04" width="18.11962890625" height="12" rx="1" fill="white" stroke="none"/>
+<text x="208.600" y="297.040" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">run</text>
+<rect x="318.0250537109375" y="288.04" width="22.389892578125" height="12" rx="1" fill="white" stroke="none"/>
+<text x="329.220" y="297.040" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">data</text>
+</svg>

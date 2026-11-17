@@ -1,0 +1,2 @@
+# Patch context lines intentionally preserve whitespace.
+*.patch -whitespace

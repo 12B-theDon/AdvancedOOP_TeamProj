@@ -1,0 +1,22 @@
+Source: https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors
+Commit: 7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13
+Authors: T. Rohwedder et al., BIOSIG 2023.
+Architecture and preprocessing: LGPL-3.0 (LICENSE).
+InceptionV4.py: Remi Cadene, BSD-3-Clause (full notice in that file).
+Checkpoint: author's README Google Drive link, DeepPrint_TexMinu_512/best_model.pyt.
+No separate checkpoint license was supplied by the author; source license is recorded,
+not a claim of additional checkpoint permissions.
+
+Local changes to binarization.py: removed unused display/device imports; changed
+constant-image min/max normalization to torch.where for tracing. Nonconstant inputs
+retain the upstream formula. Upstream architecture is loaded with strict=True.
+Conversion omits training-only logits/minutia map and inactive dropout. It preserves
+both 256-dimensional branches, fixes the upstream batch-one texture squeeze, and
+L2-normalizes their concatenation. Batch normalization stays in eval mode.
+
+LibTorch/PyTorch: https://github.com/pytorch/pytorch (BSD-3-Clause).
+Torchvision (one-time conversion only): https://github.com/pytorch/vision (BSD-3-Clause).
+Qt: https://www.qt.io/licensing/ (existing project dependency).
+
+Submodule preparation: pin the commit above and apply third_party/deepprint.patch
+from the main repository after initialization. The patch is tracked separately.

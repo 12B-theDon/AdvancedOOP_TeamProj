@@ -1,0 +1,22 @@
+# Local builds and IDE state.
+/build*/
+/out/
+/.vs/
+/.vscode/
+CMakeUserPresets.json
+
+# Generated data and all weights, including pretrained checkpoints.
+/data/augmented/
+/models/
+/model/
+
+# External source contents belong to the registered Git submodule.
+# Only its pinned Git entry is tracked by this repository.
+/third_party/deepprint/**
+
+# Local Python environments and caches.
+/.venv*/
+*.pyc
+*.pyo
+.DS_Store
+__pycache__/

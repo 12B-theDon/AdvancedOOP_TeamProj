@@ -1,0 +1,28 @@
+--- a/flx/image_processing/binarization.py
++++ b/flx/image_processing/binarization.py
+@@ -3,13 +3,7 @@
+ import torchvision.transforms.functional as VTF
+ import torch
+ 
+-from flx.visualization.show_with_opencv import (
+-    save_3Dtensor_as_image_grid,
+-    save_2Dtensor_as_image,
+-    show_tensor_as_image,
+-)
+-
+-from flx.models.torch_helpers import get_device
++# Unused visualization and device imports removed for standalone conversion.
+ 
+ 
+ def _is_even(n: int) -> bool:
+@@ -109,9 +103,7 @@
+ def _normalize_0_1(img: torch.Tensor) -> torch.Tensor:
+     img_min = torch.min(img)
+     img_max = torch.max(img)
+-    if not img_max > img_min:
+-        return torch.zeros_like(img)
+-    return (img - img_min) / (img_max - img_min)
++    return torch.where(img_max > img_min, (img - img_min) / (img_max - img_min).clamp_min(1e-12), torch.zeros_like(img))
+ 
+ 
+ class _GaborFilter:
