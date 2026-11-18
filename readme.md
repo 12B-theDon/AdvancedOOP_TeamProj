@@ -4,9 +4,28 @@
 
 ## 1. Build / Run
 
-C++17, Git·Git LFS, CMake 3.21 이상, Qt Widgets·TIFF 플러그인, OS·CPU에 맞는 LibTorch가 필요합니다. 아래는 **macOS 예시**이며 Qt·LibTorch 경로를 설치 위치에 맞게 바꿉니다. [Windows / Visual Studio](docs/repository_preparation.md#2-windows--visual-studio) · [macOS / Linux 상세 설정](docs/repository_preparation.md#3-macos--linux)
+C++17, Git·Git LFS, CMake 3.21 이상, Qt Widgets·TIFF 플러그인, OS·CPU에 맞는 LibTorch가 필요합니다. 아래는 **터미널 예시**입니다. Linux/macOS에서 Qt·LibTorch 설치 위치에 맞게 `/path/to/qt`와 `/path/to/libtorch`를 바꿉니다. [Windows / Visual Studio](docs/repository_preparation.md#2-windows--visual-studio) · [터미널 상세 설정](docs/repository_preparation.md#3-macos--linux)
 
-**1.1. Clone**
+**1.1. 의존성 설치 — 없는 항목만 설치**
+
+macOS(Homebrew):
+
+```sh
+brew install git git-lfs cmake qt@5
+```
+
+Windows(PowerShell / WinGet):
+
+```powershell
+winget install --exact --id Git.Git
+winget install --exact --id GitHub.GitLFS
+winget install --exact --id Kitware.CMake
+winget install --exact --id Microsoft.VisualStudio.2022.Community --override "--wait --passive --add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended"
+```
+
+위 명령 외에 **LibTorch CPU ZIP**을 준비하고, Windows에서는 **Qt MSVC 2022 64-bit·TIFF 플러그인**도 설치합니다. Homebrew·WinGet 준비, Qt 설치와 LibTorch 다운로드·압축 해제는 [Windows 설치](docs/repository_preparation.md#21-의존성-설치) · [macOS 설치](docs/repository_preparation.md#31-의존성-설치)를 따릅니다. 설치가 끝나면 새 터미널을 엽니다.
+
+**1.2. Clone**
 
 ```sh
 git lfs install
@@ -14,14 +33,14 @@ git clone --recurse-submodules https://github.com/12B-theDon/AdvancedOOP_TeamPro
 cd AdvancedOOP_TeamProj
 ```
 
-**1.2. Build**
+**1.3. Build**
 
 ```sh
-cmake -S . -B build -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;/opt/libtorch" -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -DCMAKE_PREFIX_PATH="/path/to/qt;/path/to/libtorch" -DCMAKE_BUILD_TYPE=Release
 cmake --build build --target FingerprintTrain FingerprintGUI --parallel 2
 ```
 
-**1.3. Train → GUI**
+**1.4. Train → GUI**
 
 ```sh
 ./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01
@@ -66,7 +85,7 @@ Backbone을 고정하고 Texture·Minutia Projection과 Cosine Classifier를 학
 
 ![GUI demo](demo.gif)
 
-GIF와 [리포트 예시](Report_example/readme.md)는 이전 512차원 버전의 실행 기록입니다. 현재 화면은 [전체 흐름](GUI_flows/00_overview.png) · [한 장 등록](GUI_flows/01_single_enrollment.png) · [여러 장 등록](GUI_flows/02_multiple_enrollment.png) · [외부 DB](GUI_flows/03_external_db.png)에서 확인할 수 있습니다.
+GIF와 [리포트 예시](Report_example/readme.md)는 이전 512차원 버전의 실행 기록입니다. 현재 화면은 [전체 흐름](docs/GUI_flows/00_overview.png) · [한 장 등록](docs/GUI_flows/01_single_enrollment.png) · [여러 장 등록](docs/GUI_flows/02_multiple_enrollment.png) · [외부 DB](docs/GUI_flows/03_external_db.png)에서 확인할 수 있습니다.
 
 점수는 동일 지문일 확률이 아닙니다. 성능 수치는 학습에 등장한 손가락의 다른 촬영본 평가이며, 독립 Test나 미학습 손가락 성능과 구분합니다. [평가 결과와 한계](src/Algorithm/readme.md#final-production-run--calibration)
 

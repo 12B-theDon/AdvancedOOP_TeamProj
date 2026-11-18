@@ -26,31 +26,77 @@ Git·Git LFS, CMake 3.21 이상, MSVC x64용 Qt Widgets·TIFF plugin, Windows x6
 
 아래 명령은 **Developer Command Prompt for VS 2022**에서 실행합니다. Windows 실행은 아직 검증하지 않았습니다.
 
-### 2.1. Clone
+### 2.1. 의존성 설치
+
+이미 설치한 항목은 생략합니다. 아래 설치 명령은 **PowerShell**에서 실행합니다. `winget`이 없으면 Microsoft Store의 [앱 설치 관리자](https://learn.microsoft.com/en-us/windows/package-manager/winget/#install-winget)를 먼저 설치·갱신합니다.
+
+**Git·Git LFS·CMake·MSVC**
+
+```powershell
+winget install --exact --id Git.Git
+winget install --exact --id GitHub.GitLFS
+winget install --exact --id Kitware.CMake
+winget install --exact --id Microsoft.VisualStudio.2022.Community --override "--wait --passive --add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended"
+```
+
+Visual Studio가 이미 있다면 Installer의 수정 화면에서 **Desktop development with C++**, MSVC v143 x64, Windows SDK, C++ CMake 도구를 확인합니다. 설치 후 터미널을 다시 엽니다. [WinGet 사용법](https://learn.microsoft.com/en-us/windows/package-manager/winget/) · [Visual Studio 설치 옵션](https://learn.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio?view=vs-2022)
+
+**Qt와 TIFF 플러그인**
+
+공식 설치 프로그램을 내려받아 실행합니다. Qt 계정 로그인과 구성 요소 선택은 설치 화면에서 진행합니다.
+
+```powershell
+Invoke-WebRequest -Uri "https://download.qt.io/official_releases/online_installers/qt-online-installer-windows-x64-online.exe" -OutFile "$env:TEMP\fingerprint-qt-installer.exe"
+& "$env:TEMP\fingerprint-qt-installer.exe" --root C:\deps\Qt
+```
+
+설치할 Qt 6 버전에서 **MSVC 2022 64-bit**와 **Qt Image Formats**를 선택합니다. MinGW·ARM64 패키지와 혼용하지 않습니다. Widgets는 Qt 기본 모듈에, TIFF 지원은 Image Formats 플러그인에 포함됩니다. 설치 후 `C:\deps\Qt\<설치 버전>\msvc2022_64\plugins\imageformats\qtiff.dll`을 확인합니다. 아래 빌드 예시의 `6.x.y`는 실제 설치 버전으로 바꿉니다. [Qt 설치 안내](https://doc.qt.io/qt-6/get-and-install-qt.html) · [TIFF 플러그인](https://doc.qt.io/qt-6/qtimageformats-index.html)
+
+**LibTorch — Windows x64 CPU Release**
+
+[공식 LibTorch 안내](https://docs.pytorch.org/cppdocs/installing.html)의 다운로드 선택기에서 **C++/LibTorch, Windows, CPU, Release(shared with dependencies)**에 맞는 ZIP 링크를 복사합니다. 아래 명령의 입력 창에 그 URL을 붙여 넣으면 `C:\deps\libtorch`에 압축을 풉니다. 이미 설치된 폴더에는 다시 덮어 풀지 않습니다.
+
+```powershell
+$FingerprintLibTorchUrl = Read-Host "Windows x64 CPU Release LibTorch ZIP URL"
+New-Item -ItemType Directory -Force C:\deps | Out-Null
+Invoke-WebRequest -Uri $FingerprintLibTorchUrl -OutFile "$env:TEMP\fingerprint-libtorch.zip"
+Expand-Archive -Path "$env:TEMP\fingerprint-libtorch.zip" -DestinationPath C:\deps
+Test-Path C:\deps\libtorch\share\cmake\Torch\TorchConfig.cmake
+```
+
+Python용 `pip install torch`만으로 아래 C++ 설치 경로가 준비되지는 않습니다. 배포된 학습 초기 파일은 PyTorch **2.15.0**에서 변환했으므로 LibTorch 버전 호환성도 확인합니다. 다른 버전으로 빌드·로딩한 결과를 검증된 환경과 동일하다고 단정하지 않습니다.
+
+설치 확인 후 **Developer Command Prompt for VS 2022**로 바꿔 아래 Clone·Build 명령을 실행합니다.
+
+### 2.2. Clone
 
 ```bat
 git lfs install && git clone --recurse-submodules https://github.com/12B-theDon/AdvancedOOP_TeamProj.git && cd AdvancedOOP_TeamProj
 ```
 
-### 2.2. Build
+### 2.3. Build
 
-예시는 Qt가 `C:\deps\Qt\msvc2022_64`, LibTorch가 `C:\deps\libtorch`에 설치된 경우입니다. 설치 위치가 다르면 아래 경로를 바꿉니다.
+Qt의 `6.x.y`를 실제 설치 버전으로 바꿉니다. 아래는 **Developer Command Prompt for VS 2022** 문법입니다.
 
 ```bat
-set "PATH=C:\deps\Qt\msvc2022_64\bin;C:\deps\libtorch\lib;%PATH%"
-set "QT_PLUGIN_PATH=C:\deps\Qt\msvc2022_64\plugins"
-cmake -S . -B build-vs -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:\deps\Qt\msvc2022_64;C:\deps\libtorch" && cmake --build build-vs --config Release --target FingerprintGUI FingerprintTrain --parallel 2
+set "FINGERPRINT_QT_PREFIX=C:\deps\Qt\6.x.y\msvc2022_64"
+set "FINGERPRINT_TORCH_PREFIX=C:\deps\libtorch"
+set "PATH=%FINGERPRINT_QT_PREFIX%\bin;%FINGERPRINT_TORCH_PREFIX%\lib;%PATH%"
+set "QT_PLUGIN_PATH=%FINGERPRINT_QT_PREFIX%\plugins"
+cmake -S . -B build-vs -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="%FINGERPRINT_QT_PREFIX%;%FINGERPRINT_TORCH_PREFIX%"
+cmake --build build-vs --config Release --target FingerprintGUI FingerprintTrain --parallel 2
 ```
 
 빌드가 성공하면 실행에 필요한 DLL과 Qt plugin을 준비합니다.
 
 ```bat
-copy /Y "C:\deps\libtorch\lib\*.dll" "build-vs\Release\" && "C:\deps\Qt\msvc2022_64\bin\windeployqt.exe" --release "build-vs\Release\FingerprintGUI.exe"
+copy /Y "%FINGERPRINT_TORCH_PREFIX%\lib\*.dll" "build-vs\Release\"
+"%FINGERPRINT_QT_PREFIX%\bin\windeployqt.exe" --release "build-vs\Release\FingerprintGUI.exe"
 ```
 
 `build-vs/FingerprintEvaluator.sln`을 Visual Studio에서 열면 IDE에서도 빌드할 수 있습니다. 구성은 **Release / x64**로 선택합니다. [Qt 배포 안내](https://doc.qt.io/qt-6/windows-deployment.html)
 
-### 2.3. Training
+### 2.4. Training
 
 사전학습 파일 **`models/pretrained/deepprint.bin`**과 정보 파일 `deepprint.json`은 Clone할 때 함께 받습니다. 모델이 내려오지 않았다면 프로젝트 폴더에서 `git lfs pull`을 실행합니다. Python 변환은 필요하지 않습니다. [사전학습 파일 안내](../src/Algorithm/readme.md#conversion--offline-run)
 
@@ -62,7 +108,7 @@ build-vs\Release\FingerprintTrain.exe data\original models\pretrained\deepprint.
 
 세 DB의 개별 모델과 통합 모델을 각각 학습합니다. 네 모델 모두 30개 값을 출력하며, 판정 기준을 담은 `calibration.json`도 함께 저장합니다. 재학습에는 `run_02`처럼 **새 출력 폴더명**을 사용합니다. 이미 학습된 네 모델을 별도로 받은 경우에는 이 단계를 생략할 수 있습니다. [IDE에서 학습하기](../src/Algorithm/readme.md#windows--visual-studio)
 
-### 2.4. Inference
+### 2.5. Inference
 
 ```bat
 build-vs\Release\FingerprintGUI.exe
@@ -70,24 +116,64 @@ build-vs\Release\FingerprintGUI.exe
 
 GUI의 Step 3에서 `Select weights folder...`를 누르고 **학습이 완료된 모델 폴더**를 선택합니다. 위 Training 명령을 완료했다면 `models/run_01`, 다른 경로로 학습했거나 모델을 공유받았다면 해당 폴더를 선택합니다. Clone만 한 상태에서는 학습을 먼저 완료해야 비교할 수 있습니다.
 
-IDE에서는 **FingerprintGUI → Set as Startup Project → Ctrl+F5**로 실행합니다. 새 Command Prompt를 열었다면 2.2 Build의 `set` 두 줄을 다시 실행합니다.
+IDE에서는 **FingerprintGUI → Set as Startup Project → Ctrl+F5**로 실행합니다. 새 Command Prompt를 열었다면 2.3 Build의 경로 설정을 다시 실행합니다.
 
 ## 3. macOS / Linux
 
 C++17 compiler, Git·Git LFS, CMake 3.21 이상, Qt Widgets·TIFF plugin, OS·CPU에 맞는 LibTorch가 필요합니다. macOS arm64에서 Qt 5.15.17·LibTorch 2.15.0으로 빌드·학습·추론을 확인했습니다. Linux 실행은 아직 검증하지 않았습니다.
 
-### 3.1. Clone
+### 3.1. 의존성 설치
+
+**macOS: Command Line Tools·Homebrew·Qt**
+
+Command Line Tools와 Homebrew가 없다면 순서대로 설치합니다. 각 설치가 끝난 뒤 다음 명령을 진행하고, Homebrew가 안내하는 PATH 설정도 적용합니다.
+
+```sh
+xcode-select --install
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Homebrew가 준비되면 없는 패키지를 설치합니다. `qt@5`는 이 프로젝트에서 사용한 Qt 5 계열이며, 실제 설치되는 Patch 버전은 달라질 수 있습니다.
+
+```sh
+brew install git git-lfs cmake qt@5
+xcode-select -p
+cmake --version
+git lfs version
+ls "$(brew --prefix qt@5)/plugins/imageformats/"*tiff*
+```
+
+Homebrew의 Qt 5는 TIFF 라이브러리와 이미지 플러그인을 함께 제공합니다. [Homebrew 설치](https://brew.sh/) · [Command Line Tools 조건](https://docs.brew.sh/Installation) · [Qt 5 패키지](https://formulae.brew.sh/formula/qt%405)
+
+**macOS: LibTorch CPU ZIP**
+
+[공식 LibTorch 다운로드 안내](https://docs.pytorch.org/cppdocs/installing.html)에서 OS·CPU에 맞는 ZIP을 선택합니다. Apple Silicon은 **arm64**, Intel Mac은 **x86_64** 배포본을 사용하며 Qt·컴파일러의 아키텍처와 맞춥니다. 원하는 호환 버전의 ZIP 링크로 아래 `공식 LibTorch ZIP URL`을 바꿉니다.
+
+```sh
+FINGERPRINT_LIBTORCH_URL='공식 LibTorch ZIP URL'
+curl -fL "$FINGERPRINT_LIBTORCH_URL" -o fingerprint-libtorch.zip
+mkdir -p "$HOME/deps"
+unzip fingerprint-libtorch.zip -d "$HOME/deps"
+ls "$HOME/deps/libtorch/share/cmake/Torch/TorchConfig.cmake"
+```
+
+기존 `libtorch` 폴더에는 덮어 풀지 않습니다. 배포된 학습 초기 파일은 PyTorch **2.15.0**에서 변환했으므로 호환되는 LibTorch를 선택합니다. 새로 설치한 다른 버전의 동작은 별도로 확인해야 합니다. 아래 macOS 빌드 명령은 이 ZIP의 설치 위치를 사용합니다.
+
+**Linux**는 배포판 패키지 관리자로 C++17 컴파일러·Git·Git LFS·CMake·Qt 개발 패키지와 TIFF 플러그인을 준비합니다. LibTorch는 Linux CPU용 배포본을 별도로 설치하고, 아래 `/opt/libtorch`를 실제 경로로 바꿉니다. Linux의 설치·실행은 아직 검증하지 않았습니다.
+
+### 3.2. Clone
 
 ```sh
 git lfs install && git clone --recurse-submodules https://github.com/12B-theDon/AdvancedOOP_TeamProj.git && cd AdvancedOOP_TeamProj
 ```
 
-### 3.2. Build
+### 3.3. Build
 
-**macOS:** Apple Silicon의 Homebrew Qt 5 경로와 `/opt/libtorch` 설치를 가정한 예시입니다. 실제 Qt·LibTorch 위치에 맞게 `CMAKE_PREFIX_PATH`를 수정합니다.
+**macOS:** 위 설치 방법의 Homebrew Qt 5와 `$HOME/deps/libtorch`를 사용합니다. 설치 위치가 다르면 경로를 수정합니다.
 
 ```sh
-cmake -S . -B build -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;/opt/libtorch" -DCMAKE_BUILD_TYPE=Release && cmake --build build --target FingerprintGUI FingerprintTrain --parallel 2
+cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt@5);$HOME/deps/libtorch" -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target FingerprintGUI FingerprintTrain --parallel 2
 ```
 
 **Linux:** Qt가 `/usr`, LibTorch가 `/opt/libtorch`에 설치된 경우입니다.
@@ -96,7 +182,7 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;/opt/libtorch" -
 cmake -S . -B build -DCMAKE_PREFIX_PATH="/usr;/opt/libtorch" -DCMAKE_BUILD_TYPE=Release && cmake --build build --target FingerprintGUI FingerprintTrain --parallel 2
 ```
 
-### 3.3. Training
+### 3.4. Training
 
 `models/pretrained/deepprint.bin`은 Git LFS로 함께 받습니다. 파일이 없다면 `git lfs pull`을 실행합니다. Python 변환 없이 아래 명령으로 학습할 수 있습니다. [사전학습 파일 안내](../src/Algorithm/readme.md#conversion--offline-run)
 
@@ -108,7 +194,7 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH="/usr;/opt/libtorch" -DCMAKE_BUILD_TYPE=
 
 데이터 증강, 네 모델의 학습과 저장, 저장된 모델의 검증, 판정 기준 산정까지 차례로 진행합니다. 출력 폴더의 네 `.bin`과 `calibration.json`을 함께 GUI에 사용합니다. 재학습에는 새 출력 폴더명을 사용합니다. `--augment-only`를 붙이면 증강만 생성하며, GUI용 모델은 생성하지 않습니다.
 
-### 3.4. Inference
+### 3.5. Inference
 
 ```sh
 ./build/FingerprintGUI
@@ -135,14 +221,14 @@ Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명�
 |---|---|
 | C++ 소스·CMake·원본 TIFF DB | 빌드·IDE·Python 캐시, 증강 이미지 |
 | 학습 초기 `.bin`과 정보 JSON, `models/readme.md` | `models/current`, 이전 학습·실험·검증 기록, 원본 체크포인트 |
-| 구조도 SVG·PNG, GUI 화면 모음 PNG | `GUI_flows/captures`의 원본 화면·실행 결과·샘플 이미지·요약 JSON |
-| `GUI_flows/captures/readme.md`, 이전 `Report_example` | `tools/readme.md`의 로컬 스타일 기록 |
+| 구조도 SVG·PNG, GUI 화면 모음 PNG | `docs/GUI_flows/captures`의 원본 화면·실행 결과·샘플 이미지·요약 JSON |
+| `docs/GUI_flows/captures/readme.md`, 이전 `Report_example` | `tools/readme.md`의 로컬 스타일 기록 |
 
 `Report_example/templates/*.bin`은 작은 출력 특징 벡터이며 학습 Weight가 아닙니다. 완료된 실험·이전 모델·회귀 검증의 Weight는 설정·결과를 확인한 뒤 정리했으며, 현재 운영 모델과 사전학습 파일은 유지합니다. 현재 폴더의 역할은 [모델 안내](../models/readme.md)를 참고합니다.
 
 ## 6. 예시와 검증 기록
 
-`GUI_flows`의 화면 모음은 2026-11-18의 30차원 모델 실행을 보여줍니다. 원본 캡처와 원시 결과는 로컬 자료이며 [캡처 기록 안내](../GUI_flows/captures/readme.md)에서 범위를 설명합니다. 문서용 그림·캡처 생성 도구는 정리했고 결과 이미지는 유지합니다.
+`docs/GUI_flows`의 화면 모음은 2026-11-18의 30차원 모델 실행을 보여줍니다. 원본 캡처와 원시 결과는 로컬 자료이며 [캡처 기록 안내](GUI_flows/captures/readme.md)에서 범위를 설명합니다. 문서용 그림·캡처 생성 도구는 정리했고 결과 이미지는 유지합니다.
 
 `Report_example`은 이전 512차원 방식으로 저장한 HTML·CSV·SVG와 미리보기입니다. 당시 경로·수치·판정을 보존하며 현재 모델 결과로 해석하지 않습니다. [리포트 설명](../Report_example/readme.md)을 참고합니다.
 

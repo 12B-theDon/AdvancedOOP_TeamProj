@@ -40,7 +40,7 @@ GUI는 DB와 등록 이미지를 선택하고 비교를 실행하는 화면이�
 
 GUI의 모델 선택은 호환되는 Cosine30 v2 Weight를 바꾸는 기능이다. 외부 알고리즘 DLL을 교체하는 기능은 현재 제공하지 않으며, 확장 방법은 [Engine 안내](../Engine/readme.md#dll-backend--extension)를 참고한다.
 
-[한 장 등록](../../GUI_flows/01_single_enrollment.png) · [여러 장 등록](../../GUI_flows/02_multiple_enrollment.png) · [외부 DB](../../GUI_flows/03_external_db.png) · [이전 리포트 미리보기](../../Report_example/report_preview.png)
+[한 장 등록](../../docs/GUI_flows/01_single_enrollment.png) · [여러 장 등록](../../docs/GUI_flows/02_multiple_enrollment.png) · [외부 DB](../../docs/GUI_flows/03_external_db.png) · [이전 리포트 미리보기](../../Report_example/report_preview.png)
 
 사용자 안내에는 템플릿의 역할, 점수의 의미와 조절 방법만 간단히 설명한다. HTML의 자세한 실행 설정은 `Run settings`를 펼쳐 볼 수 있다. 모델 형식과 평가 근거는 [Algorithm README](../Algorithm/readme.md)에 정리하고, 실제 모델 정보는 원시 결과에도 보존한다.
 
@@ -127,8 +127,8 @@ CSV는 `enrollment,attempt`와 선택적인 `type` 열을 받으며, 파일명�
 
 ## Status / Evidence
 
-운영 전환과 파일 통합 후 `QT_QPA_PLATFORM=offscreen`에서 실제 Window와 위젯으로 제공 DB 7개 흐름·140쌍과 외부 파일명 ID 1개 흐름·2쌍을 확인했다. 등록, 비교, 독립 기준 변경, `.fpt`·CSV·HTML 저장이 정상 동작했다. 검증 전용 `tests/`와 별도 CMake 대상은 이후 정리했으며, 이 검증 기록은 `models/current` 아래에 보존한다. 이후 코드 정리·폴더 이동 검증은 `models/validation`에, 화면 예시는 `GUI_flows`에 보관한다. 외부 검사는 기능 확인이며 미학습 손가락의 정확도 측정이 아니다. 학습에 포함된 검증과 재평가 명령은 [Algorithm README](../Algorithm/readme.md#verification--limits)에 정리했다.
+운영 전환과 파일 통합 후 `QT_QPA_PLATFORM=offscreen`에서 실제 Window와 위젯으로 제공 DB 7개 흐름·140쌍과 외부 파일명 ID 1개 흐름·2쌍을 확인했다. 등록, 비교, 독립 기준 변경, `.fpt`·CSV·HTML 저장이 정상 동작했다. 검증 전용 `tests/`와 별도 CMake 대상은 이후 정리했으며, 이 검증 기록은 `models/current` 아래에 보존한다. 이후 코드 정리·폴더 이동 검증은 `models/validation`에, 화면 예시는 `docs/GUI_flows`에 보관한다. 외부 검사는 기능 확인이며 미학습 손가락의 정확도 측정이 아니다. 학습에 포함된 검증과 재평가 명령은 [Algorithm README](../Algorithm/readme.md#verification--limits)에 정리했다.
 
 당시 검증은 Qt offscreen으로 수행했으며, 실제 데스크톱 창 조작은 확인하지 못했다. 추론은 GUI 스레드에서 순차 실행하며, 실행 중 강제 취소와 오류 격리는 미구현이다. 진행 표시는 단계 번호이며 이미지쌍별 실시간 진행률이 아니다. Word/PDF 리포트, 정규편차 DET, 지표 수식 선택, KISA DLL은 미구현이고 Windows 배포도 미검증이다.
 
-[GUI 화면 예시](../../GUI_flows/00_overview.png)와 [캡처 기록 안내](../../GUI_flows/captures/readme.md)를 참고한다. [Report_example](../../Report_example/readme.md)은 이전 리포트 예시로 보존한다.
+[GUI 화면 예시](../../docs/GUI_flows/00_overview.png)와 [캡처 기록 안내](../../docs/GUI_flows/captures/readme.md)를 참고한다. [Report_example](../../Report_example/readme.md)은 이전 리포트 예시로 보존한다.
