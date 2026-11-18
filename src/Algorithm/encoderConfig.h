@@ -16,6 +16,9 @@ inline constexpr double ExportAtol = 1e-5; // Absolute export comparison toleran
 inline constexpr double ExportRtol = 1e-4; // Relative export comparison tolerance.
 inline constexpr int Threads = 4; // [threads] CPU execution.
 inline constexpr const char* Architecture = "DeepPrint_TexMinu_512";
-inline constexpr const char* Preprocessing = "gray01-white-square-aa299-gabor1.8-v1";
+// Older archives contain the same encoder/Gabor method; geometry is selected by DB.
+inline constexpr const char* CompatibleArchivePreprocessing = "gray01-white-square-aa299-gabor1.8-v1";
+inline constexpr const char* Preprocessing = "gray01-fvc2004-center-square-aa299-gabor1.8-v2";
+inline constexpr const char* CenterCropDatabase = "FVC2004_DB1_B";
 inline constexpr const char* UpstreamCommit = "7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13";
 }

@@ -3,6 +3,7 @@
 #include <chrono>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QImage>
 
 static double ElapsedMs(const std::chrono::steady_clock::time_point& start) {
@@ -283,9 +284,13 @@ SimilarityResult Engine::Compare(const EnrollmentTemplates& enrollment, const Al
     return result;
 }
 
-AlgorithmImage Engine::ReadImage(const std::string& path) {
+AlgorithmImage Engine::ReadImage(const std::string& path, const std::string& database_id) {
     const QImage image = QImage(QString::fromStdString(path)).convertToFormat(QImage::Format_Grayscale8);
     AlgorithmImage result;
+    // Explicit GUI/training context wins; known parent names also support CLI callers.
+    const auto source = database_id.empty() ? QFileInfo(QString::fromStdString(path)).dir().dirName().toStdString() : database_id;
+    for (const auto& known : EngineConfig::DatabaseIds)
+        if (source == known || source + "_B" == known) result.database_id = known;
     result.width = image.width();
     result.height = image.height();
     for (int y = 0; y < image.height(); ++y)
@@ -321,7 +326,7 @@ std::vector<SimilarityResult> Engine::Execute(const std::vector<ComparisonPair>&
             }
             results.push_back(result);
         } else
-            results.push_back(Compare(templates[pair.enrollment], ReadImage(images[pair.attempt].path)));
+            results.push_back(Compare(templates[pair.enrollment], ReadImage(images[pair.attempt].path, images[pair.attempt].database_id)));
     }
     return results;
 }

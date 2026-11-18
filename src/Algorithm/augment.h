@@ -13,6 +13,6 @@ struct TrainingImage {
     bool augmented = false;
 };
 
-// Returns original images plus their cached, independently stored augmentations.
+// Originals plus cached augmentations; FVC2004 is center-cropped before augmentation.
 QVector<TrainingImage> PrepareAugmentations(const QString& imagesFolder, const QString& outputFolder,
                                            QString* manifestFile = nullptr);

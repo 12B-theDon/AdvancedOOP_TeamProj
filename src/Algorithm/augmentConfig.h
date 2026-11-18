@@ -2,8 +2,9 @@
 
 // Offline image generation; inference never uses these settings.
 namespace AugmentConfig {
-inline constexpr const char* FolderPattern = "%1_per_image_seed%2"; // Copies and seed; numbered on setting changes.
-inline constexpr int Version = 1; // Cache format revision.
+inline constexpr const char* FolderPattern = "crop_first_%1_per_image_seed%2"; // Copies and seed; numbered on setting changes.
+inline constexpr int Version = 2; // Cache format revision.
+inline constexpr const char* SourceGeometry = "fvc2004-center-square-before-augmentation";
 inline constexpr unsigned int Seed = 42; // Reproducible augmentation seed.
 inline constexpr int CopiesPerOriginal = 12; // [images/original]
 // Independent probabilities; enabled changes are composed in the listed order.

@@ -13,7 +13,6 @@ Source diagram: [SVG](../../docs/diagrams/algorithm.svg) · [PNG](../../docs/dia
 | 파일 | 역할 |
 |---|---|
 | [Algorithm.h](Algorithm.h) | Engine이 사용하는 Abstract API와 `AlgorithmImage`, `PreparedImage`를 정의한다. |
-| [Algorithm.cpp](Algorithm.cpp) | 현재 Include와 안내 주석만 있다. 별도 Model 구현은 없다. |
 | [encoder.h](encoder.h) | `FingerprintEncoder` 선언이다. PImpl로 Torch type을 다른 Header에서 숨긴다. |
 | [encoder.cpp](encoder.cpp) | Weight/Metadata 확인, 동일 Preprocessing, Encoding, Template 직렬화, Cosine comparison을 구현한다. |
 | [encoderConfig.h](encoderConfig.h) | Architecture·Input size·Feature size·Gabor·검증 Tolerance·CPU thread 설정이다. |
@@ -98,7 +97,11 @@ Source diagram: [SVG](../../docs/diagrams/algorithm.svg) · [PNG](../../docs/dia
 | Output | 두 Vector concatenate → L2 normalize → 512 features | Float32 512개, 현재 2,048 [bytes]다. |
 | Pretraining 전용 | 두 8,000-class head와 Minutiae map decoder | 변환된 Encoder에서 제외한다. |
 
-Preprocessing은 `Gray8/255 → White square padding → Antialiased bilinear 299×299 resize → Gabor binarization`이다. Gabor ridge width는 1.8 [px]다. Width/Height 차이가 홀수면 마지막 1 [px]를 Right/Bottom에 둔다. Enrollment와 Attempt가 같은 함수를 사용한다.
+Preprocessing은 `Gray8/255 → DB별 정사각형 변환 → Antialiased bilinear 299×299 resize → Gabor binarization`이다. **FVC2004_DB1_B는 중앙 Crop**으로 640×480의 좌우 80 [px]를 잘라 480×480으로 만들고, FVC2000·FVC2002·출처가 불명확한 이미지는 White square padding을 사용한다. Gabor ridge width는 1.8 [px]다. Width/Height 차이가 홀수면 Right/Bottom에서 1 [px] 더 제거하거나 Padding한다.
+
+학습·Enrollment·Attempt는 모두 `FingerprintEncoder::Preprocess`를 사용한다. `AlgorithmImage.database_id`로 입력 DB를 전달하며, 선택한 모델이나 Archive 버전에 관계없이 같은 규칙을 적용한다. Engine은 명시된 DB ID를 우선하고, 생략하면 알려진 부모 폴더 이름으로 식별한다. 기존 Archive도 호환되는 Encoder·Gabor 함수를 사용해 그대로 로드하며, Weight 파일은 변경하지 않는다.
+
+Padding과 중앙 Crop을 비교한 결과 FVC2004의 Validation EER이 13.33%에서 6.67%로 개선되어 중앙 Crop을 채택하였다.
 
 Upstream의 Constant-image normalization을 `torch.where`로 바꾸고 불필요한 Display import를 제거했다. Texture branch의 Batch-one `squeeze` 문제를 Wrapper에서 피했다. BatchNorm은 Eval 상태이며 Wrapper에는 Dropout을 포함하지 않는다. [변경 고지](../../third_party/deepprint.NOTICE.txt)를 참고한다.
 
@@ -106,7 +109,7 @@ Upstream의 Constant-image normalization을 `torch.where`로 바꾸고 불필요
 
 원본은 [data/original](../../data/original)에 보존한다. 각 DB는 10 fingers × 8 captures = 80장이다. 먼저 Capture ID 1–6을 Training, 7–8을 Validation으로 나눈다. 모든 Augmentation은 원본의 Split을 상속한다. Validation에는 원본만 사용한다. 같은 손가락의 촬영본을 나누는 방식이며, 손가락 ID를 분리한 학습이나 별도 Test split은 없다.
 
-재학습 결과는 새 폴더 `models/retrain_날짜_시간`에 저장한다. 개발 PC에서 확인한 Run은 `models/retrain_20261117_235258`이다. 모델·Metadata·학습 CSV는 Git에 포함하지 않으므로 Clone 후 직접 준비해야 한다.
+학습 결과는 새 폴더에 저장하며 기존 Weight를 덮어쓰지 않는다. 모델·Metadata·학습 CSV는 Git에 포함하지 않으므로 Clone 후 준비해야 한다.
 
 | 모델 | Classes | Training originals | 사용 Augmentation | Training 합계 | Validation originals |
 |---|---:|---:|---:|---:|---:|
@@ -150,6 +153,8 @@ Upstream의 Constant-image normalization을 `torch.where`로 바꾸고 불필요
 | `GaborRidgeWidth`, `NormEpsilon` | 1.8 [px], `1e-12` | Gabor 설정과 Zero-norm 검출 기준이다. |
 | `Threads` | 4 [threads] | C++ CPU 연산 Thread 수다. CUDA/MPS는 사용하지 않는다. |
 | `ExportAtol`, `ExportRtol` | `1e-5`, `1e-4` | Python/TorchScript 비교 허용 오차다. |
+| `CenterCropDatabase` | `FVC2004_DB1_B` | 중앙 정사각형 Crop을 적용할 입력 DB다. |
+| `Preprocessing`, `CompatibleArchivePreprocessing` | `…-v2`, `…-v1` | 저장할 전처리 식별자와 기존 Archive의 호환 식별자다. 실행 규칙은 입력 DB로 결정한다. |
 
 Architecture·Preprocessing을 바꾸면 Checkpoint 호환성과 재변환 여부도 확인해야 한다. Config 이름만 바꿔 기존 Weight의 Network 구조가 바뀌는 것은 아니다.
 
@@ -157,19 +162,20 @@ Architecture·Preprocessing을 바꾸면 Checkpoint 호환성과 재변환 여�
 
 | AugmentConfig | 현재 값·적용 확률 |
 |---|---|
-| `CopiesPerOriginal`, `Seed`, `Version` | 12 [images/original], 42, Cache format 1 |
+| `CopiesPerOriginal`, `Seed`, `Version` | 12 [images/original], 42, Cache format 2 |
 | `RotationDegrees`, `RotationProbability` | −15~+15 [deg], 0.9 |
 | `ScaleMin/Max`, `ScaleProbability` | 0.90~1.10 [ratio], 0.9 |
-| `Fvc2004ScaleMin/Max` | 1.00~1.30 [ratio]. 넓은 여백을 고려한다. |
+| `Fvc2004ScaleMin/Max` | 1.00~1.30 [ratio]. 중앙 Crop 후 영역에서 Foreground 잘림 제한을 적용한다. |
 | `NoiseStdMin/Max`, `NoiseProbability` | Gaussian sigma 1~5 [gray8], 0.7 |
 | `BrightnessMin/Max`, `BrightnessProbability` | Pixel gain 0.90~1.10, 0.8 |
 | `ForegroundThreshold`, `MaxClippedForeground` | 235 [gray8] 미만을 Foreground로 보고, 화면 밖으로 나가는 비율을 최대 0.05로 제한한다. |
 | `GeometryAttempts` | 32회 재추첨 후 조건을 못 맞추면 Identity geometry를 사용한다. |
-| `FolderPattern` | `%1_per_image_seed%2`. 설정이 다르면 번호 Suffix를 붙인다. |
+| `FolderPattern` | `crop_first_%1_per_image_seed%2`. 설정이 다르면 번호 Suffix를 붙인다. |
+| `SourceGeometry` | `fvc2004-center-square-before-augmentation` |
 
-변형 적용 여부는 독립적으로 추첨한다. Rotation·Scale을 합성한 뒤 Brightness gain·Gaussian noise·Gray8 clamp를 적용한다. Foreground 검사는 Threshold 기반 근사이며 정밀 Segmentation은 아니다.
+FVC2004는 원본 640×480의 중앙 480×480을 먼저 Crop한 뒤 증강한다. 다른 DB는 기존 원본 영역에서 증강한다. 변형 적용 여부는 독립적으로 추첨한다. Rotation·Scale을 합성한 뒤 Brightness gain·Gaussian noise·Gray8 clamp를 적용한다. Foreground 잘림 검사도 Crop 후 영역을 기준으로 한다. 검사는 Threshold 기반 근사이며 정밀 Segmentation은 아니다. FVC2004 증강 PNG는 이미 정사각형이므로 Encoder에서 추가로 잘리는 영역이 없다.
 
-증강 결과는 `data/augmented/12_per_image_seed42`처럼 설정을 알아볼 수 있는 폴더에 저장한다. 없으면 생성하고, 같은 설정과 원본으로 완성된 Cache가 있으면 Hash를 확인해 재사용한다. Manifest에는 설정, 원본·결과의 SHA-256, split, 실제 변형값을 기록한다. 설정이 달라지면 다른 번호의 폴더를 사용한다. 이 폴더는 Git에서 제외되며 추론 중에는 읽지 않는다.
+증강 결과는 `data/augmented/crop_first_12_per_image_seed42`처럼 설정을 알아볼 수 있는 폴더에 저장한다. 같은 설정과 원본으로 완성된 Cache만 Hash를 확인해 재사용한다. Manifest에는 설정, 원본·결과의 SHA-256, split, 실제 변형값과 Crop 위치·전후 크기를 기록한다. 설정이 달라지면 다른 번호의 폴더를 사용한다. 이 폴더는 Git에서 제외되며 추론 중에는 읽지 않는다.
 
 ### Local Resource / Results
 
@@ -196,7 +202,7 @@ Architecture·Preprocessing을 바꾸면 Checkpoint 호환성과 재변환 여�
 | 함수·위치 | 입력 | 출력·목적 |
 |---|---|---|
 | `LoadModel` / encoder.cpp | Model ID, Archive 경로 | `bool`, Error. Embedded format·Architecture·Preprocessing·512 dimensions·Model ID와 Probe output을 확인한다. |
-| `Preprocess` / encoder.cpp | Model ID, tightly packed `AlgorithmImage` | `PreparedImage`: 299×299 Float values. 실패하면 `false`와 Error를 준다. |
+| `Preprocess` / encoder.cpp | Model ID, tightly packed `AlgorithmImage`와 `database_id` | `PreparedImage`: 299×299 Float values. 입력 DB로 Crop/Padding을 결정한다. 실패하면 `false`와 Error를 준다. |
 | `CreateTemplate` / encoder.cpp | Model ID, `PreparedImage` | Float32 512개의 Byte buffer. Size·Finite·Norm을 확인한다. |
 | `Compare` / encoder.cpp | Model ID, Enrollment/Attempt Template | `double` Normalized similarity `[0,1]`, 성공 여부·Error. 높은 값이 더 유사하다. |
 | `PrepareAugmentations` / augment.cpp | Original DB root, Cache root, 선택적 Manifest 경로 포인터 | `QVector<TrainingImage>`. 원본·증강본 경로와 Split을 돌려준다. 오류는 Exception으로 전달한다. |

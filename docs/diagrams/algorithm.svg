@@ -16,8 +16,6 @@
 <polygon points="445.72,264.98 447.62,260.48 443.82000000000005,260.48" fill="#81909b"/>
 <polyline points="417.940,285.980 377.220,285.980" fill="none" stroke="#81909b" stroke-width="1.1" stroke-dasharray="3 3"/>
 <polygon points="377.22,285.98 381.72,287.88 381.72,284.08000000000004" fill="#81909b"/>
-<polyline points="258.500,285.980 292.220,285.980" fill="none" stroke="#81909b" stroke-width="1.1" stroke-dasharray="3 3"/>
-<polygon points="292.22,285.98 287.72,284.08000000000004 287.72,287.88" fill="#81909b"/>
 <polyline points="227.700,166.690 164.457,166.690" fill="none" stroke="#4f5b65" stroke-width="1.1"/>
 <polygon points="164.4566285581292,166.69 168.9566285581292,168.59 168.9566285581292,164.79" fill="#4f5b65"/>
 <polyline points="162.932,203.030 228.471,203.030" fill="none" stroke="#4f5b65" stroke-width="1.1"/>
@@ -80,10 +78,6 @@
 <text x="71.280" y="281.980" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">augment.h</text>
 <line x1="47.88" y1="287.98" x2="94.68" y2="287.98" stroke="#2864b4" stroke-width="0.5" opacity="0.35"/>
 <text x="71.280" y="298.980" font-family="Apple SD Gothic Neo" font-size="10" font-weight="400" text-anchor="middle" fill="#000000">TrainingImage</text>
-</g>
-<g data-file="Algorithm.cpp" data-node="file" data-part="Algorithm">
-<ellipse cx="203.0" cy="285.98" rx="55.5" ry="16.0" fill="#eaf1ff" stroke="#2864b4" stroke-width="1.2"/>
-<text x="203.000" y="290.296" font-family="Apple SD Gothic Neo" font-size="13" font-weight="700" text-anchor="middle" fill="#000000">Algorithm.cpp</text>
 </g>
 <g data-file="Algorithm.h" data-node="file" data-part="Algorithm">
 <rect x="292.22" y="258.98" width="85" height="54" rx="0" fill="#eaf1ff" stroke="#2864b4" stroke-width="1.1"/>

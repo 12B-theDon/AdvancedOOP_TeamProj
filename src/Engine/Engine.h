@@ -12,6 +12,7 @@ struct ImageInfo {
     int capture = 0; // Capture number; 0 means unknown.
     int source_id = -1; // Same value means identical pixels; -1 means unknown.
     std::string path;
+    std::string database_id; // Source DB for the same geometry used during fine-tuning.
 };
 
 // Zero-based indices in the DB image list.
@@ -123,7 +124,7 @@ public:
     const std::vector<ModelState>& Models() const { return models_; }
     EnrollmentTemplates Enroll(const AlgorithmImage& image);
     SimilarityResult Compare(const EnrollmentTemplates& enrollment, const AlgorithmImage& attempt);
-    static AlgorithmImage ReadImage(const std::string& path);
+    static AlgorithmImage ReadImage(const std::string& path, const std::string& database_id = "");
     std::vector<SimilarityResult> Execute(const std::vector<ComparisonPair>& pairs,
                                          const std::vector<ImageInfo>& images,
                                          const std::vector<EnrollmentTemplates>& templates);

@@ -655,7 +655,7 @@ void Window::CreateEnrollmentTemplates() {
     int successful = 0;
     for (const auto* item : imageList_->selectedItems()) {
         const int index = imageList_->row(item);
-        enrollmentTemplates_[index] = engine_.Enroll(Engine::ReadImage(images_[index].path.toStdString()));
+        enrollmentTemplates_[index] = engine_.Enroll(Engine::ReadImage(images_[index].path.toStdString(), databaseId_.toStdString()));
         for (const auto& model : enrollmentTemplates_[index].models) {
             AddRow(templateTable_, {item->text(), QString::fromStdString(model.model_id),
                                    model.success ? "OK" : "Failed", QString::number(model.data.size()),
@@ -673,7 +673,7 @@ void Window::RunComparisons(ComparisonControls& controls) {
     std::vector<ImageInfo> images;
     for (const auto& image : images_)
         images.push_back({QFileInfo(image.path).fileName().toStdString(), image.finger, image.capture,
-                          image.source_id, image.path.toStdString()});
+                          image.source_id, image.path.toStdString(), databaseId_.toStdString()});
     controls.results = engine_.Execute(controls.pairs, images, enrollmentTemplates_);
     for (int row = 0; row < int(controls.results.size()); ++row) {
         const auto& result = controls.results[row];

@@ -29,9 +29,10 @@ bool FingerprintEncoder::LoadModel(const std::string& id, const std::string& fil
         torch::jit::ExtraFilesMap extras{{"metadata.json", ""}};
         auto module = torch::jit::load(file, torch::kCPU, extras);
         const auto metadata = QJsonDocument::fromJson(QByteArray::fromStdString(extras["metadata.json"])).object();
+        const auto preprocessing = metadata.value("preprocessing").toString();
         if (metadata.value("format").toString() != "deepprint-torchscript-v1"
             || metadata.value("architecture").toString() != EncoderConfig::Architecture
-            || metadata.value("preprocessing").toString() != EncoderConfig::Preprocessing
+            || (preprocessing != EncoderConfig::Preprocessing && preprocessing != EncoderConfig::CompatibleArchivePreprocessing)
             || metadata.value("embedding_size").toInt() != EncoderConfig::EmbeddingSize
             || metadata.value("model_id").toString().toStdString() != id)
             throw std::runtime_error("Incompatible model metadata or model ID.");
@@ -57,13 +58,20 @@ bool FingerprintEncoder::Preprocess(const std::string& id, const AlgorithmImage&
             || image.pixels.size() != std::size_t(image.width) * image.height)
             throw std::runtime_error("Expected tightly packed gray8 image.");
         torch::NoGradGuard guard;
+        auto& model = state_->Find(id);
         auto tensor = torch::from_blob(const_cast<unsigned char*>(image.pixels.data()), {1, 1, image.height, image.width}, torch::kUInt8)
                           .to(torch::kFloat32).div(double(EncoderConfig::GrayMaximum));
-        const int side = image.width > image.height ? image.width : image.height;
-        const int left = (side - image.width) / 2, top = (side - image.height) / 2;
-        tensor = torch::constant_pad_nd(tensor, {left, side - image.width - left, top, side - image.height - top}, 1.0);
+        if (image.database_id == EncoderConfig::CenterCropDatabase) {
+            const int side = image.width < image.height ? image.width : image.height;
+            const int left = (image.width - side) / 2, top = (image.height - side) / 2;
+            tensor = tensor.slice(2, top, top + side).slice(3, left, left + side);
+        } else {
+            const int side = image.width > image.height ? image.width : image.height;
+            const int left = (side - image.width) / 2, top = (side - image.height) / 2;
+            tensor = torch::constant_pad_nd(tensor, {left, side - image.width - left, top, side - image.height - top}, 1.0);
+        }
         tensor = at::_upsample_bilinear2d_aa(tensor, {EncoderConfig::InputSize, EncoderConfig::InputSize}, false, {}, {});
-        tensor = state_->Find(id).run_method("preprocess", tensor).toTensor().contiguous();
+        tensor = model.run_method("preprocess", tensor).toTensor().contiguous();
         if (tensor.numel() != EncoderConfig::InputSize * EncoderConfig::InputSize || !torch::isfinite(tensor).all().item<bool>())
             throw std::runtime_error("Invalid preprocessed input.");
         prepared.width = prepared.height = EncoderConfig::InputSize;

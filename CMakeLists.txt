@@ -10,7 +10,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(Torch REQUIRED)
 separate_arguments(TORCH_FLAGS NATIVE_COMMAND "${TORCH_CXX_FLAGS}")
 
-add_library(Algorithm STATIC src/Algorithm/Algorithm.cpp src/Algorithm/encoder.cpp)
+add_library(Algorithm STATIC src/Algorithm/encoder.cpp)
 target_include_directories(Algorithm PUBLIC src/Algorithm)
 target_link_libraries(Algorithm PUBLIC "${TORCH_LIBRARIES}" Qt${QT_VERSION_MAJOR}::Core)
 target_compile_options(Algorithm PUBLIC ${TORCH_FLAGS})

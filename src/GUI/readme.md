@@ -49,6 +49,8 @@ Qt Widgets로 화면을 구성한다. 그래프는 SVG를 직접 생성하므로
 
 GUI는 `models/pretrained/deepprint.bin`을 비교용 모델로 사용하지 않는다. Clone 직후에는 Fine-tuning을 먼저 실행하거나 학습된 모델을 별도로 받아야 한다. Root의 `models/run_01`은 학습 명령의 출력 예시이며, GUI에서는 실제 네 `.bin`이 생성된 폴더를 선택한다.
 
+GUI는 입력 DB ID를 Engine에 전달하고 학습과 같은 전처리 함수를 사용한다. FVC2004는 중앙 Crop 후 299×299로 축소하며, 다른 DB는 Padding한다. 기존 Weight와 Combined에도 같은 규칙을 적용하므로 별도 Crop 조작은 필요 없다. External 폴더는 알려진 DB 폴더 이름으로 식별하고, 출처가 불명확하면 Padding한다. 전처리가 변경된 프로그램에서는 Enrollment template을 다시 생성한다.
+
 DB의 바로 아래 `.tif`·`.tiff`를 읽으며 Subfolder는 재귀 탐색하지 않는다. 총수 표시는 TIFF 파일 기준이고 선택 List에는 Decode 가능한 이미지만 넣는다. 이름이 `finger_capture`이면 Known ID로 해석한다. 그 외 파일명도 Enrollment는 가능하지만 자동 Genuine/Impostor 후보에서는 제외한다. 이 경우 해당 Type의 Rule에서 CSV로 Label을 지정한다.
 
 모델을 하나 선택하면 `Model / Score`, 두 개 이상 선택하면 `Best model / Best score / Worst model / Worst score`를 표시한다. Best/Worst는 성공한 모델의 최고/최저 유사도다. 성공 모델이 하나뿐이면 Worst는 비워 둔다. `#`는 각 비교 종류에서 1부터 Pair 수까지 증가한다. 화면의 값은 중앙 정렬하며, 모든 모델별 점수·오류는 Result Tooltip과 원시 CSV에 남긴다. Metric과 Report는 Best score를 사용한다.

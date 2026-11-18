@@ -145,10 +145,13 @@ Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명�
 | 항목 | 기본값 | 설정 파일 |
 |---|---|---|
 | Encoder 입력 / 특징 차원 | 299×299 [px] / 512 | [encoderConfig.h](src/Algorithm/encoderConfig.h) |
+| 정사각형 변환 | FVC2004 중앙 Crop, 나머지 Padding | [전처리 설명](src/Algorithm/readme.md#encoder-architecture--preprocessing) |
 | 원본당 증강 수 / Seed | 12장 / 42 | [augmentConfig.h](src/Algorithm/augmentConfig.h) |
 | Optimizer / Learning rate | Adam / 0.0001 | [trainConfig.h](src/Algorithm/trainConfig.h) |
 | Batch / Epoch | 32 / 20 | [trainConfig.h](src/Algorithm/trainConfig.h) |
 | Similarity threshold | Genuine·Impostor 각각 0.75 | [engineConfig.h](src/Engine/engineConfig.h) |
+
+Padding과 중앙 Crop을 비교한 결과 FVC2004의 Validation EER이 13.33%에서 6.67%로 개선되어 중앙 Crop을 채택했습니다.
 
 학습 범위·증강 범위·Train/Validation 구분은 [Algorithm README](src/Algorithm/readme.md#fine-tuning--data-split)에 있습니다. 별도 Test split은 없습니다.
 

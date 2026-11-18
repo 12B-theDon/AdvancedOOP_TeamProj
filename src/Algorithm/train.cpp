@@ -1,4 +1,5 @@
 #include "augment.h"
+#include "augmentConfig.h"
 #include "encoder.h"
 #include "encoderConfig.h"
 #include "trainConfig.h"
@@ -33,16 +34,16 @@ static void WriteFile(const QString& path, const QByteArray& data) {
     Require(file.open(QIODevice::WriteOnly) && file.write(data) == data.size() && file.commit(), "Cannot write " + path);
 }
 
-static AlgorithmImage ReadImage(const QString& path) {
-    const auto image = Engine::ReadImage(path.toStdString());
+static AlgorithmImage ReadImage(const QString& path, const QString& database) {
+    const auto image = Engine::ReadImage(path.toStdString(), database.toStdString());
     Require(image.width > 0 && image.height > 0, "Cannot read " + path);
     return image;
 }
 
-static torch::Tensor PreparedTensor(FingerprintEncoder& encoder, const QString& path) {
+static torch::Tensor PreparedTensor(FingerprintEncoder& encoder, const QString& path, const QString& database) {
     PreparedImage prepared;
     std::string error;
-    Require(encoder.Preprocess("pretrained", ReadImage(path), prepared, error), QString::fromStdString(error));
+    Require(encoder.Preprocess("pretrained", ReadImage(path, database), prepared, error), QString::fromStdString(error));
     return torch::from_blob(prepared.values.data(), {1, 1, prepared.height, prepared.width}, torch::kFloat32).clone();
 }
 
@@ -92,7 +93,7 @@ int main(int argc, char* argv[]) {
         for (int start = 0; start < samples.size(); start += TrainConfig::FeatureBatchSize) {
             std::vector<torch::Tensor> batch;
             for (int index = start; index < samples.size() && index < start + TrainConfig::FeatureBatchSize; ++index)
-                batch.push_back(PreparedTensor(preprocessor, samples[index].path));
+                batch.push_back(PreparedTensor(preprocessor, samples[index].path, samples[index].database));
             torch::NoGradGuard guard;
             auto input = torch::cat(batch, 0);
             chunks.push_back(cacheFeatures ? base.run_method("features", input).toTensor().clone() : input);
@@ -195,9 +196,11 @@ int main(int argc, char* argv[]) {
             Require(changed, "Fine-tuning did not update encoder weights.");
             auto modelMetadata = metadata;
             modelMetadata.insert("model_id", ids[modelIndex]);
+            modelMetadata.insert("preprocessing", EncoderConfig::Preprocessing);
             modelMetadata.insert("base_encoder_sha256", baseHash);
             modelMetadata.insert("augmentation_manifest", augmentationManifest);
             modelMetadata.insert("augmentation_manifest_sha256", QString::fromLatin1(FileHash(augmentationManifest)));
+            modelMetadata.insert("augmentation_source_geometry", AugmentConfig::SourceGeometry);
             modelMetadata.insert("data_scope", modelIndex < databases.size() ? databases[modelIndex] : databases.join("+"));
             modelMetadata.insert("original_splits", split);
             modelMetadata.insert("train_samples", int(train.numel()));
@@ -218,8 +221,8 @@ int main(int argc, char* argv[]) {
             FingerprintEncoder backend;
             Engine engine;
             Require(engine.LoadSelectedModels({ids[modelIndex].toStdString()}, folder.toStdString(), &backend), "Cannot reload saved model.");
-            const auto enrollmentImage = ReadImage(samples[trainIndices.front()].path);
-            const auto attemptImage = ReadImage(samples[validationIndices.front()].path);
+            const auto enrollmentImage = ReadImage(samples[trainIndices.front()].path, samples[trainIndices.front()].database);
+            const auto attemptImage = ReadImage(samples[validationIndices.front()].path, samples[validationIndices.front()].database);
             const auto enrollment = engine.Enroll(enrollmentImage);
             const auto self = engine.Compare(enrollment, enrollmentImage);
             const auto result = engine.Compare(enrollment, attemptImage);
@@ -227,14 +230,14 @@ int main(int argc, char* argv[]) {
             for (auto index : validationIndices)
                 if (labelValues[index] != labelValues[trainIndices.front()]) { impostorIndex = index; break; }
             Require(impostorIndex >= 0, "No impostor verification image.");
-            const auto impostor = engine.Compare(enrollment, ReadImage(samples[impostorIndex].path));
+            const auto impostor = engine.Compare(enrollment, ReadImage(samples[impostorIndex].path, samples[impostorIndex].database));
             Require(enrollment.success && self.success && std::abs(self.score - 1.0) < TrainConfig::SelfScoreTolerance && result.success,
                     "Reloaded Engine enrollment/attempt verification failed.");
             Require(impostor.success, "Reloaded Engine impostor verification failed.");
             {
                 torch::NoGradGuard guard;
                 auto reloaded = torch::jit::load(path.toStdString(), torch::kCPU);
-                const auto probe = PreparedTensor(preprocessor, samples[validationIndices.front()].path);
+                const auto probe = PreparedTensor(preprocessor, samples[validationIndices.front()].path, samples[validationIndices.front()].database);
                 Require(torch::allclose(model.forward({probe}).toTensor(), reloaded.forward({probe}).toTensor(), TrainConfig::ReloadRtol, TrainConfig::ReloadAtol),
                         "Saved encoder differs after reload.");
             }

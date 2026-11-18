@@ -1,5 +1,6 @@
 #include "augment.h"
 #include "augmentConfig.h"
+#include "encoderConfig.h"
 #include "trainConfig.h"
 #include "../Engine/engineConfig.h"
 #include <QCryptographicHash>
@@ -44,7 +45,8 @@ QVector<TrainingImage> PrepareAugmentations(const QString& imagesFolder, const Q
         {"brightness_max", BrightnessMax}, {"foreground_threshold", ForegroundThreshold},
         {"max_clipped_foreground", MaxClippedForeground}, {"geometry_attempts", GeometryAttempts},
         {"validation_first_capture", TrainConfig::ValidationFirstCapture},
-        {"composition", "rotation+scale about image center; brightness multiply; additive Gaussian noise; clamp gray8"}
+        {"source_geometry", SourceGeometry}, {"center_crop_database", EncoderConfig::CenterCropDatabase},
+        {"composition", "FVC2004 center crop first; rotation+scale about image center; brightness multiply; additive Gaussian noise; clamp gray8"}
     };
     QJsonArray sources;
     QVector<TrainingImage> images;
@@ -99,8 +101,14 @@ QVector<TrainingImage> PrepareAugmentations(const QString& imagesFolder, const Q
     const int originalCount = images.size();
     for (int index = 0; index < originalCount; ++index) {
         const TrainingImage source = images[index];
-        const QImage original = QImage(source.path).convertToFormat(QImage::Format_Grayscale8);
+        QImage original = QImage(source.path).convertToFormat(QImage::Format_Grayscale8);
         Require(!original.isNull(), "Cannot decode " + source.path);
+        const int sourceWidth = original.width(), sourceHeight = original.height();
+        const bool centerCrop = source.database == EncoderConfig::CenterCropDatabase;
+        const int side = qMin(sourceWidth, sourceHeight);
+        const int cropLeft = centerCrop ? (sourceWidth - side) / 2 : 0;
+        const int cropTop = centerCrop ? (sourceHeight - side) / 2 : 0;
+        if (centerCrop) original = original.copy(cropLeft, cropTop, side, side);
         QVector<QPointF> foreground;
         for (int y = 0; y < original.height(); ++y)
             for (int x = 0; x < original.width(); ++x)
@@ -114,9 +122,8 @@ QVector<TrainingImage> PrepareAugmentations(const QString& imagesFolder, const Q
             bool accepted = false;
             for (int attempt = 0; attempt < GeometryAttempts; ++attempt) {
                 rotation = sample(0, 1) < RotationProbability ? sample(-RotationDegrees, RotationDegrees) : 0;
-                const bool fvc2004 = source.database == "FVC2004_DB1_B";
                 scale = sample(0, 1) < ScaleProbability
-                    ? sample(fvc2004 ? Fvc2004ScaleMin : ScaleMin, fvc2004 ? Fvc2004ScaleMax : ScaleMax) : 1;
+                    ? sample(centerCrop ? Fvc2004ScaleMin : ScaleMin, centerCrop ? Fvc2004ScaleMax : ScaleMax) : 1;
                 transform = QTransform();
                 transform.translate(original.width() / 2.0, original.height() / 2.0);
                 transform.rotate(rotation);
@@ -160,9 +167,13 @@ QVector<TrainingImage> PrepareAugmentations(const QString& imagesFolder, const Q
             generated.append(QJsonObject{{"file", relative}, {"original", source.original}, {"db", source.database},
                 {"identity", source.identity}, {"validation", source.validation}, {"rotation", rotation}, {"scale", scale},
                 {"brightness", brightness}, {"noise_std", sigma}, {"clipped_foreground", clipped},
+                {"source_width", sourceWidth}, {"source_height", sourceHeight},
+                {"crop_before_augmentation", centerCrop}, {"crop_left", cropLeft}, {"crop_top", cropTop},
+                {"augmentation_width", original.width()}, {"augmentation_height", original.height()},
                 {"geometry_fallback", !accepted}, {"sha256", QString::fromLatin1(HashFile(path))}});
             images.append({path, source.original, source.database, source.identity, source.validation, true});
         }
+        if (index % 10 == 0) QTextStream(stdout) << "Generated augmentations " << index << " / " << originalCount << Qt::endl;
     }
     QSaveFile manifest(manifestPath);
     const auto bytes = QJsonDocument(QJsonObject{{"input", input}, {"images", generated}}).toJson();

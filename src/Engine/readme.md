@@ -68,6 +68,8 @@ Algorithm pointer는 Engine이 소유하지 않는다. [main.cpp](../main.cpp)�
 
 Time은 Algorithm 호출 경로의 경과 시간이다. Enrollment는 Preprocessing+Encoding, Comparison은 Attempt Encoding+Cosine+Model 순회를 포함한다. `ReadImage`의 File decoding은 이 시간 밖에서 실행한다. Model Load 시간도 별도 Metric으로 수집하지 않는다.
 
+`ReadImage(path, database_id)`는 Gray8 pixel과 입력 DB ID를 함께 반환한다. 명시된 DB ID가 우선하며, 생략하면 알려진 부모 폴더 이름으로 식별한다. GUI의 Enrollment와 `Execute`의 Attempt 모두 이 정보를 Algorithm에 전달한다. FVC2004는 중앙 정사각형 Crop하고 다른 DB·알 수 없는 출처는 Padding한다. 선택한 Model ID나 Archive 버전과 관계없이 같은 입력 DB 규칙을 사용한다.
+
 ## Comparison Rules
 
 | Rule | 동작 |
