@@ -126,6 +126,14 @@ Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명�
 
 [![Algorithm](docs/diagrams/algorithm.png)](docs/diagrams/algorithm.svg)
 
+**모델 구조와 학습 범위** — Backbone은 고정하고 두 Projection과 Cosine Classifier를 학습합니다. 최종 Softmax 출력이 30차원 템플릿입니다. 그림을 누르면 SVG 원본을 볼 수 있습니다.
+
+[![DeepPrint 모델 구조와 Partial Fine-tuning 범위](docs/diagrams/deepprint_finetuning.png)](docs/diagrams/deepprint_finetuning.svg)
+
+**Inception·Reduction 블록 내부 구조** — 두 Branch에서 사용하는 병렬 경로, 채널 연결과 블록 반복을 보여줍니다.
+
+[![Inception과 Reduction 블록 내부 구조](docs/diagrams/deepprint_blocks.png)](docs/diagrams/deepprint_blocks.svg)
+
 ### Engine
 
 비교할 이미지쌍을 만들고 선택한 모델을 실행합니다. 동일 이미지의 비교를 제외하고, 모델별 점수·시간·오류를 수집해 저장합니다. [상세 설명](src/Engine/readme.md)

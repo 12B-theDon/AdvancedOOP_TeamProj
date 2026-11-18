@@ -36,3 +36,8 @@ __pycache__/
 # Local raw GUI verification outputs; keep the explanatory README.
 /GUI_flows/captures/*
 !/GUI_flows/captures/readme.md
+
+# Local reference paper and diagram PDF exports.
+/Deepprint.pdf
+/output/pdf/deepprint_blocks.pdf
+/output/pdf/deepprint_finetuning.pdf
