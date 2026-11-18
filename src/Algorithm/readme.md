@@ -357,7 +357,7 @@ GUI Step 3에서 `models/run_01` 등 학습을 완료한 폴더를 선택한다.
 
 ## Windows / Visual Studio
 
-Root의 Windows Build 설정으로 Release/x64를 사용한다. `FingerprintTrain`을 Startup Project로 설정하고 Working Directory를 Project root, Command Arguments를 `data\original models\pretrained\deepprint.bin models\run_01`로 지정하면 된다. Qt/LibTorch DLL과 TIFF plugin 준비는 [Root](../../readme.md#windows--visual-studio)를 따른다. Windows 실제 실행은 아직 확인하지 않았다.
+[Windows 빌드 안내](../../docs/repository_preparation.md#2-windows--visual-studio)에 따라 Release/x64를 사용한다. `FingerprintTrain`을 Startup Project로 설정하고 Working Directory를 Project root, Command Arguments를 `data\original models\pretrained\deepprint.bin models\run_01`로 지정하면 된다. Qt/LibTorch DLL과 TIFF plugin 준비는 [Windows 실행 환경](../../docs/repository_preparation.md#2-windows--visual-studio)를 따른다. Windows 실제 실행은 아직 확인하지 않았다.
 
 모델 폴더의 용도와 이전 경로 대응은 [모델 보관 안내](../../models/readme.md)를 참고한다.
 
@@ -384,4 +384,4 @@ GUI 검증은 Qt 오프스크린 모드에서 실행했다. 현재 환경에서�
 
 ## License / Status
 
-공개 재구현 Source는 [LGPL-3.0](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/LICENSE), Inception Source는 BSD-3-Clause다. 변경 내용은 [NOTICE](../../third_party/deepprint.NOTICE.txt)를 따른다. 공개 Checkpoint의 별도 License는 확인되지 않았다. 외부 Library는 [Root License](../../readme.md#license--submodule)를 참고한다. 현재 운영 Weight와 실험 기록은 로컬에 보존하고 Git에서 제외한다. 완료된 실험 Weight는 정리했으며 사전학습 Archive의 기존 Git LFS 배포 정책은 유지한다.
+공개 재구현 Source는 [LGPL-3.0](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/LICENSE), Inception Source는 BSD-3-Clause다. 변경 내용은 [NOTICE](../../third_party/deepprint.NOTICE.txt)를 따른다. 공개 Checkpoint의 별도 License는 확인되지 않았다. 외부 Library는 [Root License](../../readme.md#4-license--submodule)를 참고한다. 현재 운영 Weight와 실험 기록은 로컬에 보존하고 Git에서 제외한다. 완료된 실험 Weight는 정리했으며 사전학습 Archive의 기존 Git LFS 배포 정책은 유지한다.

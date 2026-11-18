@@ -22,7 +22,7 @@ GUI는 DB와 등록 이미지를 선택하고 비교를 실행하는 화면이�
 | [report.h](report.h), [report.cpp](report.cpp) | 지표 계산, SVG 생성, CSV·HTML 저장 |
 | [main.cpp](../main.cpp) | Encoder와 Window를 생성하고 연결하는 진입점 |
 
-이미지 정보는 `engine::ImageInfo`로 한 번만 저장하고 등록·비교·CSV·리포트에서 공유한다. 화면 위젯은 명시적 타입으로 선언하며 이벤트 연결에 필요한 짧은 람다를 사용한다. Qt Widgets를 사용하며 별도의 차트 라이브러리 없이 SVG를 생성한다. 페이지는 Window를 부모로 생성하고, 레이아웃에 넣은 위젯은 Qt의 부모·자식 소유권으로 해제한다. 멤버 위젯 포인터는 소유하지 않는 참조이며 nullptr로 초기화한다. Window 복사는 금지한다. Qt 이벤트 연결의 짧은 람다는 Window를 연결 문맥으로 사용하므로 Window가 소멸하면 연결도 해제된다. 이미지 읽기에는 Qt TIFF 플러그인이 필요하다. 사용하는 라이브러리와 라이선스는 [Root README](../../readme.md#libraries--headers)에 정리했다.
+이미지 정보는 `engine::ImageInfo`로 한 번만 저장하고 등록·비교·CSV·리포트에서 공유한다. 화면 위젯은 명시적 타입으로 선언하며 이벤트 연결에 필요한 짧은 람다를 사용한다. Qt Widgets를 사용하며 별도의 차트 라이브러리 없이 SVG를 생성한다. 페이지는 Window를 부모로 생성하고, 레이아웃에 넣은 위젯은 Qt의 부모·자식 소유권으로 해제한다. 멤버 위젯 포인터는 소유하지 않는 참조이며 nullptr로 초기화한다. Window 복사는 금지한다. Qt 이벤트 연결의 짧은 람다는 Window를 연결 문맥으로 사용하므로 Window가 소멸하면 연결도 해제된다. 이미지 읽기에는 Qt TIFF 플러그인이 필요하다. 사용하는 라이브러리와 라이선스는 [Root README](../../readme.md#3-libraries--headers)에 정리했다.
 
 ## Pages / Actual Flow
 
@@ -36,7 +36,11 @@ GUI는 DB와 등록 이미지를 선택하고 비교를 실행하는 화면이�
 | 6. Run | 비교 개수를 확인하고 `Run selected comparisons`로 실행한다. |
 | 7. Results | 점수와 판정 기준을 확인한다. `Metrics and report` 탭에서 지표를 선택한 뒤 `Save all`로 저장한다. |
 
-학습된 네 `.bin`과 `calibration.json`을 같은 폴더에 둔다. GUI의 초기 경로는 `models/current`이며, 다른 위치에 학습한 모델은 폴더 선택으로 불러온다. `models/run_01`은 학습 명령이 생성하는 출력 폴더의 예시다. Clone 직후에는 직접 학습하거나 별도로 받은 모델이 필요하며, `models/pretrained`는 GUI 비교용 폴더가 아니다. 구형 512차원 모델을 선택하면 재학습 안내를 표시한다.
+학습된 네 `.bin`과 `calibration.json`을 같은 폴더에 둔다. 모델 파일명은 `fvc2000_db3.bin`, `fvc2002_db3.bin`, `fvc2004_db1.bin`, `combined.bin`이다. GUI의 초기 경로는 `models/current`이며, 다른 위치에 학습한 모델은 폴더 선택으로 불러온다. `models/run_01`은 학습 명령이 생성하는 출력 폴더의 예시다. Clone 직후에는 직접 학습하거나 별도로 받은 모델이 필요하며, `models/pretrained`는 GUI 비교용 폴더가 아니다. 구형 512차원 모델을 선택하면 재학습 안내를 표시한다.
+
+GUI의 모델 선택은 호환되는 Cosine30 v2 Weight를 바꾸는 기능이다. 외부 알고리즘 DLL을 교체하는 기능은 현재 제공하지 않으며, 확장 방법은 [Engine 안내](../Engine/readme.md#dll-backend--extension)를 참고한다.
+
+[한 장 등록](../../GUI_flows/01_single_enrollment.png) · [여러 장 등록](../../GUI_flows/02_multiple_enrollment.png) · [외부 DB](../../GUI_flows/03_external_db.png) · [이전 리포트 미리보기](../../Report_example/report_preview.png)
 
 사용자 안내에는 템플릿의 역할, 점수의 의미와 조절 방법만 간단히 설명한다. HTML의 자세한 실행 설정은 `Run settings`를 펼쳐 볼 수 있다. 모델 형식과 평가 근거는 [Algorithm README](../Algorithm/readme.md)에 정리하고, 실제 모델 정보는 원시 결과에도 보존한다.
 

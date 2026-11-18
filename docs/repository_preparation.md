@@ -1,10 +1,10 @@
-# 저장소 준비와 배포 범위
+# 빌드·실행과 저장소 준비
 
 저장소: [AdvancedOOP_TeamProj](https://github.com/12B-theDon/AdvancedOOP_TeamProj), 기본 브랜치: `main`.
 
-## Clone과 의존성
+## 1. Clone과 의존성
 
-Git LFS를 설치하고 `git lfs install`을 실행한 뒤 `git clone --recurse-submodules`로 받습니다. 사전학습 파일이 내려오지 않았다면 프로젝트 루트에서 `git lfs pull`을 실행합니다. OS별 빌드·학습·GUI 실행 명령은 [Root README](../readme.md)에 있습니다.
+Git LFS를 설치하고 `git lfs install`을 실행한 뒤 `git clone --recurse-submodules`로 받습니다. 사전학습 파일이 내려오지 않았다면 프로젝트 루트에서 `git lfs pull`을 실행합니다. 빠른 실행 순서는 [메인 README](../readme.md#1-build--run)에, OS별 설치 경로와 DLL 준비·IDE 실행 방법은 아래에 정리했습니다.
 
 | 항목 | 내용 |
 |---|---|
@@ -18,7 +18,118 @@ Git LFS를 설치하고 `git lfs install`을 실행한 뒤 `git clone --recurse-
 
 Qt와 LibTorch는 별도로 설치합니다. 학습 초기 파일 `models/pretrained/deepprint.bin`은 Git LFS로, 정보 파일 `deepprint.json`은 일반 파일로 포함합니다. GUI용으로 Fine-tuning한 모델은 배포하지 않으므로 새 Clone에서는 먼저 학습하거나 별도로 받은 호환 모델을 선택해야 합니다.
 
-## 포함·제외 대상
+## 2. Windows / Visual Studio
+
+**Visual Studio 2022 IDE** 기준입니다. Installer에서 **Desktop development with C++**, MSVC v143 x64, Windows SDK, **C++ CMake tools for Windows**를 설치합니다.
+
+Git·Git LFS, CMake 3.21 이상, MSVC x64용 Qt Widgets·TIFF plugin, Windows x64 CPU용 LibTorch가 필요합니다. LibTorch와 프로젝트는 **Release** 구성을 사용합니다. [Visual Studio 안내](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170) · [LibTorch 설치](https://docs.pytorch.org/cppdocs/installing.html)
+
+아래 명령은 **Developer Command Prompt for VS 2022**에서 실행합니다. Windows 실행은 아직 검증하지 않았습니다.
+
+### 2.1. Clone
+
+```bat
+git lfs install && git clone --recurse-submodules https://github.com/12B-theDon/AdvancedOOP_TeamProj.git && cd AdvancedOOP_TeamProj
+```
+
+### 2.2. Build
+
+예시는 Qt가 `C:\deps\Qt\msvc2022_64`, LibTorch가 `C:\deps\libtorch`에 설치된 경우입니다. 설치 위치가 다르면 아래 경로를 바꿉니다.
+
+```bat
+set "PATH=C:\deps\Qt\msvc2022_64\bin;C:\deps\libtorch\lib;%PATH%"
+set "QT_PLUGIN_PATH=C:\deps\Qt\msvc2022_64\plugins"
+cmake -S . -B build-vs -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:\deps\Qt\msvc2022_64;C:\deps\libtorch" && cmake --build build-vs --config Release --target FingerprintGUI FingerprintTrain --parallel 2
+```
+
+빌드가 성공하면 실행에 필요한 DLL과 Qt plugin을 준비합니다.
+
+```bat
+copy /Y "C:\deps\libtorch\lib\*.dll" "build-vs\Release\" && "C:\deps\Qt\msvc2022_64\bin\windeployqt.exe" --release "build-vs\Release\FingerprintGUI.exe"
+```
+
+`build-vs/FingerprintEvaluator.sln`을 Visual Studio에서 열면 IDE에서도 빌드할 수 있습니다. 구성은 **Release / x64**로 선택합니다. [Qt 배포 안내](https://doc.qt.io/qt-6/windows-deployment.html)
+
+### 2.3. Training
+
+사전학습 파일 **`models/pretrained/deepprint.bin`**과 정보 파일 `deepprint.json`은 Clone할 때 함께 받습니다. 모델이 내려오지 않았다면 프로젝트 폴더에서 `git lfs pull`을 실행합니다. Python 변환은 필요하지 않습니다. [사전학습 파일 안내](../src/Algorithm/readme.md#conversion--offline-run)
+
+**Clone 직후에는 `models/run_01`이 없습니다.** 아래 명령을 실행하면 출력 폴더가 자동 생성되고, 학습이 완료되면 GUI에서 사용할 네 모델이 저장됩니다. `deepprint.bin`은 학습 초기값이며 GUI에서 직접 선택하는 비교용 모델은 아닙니다.
+
+```bat
+build-vs\Release\FingerprintTrain.exe data\original models\pretrained\deepprint.bin models\run_01
+```
+
+세 DB의 개별 모델과 통합 모델을 각각 학습합니다. 네 모델 모두 30개 값을 출력하며, 판정 기준을 담은 `calibration.json`도 함께 저장합니다. 재학습에는 `run_02`처럼 **새 출력 폴더명**을 사용합니다. 이미 학습된 네 모델을 별도로 받은 경우에는 이 단계를 생략할 수 있습니다. [IDE에서 학습하기](../src/Algorithm/readme.md#windows--visual-studio)
+
+### 2.4. Inference
+
+```bat
+build-vs\Release\FingerprintGUI.exe
+```
+
+GUI의 Step 3에서 `Select weights folder...`를 누르고 **학습이 완료된 모델 폴더**를 선택합니다. 위 Training 명령을 완료했다면 `models/run_01`, 다른 경로로 학습했거나 모델을 공유받았다면 해당 폴더를 선택합니다. Clone만 한 상태에서는 학습을 먼저 완료해야 비교할 수 있습니다.
+
+IDE에서는 **FingerprintGUI → Set as Startup Project → Ctrl+F5**로 실행합니다. 새 Command Prompt를 열었다면 2.2 Build의 `set` 두 줄을 다시 실행합니다.
+
+## 3. macOS / Linux
+
+C++17 compiler, Git·Git LFS, CMake 3.21 이상, Qt Widgets·TIFF plugin, OS·CPU에 맞는 LibTorch가 필요합니다. macOS arm64에서 Qt 5.15.17·LibTorch 2.15.0으로 빌드·학습·추론을 확인했습니다. Linux 실행은 아직 검증하지 않았습니다.
+
+### 3.1. Clone
+
+```sh
+git lfs install && git clone --recurse-submodules https://github.com/12B-theDon/AdvancedOOP_TeamProj.git && cd AdvancedOOP_TeamProj
+```
+
+### 3.2. Build
+
+**macOS:** Apple Silicon의 Homebrew Qt 5 경로와 `/opt/libtorch` 설치를 가정한 예시입니다. 실제 Qt·LibTorch 위치에 맞게 `CMAKE_PREFIX_PATH`를 수정합니다.
+
+```sh
+cmake -S . -B build -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;/opt/libtorch" -DCMAKE_BUILD_TYPE=Release && cmake --build build --target FingerprintGUI FingerprintTrain --parallel 2
+```
+
+**Linux:** Qt가 `/usr`, LibTorch가 `/opt/libtorch`에 설치된 경우입니다.
+
+```sh
+cmake -S . -B build -DCMAKE_PREFIX_PATH="/usr;/opt/libtorch" -DCMAKE_BUILD_TYPE=Release && cmake --build build --target FingerprintGUI FingerprintTrain --parallel 2
+```
+
+### 3.3. Training
+
+`models/pretrained/deepprint.bin`은 Git LFS로 함께 받습니다. 파일이 없다면 `git lfs pull`을 실행합니다. Python 변환 없이 아래 명령으로 학습할 수 있습니다. [사전학습 파일 안내](../src/Algorithm/readme.md#conversion--offline-run)
+
+**`models/run_01`은 Clone에 포함된 폴더가 아니라 학습 명령이 생성하는 출력 폴더입니다.**
+
+```sh
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01
+```
+
+데이터 증강, 네 모델의 학습과 저장, 저장된 모델의 검증, 판정 기준 산정까지 차례로 진행합니다. 출력 폴더의 네 `.bin`과 `calibration.json`을 함께 GUI에 사용합니다. 재학습에는 새 출력 폴더명을 사용합니다. `--augment-only`를 붙이면 증강만 생성하며, GUI용 모델은 생성하지 않습니다.
+
+### 3.4. Inference
+
+```sh
+./build/FingerprintGUI
+```
+
+Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명령으로 학습했다면 `models/run_01`입니다. 학습을 생략하려면 별도로 받은 Fine-tuned 모델 폴더가 필요하며, `models/pretrained`는 GUI 비교용 폴더가 아닙니다. Linux에서는 GUI를 표시할 데스크톱 세션이 필요합니다.
+
+## 4. License / Submodule
+
+공개 [DeepPrint 재구현](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors)을 Submodule로 사용합니다. 위의 Clone 명령은 해당 소스도 함께 받습니다. 출처와 수정 사항은 [NOTICE](../third_party/deepprint.NOTICE.txt)에 있습니다.
+
+| 구성 요소 | 확인 가능한 License |
+|---|---|
+| DeepPrint 재구현 | [LGPL-3.0](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/LICENSE) |
+| InceptionV4 / Remi Cadene | [BSD-3-Clause](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/flx/models/InceptionV4.py) |
+| Qt | [LGPL-3.0 / GPL / Commercial 조건](https://doc.qt.io/qt-6/licensing.html), 사용하는 모듈과 배포본에 따라 확인 |
+| LibTorch / PyTorch | [BSD-style 및 포함된 Third-party License](https://github.com/pytorch/pytorch/blob/main/LICENSE) |
+
+공개 사전학습 weight의 별도 License는 확인되지 않았습니다. 소스 License와 구분하며, 준비 방법은 [Algorithm README](../src/Algorithm/readme.md#conversion--offline-run)를 참고합니다.
+
+## 5. 포함·제외 대상
 
 | 저장소에 포함 | 로컬에 보존하고 제외 |
 |---|---|
@@ -29,7 +140,7 @@ Qt와 LibTorch는 별도로 설치합니다. 학습 초기 파일 `models/pretra
 
 `Report_example/templates/*.bin`은 작은 출력 특징 벡터이며 학습 Weight가 아닙니다. 완료된 실험·이전 모델·회귀 검증의 Weight는 설정·결과를 확인한 뒤 정리했으며, 현재 운영 모델과 사전학습 파일은 유지합니다. 현재 폴더의 역할은 [모델 안내](../models/readme.md)를 참고합니다.
 
-## 예시와 검증 기록
+## 6. 예시와 검증 기록
 
 `GUI_flows`의 화면 모음은 2026-11-18의 30차원 모델 실행을 보여줍니다. 원본 캡처와 원시 결과는 로컬 자료이며 [캡처 기록 안내](../GUI_flows/captures/readme.md)에서 범위를 설명합니다. 문서용 그림·캡처 생성 도구는 정리했고 결과 이미지는 유지합니다.
 
@@ -37,4 +148,4 @@ Qt와 LibTorch는 별도로 설치합니다. 학습 초기 파일 `models/pretra
 
 현재 최종 모델의 학습과 코드를 정리한 뒤 수행한 검증은 [Algorithm의 검증 범위](../src/Algorithm/readme.md#verification--limits)에 구분해 기록했습니다. 예시는 독립 Test 성능을 뜻하지 않습니다. Train/Validation은 같은 손가락의 촬영본 1–6 / 7–8로 나뉘며, 별도 Test 분할은 없습니다. Windows/Linux 실행과 실제 데스크톱 창 조작은 아직 검증하지 않았습니다.
 
-배포 전에는 staged 파일에 로컬 산출물이 들어가지 않았는지, 문서의 상대 링크가 커밋될 파일을 가리키는지, Submodule Commit과 Git LFS 설정이 유지되는지 확인합니다. 저장소를 새로 Clone할 때 필요한 준비 과정은 Root README를 기준으로 따릅니다.
+배포 전에는 staged 파일에 로컬 산출물이 들어가지 않았는지, 문서의 상대 링크가 커밋될 파일을 가리키는지, Submodule Commit과 Git LFS 설정이 유지되는지 확인합니다. 처음 실행할 때는 [메인 README](../readme.md#1-build--run)의 순서를 따라가며, 플랫폼별 세부 설정은 이 문서를 참고합니다.
