@@ -28,6 +28,7 @@ inline constexpr const char* MissColor = "#fbe5e5";
 inline constexpr const char* RejectColor = "#e5effa";
 inline constexpr const char* FalseAcceptColor = "#fff0d9";
 inline constexpr const char* ErrorColor = "#f2f2f2";
+inline constexpr const char* OtherDatabaseScoreColor = "#888888";
 inline constexpr int GraphWidth = 840; // [px]
 inline constexpr int GraphHeight = 320; // [px]
 inline constexpr int HistogramBins = 10;
@@ -91,12 +92,9 @@ inline constexpr const char* NoComparisonType = "Select a comparison type.";
 inline constexpr const char* NoComparisonPairs = "No eligible pairs. Change the rule or enrollment images.";
 inline constexpr const char* ResultsHint = "Select a tab to view comparison results or metrics.";
 inline constexpr const char* ThresholdLabel = "Similarity threshold (0-1):";
-inline constexpr const char* GenuineThresholdHint = "Same finger: score >= threshold = PASS; below = MISS (false rejection).";
-inline constexpr const char* ImpostorThresholdHint = "Different fingers: score < threshold = REJ (correct rejection); otherwise = FA (false acceptance).";
-inline constexpr const char* ScoreHint = "Higher scores mean more similar fingerprints. Best/Worst show the highest/lowest model scores. Adjust the thresholds to change the decisions.";
-inline constexpr const char* SingleModelHeader = "Model";
-inline constexpr const char* SingleScoreHeader = "Score";
-inline constexpr const char* NoWorstScore = "At least two successful models are needed for a worst score. See Result for model errors.";
+inline constexpr const char* GenuineThresholdHint = "Same finger: minimum matching-DB/combined score >= threshold = PASS; otherwise MISS.";
+inline constexpr const char* ImpostorThresholdHint = "Different fingers: minimum matching-DB/combined score < threshold = REJ; otherwise FA.";
+inline constexpr const char* ScoreHint = "Each cell uses its own score and the current threshold; other-DB text is gray. Result uses the minimum matching-DB/combined score for both comparison types. Other models are reference only.";
 inline constexpr const char* PairDialog = "Load comparison pairs";
 inline constexpr const char* PairFilter = "CSV files (*.csv)";
 inline constexpr const char* SaveAll = "Save all (CSV + HTML)";
@@ -119,7 +117,7 @@ inline const QStringList ComparisonRules = {"All eligible images", "One image pe
     "Random images per enrollment", "Comparison pairs from CSV"};
 inline const QStringList ModelHeaders = {"Model ID", "Weight file", "Vector size", "Load status"};
 inline const QStringList TemplateHeaders = {"Enrollment image", "Model ID", "Status", "Vector size", "Size (bytes)", "Error"};
-inline const QStringList ComparisonHeaders = {"#", "Enrollment", "Comparison", "Result", "Best model", "Best score", "Worst model", "Worst score", "Time (ms)"};
+inline const QStringList ComparisonHeaders = {"#", "Enrollment", "Comparison", "Result", "Time (ms)"};
 inline const QStringList MetricHeaders = {"Metric", "Value"};
 inline const QStringList MetricNames = {"FTE (%)", "REJ genuine (%)", "REJ impostor (%)", "FMR (%)", "FNMR (%)",
     "EER (%)", "EER* (%)", "ZeroFMR (%)", "ZeroFNMR (%)", "FMR100 (%)", "FMR1000 (%)",

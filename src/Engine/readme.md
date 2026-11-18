@@ -94,9 +94,13 @@ GUI는 이미지 목록·등록 선택·모델 ID·비교 규칙을 전달한다
 | `DatabaseIds` | FVC2000_DB3_B, FVC2002_DB3_B, FVC2004_DB1_B |
 | `ModelIds` | fvc2000_db3, fvc2002_db3, fvc2004_db1, combined |
 
-`calibration.json`은 실제 가중치와 ID 순서의 해시, 파일 형식, FAR 정책과 정밀도를 확인한 뒤 사용한다. 가능한 15개 모델 조합마다 세 DB의 최고 점수 분포를 평가하고, 외부 입력용 값까지 총 60개 항목을 제공한다. 외부 입력에는 알려진 세 DB의 임계값 중 최댓값을 사용한다. 추천값은 학습에 등장한 ID의 다른 촬영본에서 선정한 결과로, 외부 DB나 임의의 GUI 비교 쌍에서 같은 FAR을 보장하지 않는다. [평가와 보정 근거](../Algorithm/readme.md#final-production-run--calibration)
+`Engine::Compare`와 `Execute`는 선택한 같은 DB 모델·통합 모델의 성공한 점수 중 최솟값을 반환한다. 원본 Finger ID나 Genuine/Impostor 정답을 집계에 사용하지 않는다. `IsDecisionModel`은 입력 DB로 참여 모델을 정하고, `SelectDecisionScore`는 모델별 결과에서 최솟값을 선택한다. 다른 DB 모델의 점수·오류도 원시 기록에는 남지만 최종 판정에는 사용하지 않는다. 출처가 불명확하면 통합 모델만 사용하며, 판정 가능한 모델이 없으면 실패를 반환한다.
 
-Genuine은 기준 이상일 때 PASS, 미만일 때 MISS다. Impostor는 기준 미만일 때 REJ, 이상일 때 FA다. 두 조절기는 같은 추천값에서 시작해 독립적으로 수정되며, 실제 값은 실행 기록에 남긴다.
+`calibration.json`은 `fingerprint-calibration-v3`와 `minimum-successful-matching-db-or-combined` 집계 식별자, 실제 Weight·ID 순서 해시, FAR 정책과 정밀도를 확인한 뒤 사용한다. 알려진 DB별로 해당 모델만·통합만·둘 다의 세 조합을 보정하고, 외부 입력의 통합 모델 항목까지 총 10개를 제공한다. 화면에서 선택한 참고 모델은 보정 마스크에 포함하지 않는다. 이전 최댓값용 v2 파일은 거부하고 `--verify-only`로 재보정하도록 안내한다.
+
+외부 입력에는 통합 모델을 알려진 세 DB에 적용해 얻은 임계값 중 최댓값을 사용한다. 이는 임계값을 보수적으로 정하는 과정이며, 비교 점수 자체는 양쪽 모두 동일한 최솟값 규칙이다. 추천값은 학습 ID의 다른 촬영본에서 선정한 결과로 독립 Test·외부 DB·임의의 GUI 쌍에서 같은 FAR을 보장하지 않는다. [평가와 보정 근거](../Algorithm/readme.md#final-production-run--calibration)
+
+Genuine은 기준 이상일 때 PASS, 미만일 때 MISS다. Impostor는 기준 미만일 때 REJ, 이상일 때 FA다. 두 조절기는 같은 추천값으로 시작해 독립적으로 바꿀 수 있고 실제 값은 실행 기록에 남긴다. GUI는 각 점수 셀을 현재 임계값으로 개별 색칠하며, 최종 Result는 위의 공통 집계를 사용한다. EER 등 공통 점수 지표와 그래프도 정상적으로 계산한다.
 
 ## Raw Export
 
@@ -104,7 +108,7 @@ Genuine은 기준 이상일 때 PASS, 미만일 때 MISS다. Impostor는 기준 
 |---|---|
 | `models.csv` | 모델·파일 경로·로딩 결과·형식·차원·가중치 및 ID 순서 해시·전처리 |
 | `enrollments.csv` | 이미지·모델별 상태, 템플릿 크기와 경로, 시간과 오류 |
-| `comparisons.csv` | 정답 종류, 등록·비교 이미지, 최고 점수·모델·시간, 임계값과 판정 |
+| `comparisons.csv` | 정답 종류, 등록·비교 이미지, 최종 판정용 점수·모델·시간, 임계값과 판정 |
 | `model_scores.csv` | 이미지쌍·모델별 점수, 시간과 오류 |
 | `templates/<index>_<model>.fpt` | 성공한 등록 이미지의 확률 벡터와 식별 정보 |
 | `settings.txt` | 두 판정 기준과 규칙, 선택 지표와 무작위 설정, 모델별 실행 정보 |

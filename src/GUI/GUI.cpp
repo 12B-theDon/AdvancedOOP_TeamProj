@@ -72,6 +72,14 @@ static void AddRow(QTableWidget* table, const QStringList& values) {
     }
 }
 
+static const char* DecisionColor(const QString& decision) {
+    if (decision == "PASS") return PassColor;
+    if (decision == "MISS") return MissColor;
+    if (decision == "REJ") return RejectColor;
+    if (decision == "FA") return FalseAcceptColor;
+    return ErrorColor;
+}
+
 // One CSV record per line; doubled quotes escape a quote.
 static bool CsvFields(const QString& line, QStringList& fields) {
     fields.clear();
@@ -296,7 +304,7 @@ QWizardPage* Window::TemplatePage() {
     templateTable_->setObjectName("enrollmentTemplates");
     inferenceInfo_ = new QLabel(ModelHint);
     inferenceInfo_->setWordWrap(true);
-    calibrationInfo_ = new QLabel("Select trained models to get a suggested threshold.");
+    calibrationInfo_ = new QLabel("Select trained models to obtain a minimum-score threshold.");
     calibrationInfo_->setObjectName("calibrationInfo");
     calibrationInfo_->setWordWrap(true);
     layout->addWidget(weightPath_);
@@ -658,7 +666,7 @@ void Window::ReloadModels() {
     if (recommendation.available) {
         genuine_.threshold->setValue(recommendation.threshold);
         impostor_.threshold->setValue(recommendation.threshold);
-        calibration = QString("Suggested threshold: %1. You can adjust it in Results.")
+        calibration = QString("Suggested threshold: %1. Based on the minimum matching-DB/combined score; adjustable in Results.")
             .arg(recommendation.threshold, 0, 'f', ThresholdPrecision);
         if (recommendation.external_fallback)
             calibration += " This value has not been checked for external images.";
@@ -667,7 +675,7 @@ void Window::ReloadModels() {
     } else {
         genuine_.threshold->setValue(engine::GenuineThreshold);
         impostor_.threshold->setValue(engine::ImpostorThreshold);
-        calibration = "No threshold recommendation is available. Adjust it in Results.";
+        calibration = QString("No matching minimum-score calibration. %1 Adjust thresholds manually in Results.").arg(QString::fromStdString(recommendation.note));
     }
     if (calibrationInfo_) calibrationInfo_->setText(calibration);
     if (resultCalibrationInfo_) resultCalibrationInfo_->setText(calibration);
@@ -696,30 +704,17 @@ void Window::RunComparisons(ComparisonControls& controls) {
     controls.results = engine_.Execute(controls.pairs, images_, enrollmentTemplates_);
     for (int row = 0; row < int(controls.results.size()); ++row) {
         const engine::SimilarityResult& result = controls.results[row];
-        controls.table->item(row, 4)->setText(QString::fromStdString(result.model_id));
-        controls.table->item(row, 5)->setText(result.success ? QString::number(result.score, 'f', ScorePrecision) : QString());
-        controls.table->item(row, 5)->setToolTip(result.success ? QString::number(result.score, 'g', engine::CsvPrecision) : QString());
-        controls.table->item(row, 8)->setText(QString::number(result.time_ms, 'f', TimePrecision));
-        QStringList details;
-        const engine::ModelScore* worst = nullptr;
-        int successfulModels = 0;
-        for (const engine::ModelScore& score : result.model_scores) {
-            const QString id = QString::fromStdString(score.model_id);
-            details.append(score.success
-                ? id + ": " + QString::number(score.score, 'g', engine::CsvPrecision)
-                : id + " (" + QString::fromStdString(score.stage) + "): " + QString::fromStdString(score.error));
-            if (score.success) {
-                ++successfulModels;
-                if (!worst || score.score < worst->score
-                    || (score.score == worst->score && worst->model_id == result.model_id && score.model_id != result.model_id))
-                    worst = &score;
-            }
+        for (int model = 0; model < int(result.model_scores.size()); ++model) {
+            const engine::ModelScore& score = result.model_scores[model];
+            QTableWidgetItem* cell = controls.table->item(row, 4 + model);
+            cell->setText(score.success ? QString::number(score.score, 'f', ScorePrecision) : "ERR");
         }
-        const bool hasWorst = successfulModels >= 2;
-        controls.table->item(row, 6)->setText(hasWorst ? QString::fromStdString(worst->model_id) : QString());
-        controls.table->item(row, 7)->setText(hasWorst ? QString::number(worst->score, 'f', ScorePrecision) : QString());
-        controls.table->item(row, 7)->setToolTip(hasWorst ? QString::number(worst->score, 'g', engine::CsvPrecision) : NoWorstScore);
-        controls.table->item(row, 3)->setToolTip(details.join("\n"));
+        controls.table->item(row, controls.table->columnCount() - 1)->setText(QString::number(result.time_ms, 'f', TimePrecision));
+        controls.table->item(row, 3)->setToolTip(result.success
+            ? QString("Minimum successful same-DB/combined score: %1 (%2). Same rule for Genuine and Impostor.")
+                .arg(result.score, 0, 'g', engine::CsvPrecision)
+                .arg(QString::fromStdString(result.model_id))
+            : "No successful decision model. Select the matching-DB or combined model; unknown DBs use combined only.");
     }
     controls.table->resizeRowsToContents();
     ApplyThreshold(controls);
@@ -727,20 +722,37 @@ void Window::RunComparisons(ComparisonControls& controls) {
 
 void Window::ApplyThreshold(ComparisonControls& controls) {
     const bool genuine = &controls == &genuine_;
+    const std::string database = databaseId_.toStdString();
+    bool knownDatabase = false;
+    for (const std::string& db : engine::DatabaseIds)
+        if (database == db || database + "_B" == db) knownDatabase = true;
     int correct = 0, incorrect = 0, errors = 0;
     for (int row = 0; row < int(controls.results.size()); ++row) {
         const engine::SimilarityResult& result = controls.results[row];
         const QString decision = engine::Engine::ClassifyComparison(genuine, result, controls.threshold->value());
         controls.table->item(row, 3)->setText(decision);
-        const char* color = ErrorColor;
-        if (decision == "PASS") color = PassColor;
-        else if (decision == "MISS") color = MissColor;
-        else if (decision == "REJ") color = RejectColor;
-        else if (decision == "FA") color = FalseAcceptColor;
-        const QBrush background{QColor(color)};
         for (int column = 0; column < controls.table->columnCount(); ++column) {
-            controls.table->item(row, column)->setBackground(background);
+            controls.table->item(row, column)->setBackground(QBrush());
             controls.table->item(row, column)->setForeground(Qt::black);
+        }
+        controls.table->item(row, 3)->setBackground(QColor(DecisionColor(decision)));
+        for (int model = 0; model < int(result.model_scores.size()); ++model) {
+            const engine::ModelScore& score = result.model_scores[model];
+            const bool otherDatabase = knownDatabase && !engine::Engine::IsDecisionModel(score.model_id, database);
+            QTableWidgetItem* cell = controls.table->item(row, 4 + model);
+            if (otherDatabase) cell->setForeground(QColor(OtherDatabaseScoreColor));
+            QString modelDecision = "ERR";
+            if (score.success) {
+                const bool accepted = score.score >= controls.threshold->value();
+                if (genuine) modelDecision = accepted ? "PASS" : "MISS";
+                else modelDecision = accepted ? "FA" : "REJ";
+            }
+            cell->setBackground(QColor(DecisionColor(modelDecision)));
+            QString detail = score.success ? QString::number(score.score, 'g', engine::CsvPrecision)
+                : QString::fromStdString(score.stage + ": " + score.error);
+            detail += QString("\n%1 at threshold %2.").arg(modelDecision).arg(controls.threshold->value(), 0, 'f', ThresholdPrecision);
+            if (otherDatabase) detail += "\nModel trained on another DB (shown in gray).";
+            cell->setToolTip(detail);
         }
         if (!result.success) ++errors;
         else if (decision == "PASS" || decision == "REJ") ++correct;
@@ -818,15 +830,13 @@ bool Window::ReadPairCsv(const QString& path, bool genuine, std::vector<engine::
 
 void Window::UpdateComparisons(ComparisonControls& controls, bool genuine) {
     controls.table->setRowCount(0);
-    const bool multipleModels = engine_.Models().size() >= 2;
     QStringList headers = ComparisonHeaders;
-    if (!multipleModels) {
-        headers[4] = SingleModelHeader;
-        headers[5] = SingleScoreHeader;
-    }
+    for (const engine::ModelState& model : engine_.Models())
+        headers.insert(headers.size() - 1, QString::fromStdString(model.model_id));
+    controls.table->setColumnCount(headers.size());
     controls.table->setHorizontalHeaderLabels(headers);
-    controls.table->setColumnHidden(6, !multipleModels);
-    controls.table->setColumnHidden(7, !multipleModels);
+    for (int column = 3; column < headers.size(); ++column)
+        controls.table->horizontalHeader()->setSectionResizeMode(column, QHeaderView::ResizeToContents);
     controls.results.clear();
     controls.pairs.clear();
     controls.resultInfo->clear();
@@ -865,10 +875,13 @@ void Window::UpdateComparisons(ComparisonControls& controls, bool genuine) {
         controls.info->setText("Error: " + error);
         return;
     }
-    for (const engine::ComparisonPair& pair : controls.pairs)
-        AddRow(controls.table, {QString::number(controls.table->rowCount() + 1),
-                               QString::fromStdString(images_[pair.enrollment].name),
-                               QString::fromStdString(images_[pair.attempt].name), "Not run", "", "", "", "", ""});
+    for (const engine::ComparisonPair& pair : controls.pairs) {
+        QStringList values = {QString::number(controls.table->rowCount() + 1),
+            QString::fromStdString(images_[pair.enrollment].name),
+            QString::fromStdString(images_[pair.attempt].name), "Not run"};
+        while (values.size() < headers.size()) values.append(QString());
+        AddRow(controls.table, values);
+    }
     QString summary = QString("Planned pairs: %1. ").arg(controls.pairs.size());
     if (options.rule == engine::ComparisonRule::FromCsv)
         summary += "CSV order is preserved.";
@@ -920,6 +933,7 @@ bool Window::ComparisonSelected(bool genuine) const {
     const int type = comparisonType_->currentIndex();
     return type == 3 || type == (genuine ? 1 : 2);
 }
+
 
 void Window::UpdateWorkflow() {
     const bool selected = comparisonType_->currentIndex() > 0;
@@ -984,7 +998,10 @@ engine::EvaluationRun Window::Snapshot() const {
     settings += "comparison_type=" + comparisonType_->currentText() + "\n";
     settings += "template_format=fingerprint-probability-template-v2\nencoder_embedding_dim=512\ntemplate_output_dim=30\n"
         "template_values=softmax ID probabilities; serialized bytes include model identity and labels\n"
-        "aggregation=maximum successful model score\n";
+        "decision_models=selected matching-DB model and combined; unknown DB uses combined only\n"
+        "genuine_aggregation=minimum successful decision-model score\n"
+        "impostor_aggregation=minimum successful decision-model score\n"
+        "other_db_models=reference scores only; cell colors use the current comparison-type threshold\n";
     const engine::ThresholdRecommendation recommendation = engine_.RecommendedThreshold(databaseId_.toStdString());
     settings += "calibration_note=" + QString::fromStdString(recommendation.note) + "\n";
     if (recommendation.available) settings += "validation_recommended_threshold=" + QString::number(recommendation.threshold, 'g', 17) + "\n";

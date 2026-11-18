@@ -296,7 +296,7 @@ bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, c
     for (const engine::ComparisonRecord& item : run.comparisons) if (item.executed) executed = true;
     html += executed ? "<p>Status: Results available.</p>" : "<p>Status: Not run. No comparisons were executed.</p>";
     html += "<h2>Evaluation setup</h2>"
-        "<p>Each enrolled image is saved as a template. Higher scores mean more similar fingerprints. With multiple models, the best score is used. Scores are not match probabilities.</p>"
+        "<p>Each enrolled image is saved as a template. Higher scores mean more similar fingerprints. Final scores use the minimum successful matching-DB/combined similarity, identically for Genuine and Impostor. Scores are not match probabilities.</p>"
         "<details><summary>Run settings</summary><pre>" + QString::fromStdString(run.settings).toHtmlEscaped() + "</pre></details>"
         "<p>Genuine (same finger): score &gt;= threshold = PASS, below = MISS (false rejection). "
         "Impostor (different fingers): score &lt; threshold = REJ (correct rejection), otherwise = FA (false acceptance). "

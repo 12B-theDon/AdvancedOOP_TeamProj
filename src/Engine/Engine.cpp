@@ -193,20 +193,43 @@ bool Engine::LoadSelectedModels(const std::vector<std::string>& ids, const std::
     return anyLoaded;
 }
 
+bool Engine::IsDecisionModel(const std::string& model_id, const std::string& database_id) {
+    if (model_id == "combined") return true;
+    for (int db = 0; db < int(DatabaseIds.size()); ++db)
+        if (database_id == DatabaseIds[db] || database_id + "_B" == DatabaseIds[db])
+            return model_id == ModelIds[db];
+    return false;
+}
+
+void Engine::SelectDecisionScore(SimilarityResult& result, const std::string& database_id) {
+    result.success = false;
+    result.score = 0;
+    result.model_id.clear();
+    for (const ModelScore& score : result.model_scores) {
+        if (!score.success || !IsDecisionModel(score.model_id, database_id)) continue;
+        if (!result.success || score.score < result.score) {
+            result.success = true;
+            result.score = score.score;
+            result.model_id = score.model_id;
+        }
+    }
+}
+
 ThresholdRecommendation Engine::RecommendedThreshold(const std::string& database_id) const {
     ThresholdRecommendation result;
     QFile file(QDir(QString::fromStdString(weights_folder_)).filePath(CalibrationFile));
     if (!file.open(QIODevice::ReadOnly)) { result.note = "No matching calibration; adjust thresholds manually."; return result; }
     const QJsonObject calibration = QJsonDocument::fromJson(file.readAll()).object();
-    if (calibration.value("format").toString() != "fingerprint-calibration-v2"
+    if (calibration.value("format").toString() != CalibrationFormat
+        || calibration.value("aggregation").toString() != ScoreAggregation
         || calibration.value("score_type").toString() != ScoreType
         || calibration.value("template_format").toString() != "fingerprint-probability-template-v2"
         || std::abs(calibration.value("target_far").toDouble(-1) - TargetFar) > MetricTolerance
         || calibration.value("threshold_decimals").toInt() != ThresholdPrecision) {
-        result.note = "Incompatible calibration; adjust thresholds manually."; return result;
+        result.note = "Minimum-score calibration required. Run FingerprintTrain with --verify-only to regenerate it."; return result;
     }
     int mask = 0;
-    for (const ModelState& model : models_) if (model.loaded) {
+    for (const ModelState& model : models_) if (model.loaded && IsDecisionModel(model.model_id, database_id)) {
         if (calibration.value("weights").toObject().value(QString::fromStdString(model.model_id)).toString().toStdString() != model.info.weight_sha256
             || calibration.value("label_order_sha256").toString().toStdString() != model.info.label_order_sha256) {
             result.note = "Weights/labels changed; recalibrate before using a validation cutoff."; return result;
@@ -214,10 +237,11 @@ ThresholdRecommendation Engine::RecommendedThreshold(const std::string& database
         for (int m = 0; m < int(ModelIds.size()); ++m)
             if (model.model_id == ModelIds[m]) mask |= 1 << m;
     }
-    if (!mask) { result.note = "Load probability models to obtain a validation cutoff."; return result; }
-    bool known = false;
-    for (const std::string& db : DatabaseIds) if (db == database_id) known = true;
-    const QString requested = known ? QString::fromStdString(database_id) : QString("*");
+    if (!mask) { result.note = "Select the matching-DB or combined model to obtain a cutoff."; return result; }
+    QString requested = "*";
+    for (const std::string& db : DatabaseIds)
+        if (db == database_id || db == database_id + "_B") requested = QString::fromStdString(db);
+    const bool known = requested != "*";
     for (const QJsonValue& value : calibration.value("entries").toArray()) {
         const QJsonObject entry = value.toObject();
         if (entry.value("model_mask").toInt() != mask || entry.value("database").toString() != requested) continue;
@@ -225,7 +249,7 @@ ThresholdRecommendation Engine::RecommendedThreshold(const std::string& database
         if (!(cutoff >= 0.5 && cutoff <= 1)) continue;
         result.available = true; result.threshold = cutoff; result.target_met = entry.value("target_met").toBool();
         result.external_fallback = !known;
-        result.note = known ? "Known-ID validation cutoff for the loaded models' Best score; not an independent-test guarantee."
+        result.note = known ? "Known-ID validation cutoff for the minimum matching-DB/combined score; not an independent-test guarantee."
                             : "Conservative known-DB fallback; external DB performance is not validated.";
         if (!result.target_met) result.note += " FAR target is not met at the supported threshold precision; reconsider selected models.";
         return result;
@@ -316,11 +340,6 @@ SimilarityResult Engine::Compare(const EnrollmentTemplates& enrollment, const al
                 if (score.success) {
                     score.stage.clear();
                     score.error.clear();
-                    if (!result.success || score.score > result.score) {
-                        result.success = true;
-                        result.score = score.score;
-                        result.model_id = score.model_id;
-                    }
                 } else if (score.error.empty())
                     score.error = "Comparison failed.";
             }
@@ -328,6 +347,7 @@ SimilarityResult Engine::Compare(const EnrollmentTemplates& enrollment, const al
         score.time_ms = ElapsedMs(modelStart);
         result.model_scores.push_back(score);
     }
+    SelectDecisionScore(result, attempt.database_id);
     result.time_ms = ElapsedMs(start);
     return result;
 }
@@ -367,8 +387,14 @@ std::vector<SimilarityResult> Engine::Execute(const std::vector<ComparisonPair>&
                 result.model_scores.push_back(failure);
             }
             results.push_back(result);
-        } else
-            results.push_back(Compare(templates[pair.enrollment], ReadImage(images[pair.attempt].path, images[pair.attempt].database_id)));
+        } else {
+            const algorithm::AlgorithmImage attempt = ReadImage(images[pair.attempt].path, images[pair.attempt].database_id);
+            SimilarityResult result = Compare(templates[pair.enrollment], attempt);
+            // Keep explicit unknown-DB selection separate from inferred preprocessing geometry.
+            if (attempt.database_id != images[pair.attempt].database_id)
+                SelectDecisionScore(result, images[pair.attempt].database_id);
+            results.push_back(result);
+        }
     }
     return results;
 }
@@ -467,6 +493,7 @@ bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder)
                        "template_file_extension=.fpt\nserialized_template_includes_weight_and_label_metadata=true\n"
                      + "genuine_threshold=" + QString::number(run.genuine_threshold, 'g', CsvPrecision) + "\n"
                      + "impostor_threshold=" + QString::number(run.impostor_threshold, 'g', CsvPrecision) + "\n"
+                     + "aggregation=" + QString::fromUtf8(ScoreAggregation) + "\n"
                      + "decision_rule=Genuine: score >= threshold -> PASS, below -> MISS; "
                        "Impostor: score >= threshold -> FA, below -> REJ; inference failure -> ERR\n"
                      + QString::fromStdString(run.settings));

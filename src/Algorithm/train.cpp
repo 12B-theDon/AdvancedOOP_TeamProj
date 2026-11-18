@@ -277,36 +277,43 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
     }
     QJsonArray entries;
     QByteArray calibrationCsv("database,model_mask,threshold,genuine_accept_pct,false_accept_pct,target_met\n");
-    for (int mask = 1; mask < 16; ++mask) {
-        QJsonArray selected;
-        for (int m = 0; m < 4; ++m) if (mask & (1 << m)) selected.append(QString::fromStdString(engine::ModelIds[m]));
-        Scores best[3];
-        double conservative = 0;
-        for (int db = 0; db < 3; ++db) {
+    double externalCutoff = 0;
+    for (int db = 0; db < 3; ++db) {
+        // Only the matching DB model and/or combined can contribute to a decision.
+        for (int mask : {1 << db, 8, (1 << db) | 8}) {
+            QJsonArray selected;
+            for (int m = 0; m < 4; ++m)
+                if (mask & (1 << m)) selected.append(QString::fromStdString(engine::ModelIds[m]));
+            Scores minimum;
             for (std::size_t index = 0; index < pairs[db].size(); ++index) {
-                double value = 0;
-                for (int m = 0; m < 4; ++m) if (mask & (1 << m)) value = std::max(value, probabilities[m][db].value[index]);
-                best[db].value.push_back(value); best[db].genuine.push_back(pairs[db][index].genuine);
+                double value = 1;
+                for (int m = 0; m < 4; ++m)
+                    if (mask & (1 << m)) value = std::min(value, probabilities[m][db].value[index]);
+                minimum.value.push_back(value);
+                minimum.genuine.push_back(pairs[db][index].genuine);
             }
-            const Metrics m = Measure(best[db]);
-            conservative = std::max(conservative, m.threshold);
-            QJsonObject entry = Json(m); entry.insert("database", QString::fromStdString(engine::DatabaseIds[db]));
+            const Metrics m = Measure(minimum);
+            if (mask == 8) externalCutoff = std::max(externalCutoff, m.threshold);
+            QJsonObject entry = Json(m);
+            entry.insert("database", QString::fromStdString(engine::DatabaseIds[db]));
             entry.insert("model_mask", mask); entry.insert("models", selected); entries.append(entry);
             calibrationCsv += (entry.value("database").toString() + ',' + QString::number(mask) + ',' + Number(m.threshold) + ','
                 + Number(m.tar * 100) + ',' + Number(m.far * 100) + ',' + (m.far <= engine::TargetFar + 1e-12 ? "true\n" : "false\n")).toUtf8();
         }
-        // Unknown external DB: conservative across the three known DB validation cutoffs.
-        const Metrics m = Measure(Pool(best), conservative);
-        QJsonObject entry = Json(m); entry.insert("database", "*"); entry.insert("model_mask", mask); entry.insert("models", selected);
-        entry.insert("external_data_validated", false); entries.append(entry);
-        calibrationCsv += ("*," + QString::number(mask) + ',' + Number(m.threshold) + ',' + Number(m.tar * 100) + ','
-            + Number(m.far * 100) + ',' + (m.far <= engine::TargetFar + 1e-12 ? "true\n" : "false\n")).toUtf8();
     }
-    const QJsonObject calibration{{"format", "fingerprint-calibration-v2"}, {"template_format", TemplateFormat},
+    // Unknown DB: combined only, with a conservative cutoff from the known DBs.
+    const Metrics external = Measure(Pool(probabilities[3]), externalCutoff);
+    QJsonObject entry = Json(external);
+    entry.insert("database", "*"); entry.insert("model_mask", 8);
+    entry.insert("models", QJsonArray{QString::fromStdString(engine::ModelIds[3])});
+    entry.insert("external_data_validated", false); entries.append(entry);
+    calibrationCsv += ("*,8," + Number(external.threshold) + ',' + Number(external.tar * 100) + ',' + Number(external.far * 100) + ','
+        + (external.far <= engine::TargetFar + 1e-12 ? "true\n" : "false\n")).toUtf8();
+    const QJsonObject calibration{{"format", engine::CalibrationFormat}, {"template_format", TemplateFormat},
         {"score_type", engine::ScoreType}, {"label_order_sha256", labelHash}, {"weights", hashes},
         {"target_far", engine::TargetFar}, {"threshold_decimals", engine::ThresholdPrecision},
         {"basis", "known-ID original captures1-6 gallery vs7-8 probes; same validation used to choose thresholds; not independent test"},
-        {"aggregation", "maximum successful model score; every nonempty subset calibrated"}, {"entries", entries}};
+        {"aggregation", engine::ScoreAggregation}, {"entries", entries}};
     Write(QDir(folder).filePath("validation_scores.csv"), raw);
     Write(QDir(folder).filePath("validation_metrics.csv"), metricsCsv);
     Write(QDir(folder).filePath("validation_metrics.json"), QJsonDocument(summaries).toJson());
@@ -330,12 +337,14 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
             const TrainingImage& probe = originals[pairs[db][index].probe];
             const engine::SimilarityResult compared = engine.Compare(enrollment, engine::Engine::ReadImage(probe.path.toStdString(), probe.database.toStdString()));
             Require(compared.success, "Native audit comparison failed.");
+            const double expectedMinimum = std::min(probabilities[db][db].value[index], probabilities[3][db].value[index]);
+            Require(std::abs(compared.score - expectedMinimum) < 1e-5, "Native minimum-score decision disagrees with cached scores.");
             for (int m = 0; m < 4; ++m) {
                 const engine::ModelScore& score = compared.model_scores[m];
                 const double error = std::abs(score.score - probabilities[m][db].value[index]);
                 Require(score.success && error < 1e-5, "Native image and feature-cache scores disagree.");
                 runtime.append(QJsonObject{{"model", QString::fromStdString(score.model_id)}, {"database", source.database},
-                    {"enrollment", source.original}, {"probe", probe.original}, {"score", score.score}, {"cache_score_error", error}});
+                    {"enrollment", source.original}, {"probe", probe.original}, {"score", score.score}, {"cache_score_error", error}, {"decision_score", compared.score}, {"decision_model", QString::fromStdString(compared.model_id)}});
             }
         }
     }
@@ -358,14 +367,14 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
             report += "<td>" + Number(row.value(key).toDouble()) + "</td>";
         report += "</tr>";
     }
-    report += "</table><h2>GUI single / Best-score calibration</h2><p>Thresholds are rounded upward to four decimals. "
+    report += "</table><h2>GUI minimum-score calibration</h2><p>Thresholds are rounded upward to four decimals. "
         "target_met=false means FAR1% is not attainable at the supported threshold precision for that selection. "
         "External fallback is conservative only on known validation DBs; it is not external-DB calibration.</p><pre>"
         + QString::fromUtf8(QJsonDocument(calibration).toJson()).toHtmlEscaped() + "</pre><p>"
         "<a href='validation_metrics.csv'>Metrics</a> · <a href='validation_scores.csv'>Pair scores</a> · "
-        "<a href='calibration.csv'>All60 model-subset/DB cutoffs</a> · <a href='native_audit.json'>Native image checks</a></p></html>";
+        "<a href='calibration.csv'>All10 decision-model/DB cutoffs</a> · <a href='native_audit.json'>Native image checks</a></p></html>";
     Write(QDir(folder).filePath("validation_report.html"), report.toUtf8());
-    QTextStream(stdout) << "Validated24 native model comparisons; calibrated60 DB/model-subset operating points." << Qt::endl;
+    QTextStream(stdout) << "Validated24 native model comparisons; calibrated10 minimum-score DB/model operating points." << Qt::endl;
 }
 
 int RunTraining(int argc, char** argv) {

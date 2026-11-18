@@ -81,7 +81,7 @@ struct ModelScore {
     std::string error;
 };
 
-// Highest successful score, with every model outcome retained.
+// Lowest successful matching-DB/combined score, with every model outcome retained.
 struct SimilarityResult {
     bool success = false;
     double score = 0; // [0,1] Normalized similarity.
@@ -134,6 +134,8 @@ public:
     bool LoadSelectedModels(const std::vector<std::string>& model_ids, const std::string& weights_folder,
                             algorithm::Algorithm* backend);
     const std::vector<ModelState>& Models() const { return models_; }
+    static bool IsDecisionModel(const std::string& model_id, const std::string& database_id);
+    static void SelectDecisionScore(SimilarityResult& result, const std::string& database_id);
     ThresholdRecommendation RecommendedThreshold(const std::string& database_id) const;
     EnrollmentTemplates Enroll(const algorithm::AlgorithmImage& image);
     SimilarityResult Compare(const EnrollmentTemplates& enrollment, const algorithm::AlgorithmImage& attempt);
