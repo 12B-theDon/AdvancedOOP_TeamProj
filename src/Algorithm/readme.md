@@ -141,7 +141,7 @@ flowchart LR
 
 `.fpt`는 Magic·버전·모델 ID·실제 Weight SHA·전체 ID 순서와 해시·전처리·출력 차원을 기록한다. Qt 5.15 스트림의 Little endian 형식이며, 확률 값 자체는 120bytes다. 화면과 리포트에는 식별 정보까지 포함한 실제 템플릿 크기를 표시한다.
 
-구형 512차원 모델과 템플릿은 운영 경로에서 안내와 함께 거절한다. 사전학습용 `pretrained` 모델만 학습 초기값으로 허용한다. 모델을 선택하거나 다시 불러오면 Engine의 모델 버전 번호가 갱신되고 등록 템플릿이 초기화된다. 서로 다른 모델·가중치·ID 순서·전처리의 템플릿은 Backend에서도 비교를 거절한다. 모델 재로딩에 실패해도 이전 모델을 재사용하지 않는다. 기존 로컬 파일은 삭제하지 않는다.
+구형 512차원 모델과 템플릿은 운영 경로에서 안내와 함께 거절한다. 사전학습용 `pretrained` 모델만 학습 초기값으로 허용한다. 모델을 선택하거나 다시 불러오면 Engine의 모델 버전 번호가 갱신되고 등록 템플릿이 초기화된다. 서로 다른 모델·가중치·ID 순서·전처리의 템플릿은 Backend에서도 비교를 거절한다. 모델 재로딩에 실패해도 이전 모델을 재사용하지 않는다. 로딩 실패나 호환성 오류 때문에 프로그램이 기존 파일을 자동으로 삭제하지는 않는다.
 
 진단용 `embed_features`와 `embedding` 메서드는 512차원 특징을 유지한다. GUI의 주 비교 경로는 30차원이다. 외부 이미지의 ID가 학습 목록에 없어도 등록과 비교는 가능하지만, 그 정확도가 검증되었다는 의미는 아니다.
 
@@ -282,7 +282,7 @@ FVC2004에서 여백 채우기와 중앙 자르기를 비교한 결과, 검증 E
 
 임계값 0.60에서 30차원 방식의 Genuine 통과율은 100%, 평균 FAR은 0.914%였지만, 이를 모든 모델에 그대로 적용하지 않았다. 최종 저장 모델과 GUI의 최고 점수 집계 방식에 맞춰 모델 조합별로 다시 산정했다.
 
-실험용 학습·비교 스크립트와 두 보조 실행 파일은 운영 소스에서 제거했다. 결과·CSV·Weight와 이전 소스·문서 스냅샷은 Git에서 제외한 로컬 폴더에 보존했다. 주요 기록은 `models/experiments/` 아래의 `mlp_3layer`, `mlp_depth`, `output_dimensions`에 있으며 새 Clone에는 포함되지 않는다.
+실험용 학습·비교 스크립트와 두 보조 실행 파일은 운영 소스에서 제거했다. 설정·결과 CSV와 이전 소스·문서 스냅샷은 Git에서 제외한 로컬 폴더에 보존했다. 2026-11-19에 기록을 확인한 뒤 완료된 실험·이전 모델·회귀 검증의 Weight를 정리했으며, 현재 운영 모델과 사전학습 파일은 유지했다. 주요 기록은 `models/experiments/` 아래의 `mlp_3layer`, `mlp_depth`, `output_dimensions`에 있으며 새 Clone에는 포함되지 않는다.
 
 ## Conversion / Offline Run
 
@@ -347,12 +347,12 @@ GUI Step 3에서 `models/run_01` 등 학습을 완료한 폴더를 선택한다.
 ./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01 --verify-only --feature-cache models/run_01/feature_cache
 ```
 
-이전 512차원 모델 폴더가 있으면 `--baseline <folder>`로 같은 이미지쌍의 비교를 추가한다. 새 모델의 진단용 512차원 특징과 이전에 저장한 512차원 모델을 구분해 기록한다. 기본 Cache는 출력 폴더의 `feature_cache`이며 운영 추론에는 필요하지 않다.
+이전 512차원 Weight를 별도로 준비했다면 `--baseline <folder>`로 같은 이미지쌍의 비교를 추가한다. 보관하던 이전 모델의 Weight는 정리했으므로 현재 `models/baselines`에는 설정·로그만 있다. 새 모델의 진단용 512차원 특징과 이전에 저장한 512차원 모델을 구분해 기록한다. 기본 Cache는 출력 폴더의 `feature_cache`이며 운영 추론에는 필요하지 않다.
 
-기존 검증 Cache와 512차원 기준 모델을 재사용하려면 아래처럼 실행한다. 현재 모델을 덮어쓰지 않도록 새 출력 폴더를 지정하며, 이 로컬 자료는 Clone에 포함되지 않는다.
+기존 검증 Cache를 재사용하려면 아래처럼 실행한다. 현재 모델을 덮어쓰지 않도록 새 출력 폴더를 지정하며, 이 로컬 자료는 Clone에 포함되지 않는다.
 
 ```sh
-./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_03 --feature-cache models/experiments/parameter_efficient_tuning --baseline models/baselines/center_crop_before_augmentation
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_03 --feature-cache models/experiments/parameter_efficient_tuning
 ```
 
 ## Windows / Visual Studio
@@ -374,7 +374,7 @@ cmake --build build --target FingerprintTrain FingerprintGUI --parallel 2
 ./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01 --verify-only --feature-cache models/run_01/feature_cache
 ```
 
-이 명령은 Weight를 바꾸지 않고 검증 결과와 `calibration.json` 등 평가 파일을 다시 기록한다. 이전 512차원 모델과 비교하려면 `--baseline <이전 모델 폴더>`를 추가한다. 학습 명령 자체의 저장·재로딩 검사를 모두 다시 수행하려면 새 출력 폴더에서 학습한다.
+이 명령은 Weight를 바꾸지 않고 검증 결과와 `calibration.json` 등 평가 파일을 다시 기록한다. 이전 512차원 Weight를 별도로 준비했다면 `--baseline <이전 모델 폴더>`를 추가할 수 있다. 학습 명령 자체의 저장·재로딩 검사를 모두 다시 수행하려면 새 출력 폴더에서 학습한다.
 
 최종 학습에서는 네 모델 모두 Backbone의 파라미터 텐서 581개와 BatchNorm/Gabor 버퍼 573개가 사전학습 파일과 정확히 같았다. 기록은 `frozen_backbone_verification.json`에 남겼다. 특징 캐시로 계산한 점수와 실제 이미지→템플릿→비교 경로의 24개 모델별 결과도 오차 1e-5 이내로 일치했다. 파일 통합 후에도 평가를 다시 실행해 24개 비교와 60개 DB·모델 조합의 임계값을 확인했다.
 
@@ -384,4 +384,4 @@ GUI 검증은 Qt 오프스크린 모드에서 실행했다. 현재 환경에서�
 
 ## License / Status
 
-공개 재구현 Source는 [LGPL-3.0](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/LICENSE), Inception Source는 BSD-3-Clause다. 변경 내용은 [NOTICE](../../third_party/deepprint.NOTICE.txt)를 따른다. 공개 Checkpoint의 별도 License는 확인되지 않았다. 외부 Library는 [Root License](../../readme.md#license--submodule)를 참고한다. Weight/실험 산출물은 로컬 보존·Git 제외이고 사전학습 Archive만 기존 Git LFS 배포 정책을 유지한다.
+공개 재구현 Source는 [LGPL-3.0](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/LICENSE), Inception Source는 BSD-3-Clause다. 변경 내용은 [NOTICE](../../third_party/deepprint.NOTICE.txt)를 따른다. 공개 Checkpoint의 별도 License는 확인되지 않았다. 외부 Library는 [Root License](../../readme.md#license--submodule)를 참고한다. 현재 운영 Weight와 실험 기록은 로컬에 보존하고 Git에서 제외한다. 완료된 실험 Weight는 정리했으며 사전학습 Archive의 기존 Git LFS 배포 정책은 유지한다.

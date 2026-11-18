@@ -23,11 +23,11 @@ Qt와 LibTorch는 별도로 설치합니다. 학습 초기 파일 `models/pretra
 | 저장소에 포함 | 로컬에 보존하고 제외 |
 |---|---|
 | C++ 소스·CMake·원본 TIFF DB | 빌드·IDE·Python 캐시, 증강 이미지 |
-| 학습 초기 `.bin`과 정보 JSON, `models/readme.md` | `models/current`, 이전 모델·실험·검증 결과, 원본 체크포인트 |
+| 학습 초기 `.bin`과 정보 JSON, `models/readme.md` | `models/current`, 이전 학습·실험·검증 기록, 원본 체크포인트 |
 | 구조도 SVG·PNG, GUI 화면 모음 PNG | `GUI_flows/captures`의 원본 화면·실행 결과·샘플 이미지·요약 JSON |
 | `GUI_flows/captures/readme.md`, 이전 `Report_example` | `tools/readme.md`의 로컬 스타일 기록 |
 
-`Report_example/templates/*.bin`은 작은 출력 특징 벡터이며 학습 Weight가 아닙니다. 현재 모델 폴더의 역할은 [모델 안내](../models/readme.md)를 참고합니다.
+`Report_example/templates/*.bin`은 작은 출력 특징 벡터이며 학습 Weight가 아닙니다. 완료된 실험·이전 모델·회귀 검증의 Weight는 설정·결과를 확인한 뒤 정리했으며, 현재 운영 모델과 사전학습 파일은 유지합니다. 현재 폴더의 역할은 [모델 안내](../models/readme.md)를 참고합니다.
 
 ## 예시와 검증 기록
 

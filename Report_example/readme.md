@@ -20,6 +20,6 @@
 
 미리보기는 실제 HTML을 Qt로 렌더링한 이미지입니다. HTML에는 선택한 지표를, CSV에는 전체 지표와 모델별 점수를 저장했습니다. 처리 시간은 이 실행 환경의 측정값입니다.
 
-당시 상대 경로는 원시 파일에 그대로 남겼습니다. 해당 모델의 현재 로컬 위치는 `models/baselines/square_padding`이며 새 Clone에는 포함되지 않습니다. 폴더 정리로 원시 기록의 경로·수치·판정을 다시 쓰지는 않았습니다.
+당시 상대 경로는 원시 파일에 그대로 남겼습니다. 해당 모델의 설정·학습 로그는 `models/baselines/square_padding`에 남겼으며 Weight는 정리했습니다. 이 로컬 기록은 새 Clone에 포함되지 않습니다. 폴더 정리로 원시 기록의 경로·수치·판정을 다시 쓰지는 않았습니다.
 
 같은 손가락의 촬영본을 Train/Validation으로 나눈 평가이며 독립 Test 성능이 아닙니다. 현재 모델의 사용법과 평가 결과는 [Root README](../readme.md)와 [Algorithm README](../src/Algorithm/readme.md#final-production-run--calibration)를 참고합니다.

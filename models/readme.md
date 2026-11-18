@@ -1,6 +1,6 @@
 # 모델 보관 안내
 
-GUI에서 사용할 모델은 **`current/`**, 재학습의 초기값은 **`pretrained/deepprint.bin`**에 있습니다. 나머지는 이전 모델과 실험·검증 결과를 보관하는 폴더입니다. 폴더 이름은 용도를 나타내며, 학습 설정과 평가 결과는 각 실행의 JSON·CSV에서 확인할 수 있습니다.
+GUI에서 사용할 모델은 **`current/`**, 재학습의 초기값은 **`pretrained/deepprint.bin`**에 있습니다. 나머지는 이전 학습의 설정과 실험·검증 결과를 보관하는 폴더입니다. 완료된 실험과 회귀 검증의 Weight는 정리했으며, 현재 모델과 사전학습 파일은 유지합니다. 폴더 이름은 용도를 나타내며, 학습 설정과 평가 결과는 각 실행의 JSON·CSV에서 확인할 수 있습니다.
 
 `validation/`은 코드 변경 전후를 비교한 로컬 실행 기록이며, 데이터셋의 Train/Validation 분할 폴더가 아닙니다. 이 README와 사전학습 파일을 제외한 모델·실험 폴더는 Git에서 제외합니다.
 
@@ -10,18 +10,18 @@ GUI에서 사용할 모델은 **`current/`**, 재학습의 초기값은 **`pretr
 |---|---|
 | `current/` | 현재 GUI에서 사용하는 네 모델과 추천 임계값, 학습·평가 기록. Partial FT + Cosine Classifier + 30차원 Softmax 출력입니다. |
 | `pretrained/` | 공개 사전학습 체크포인트와 C++ 학습 초기 파일. GUI 비교용 모델이 아닙니다. |
-| `baselines/` | 전처리 변경 단계별로 보존한 구형 512차원 모델. 현재 방식과 비교하기 위한 자료입니다. |
+| `baselines/` | 전처리 변경 단계별 구형 512차원 모델의 메타데이터·학습 로그. Weight는 정리했습니다. |
 | `experiments/` | 전처리, Adapter·LoRA, MLP, 출력 크기, 오류 분석 등 개발 중 수행한 실험. |
 | `validation/` | 코드 정리 후 독립적으로 재학습하고 출력·성능이 유지되는지 확인한 결과. |
 | `archive/initial_metadata/` | 이전에 `models` 바로 아래 있던 학습 정보·CSV·전처리 점검 자료. 완전한 모델 세트는 아닙니다. |
 
-### 이전 모델과 검증 결과
+### 이전 학습과 검증 기록
 
 | 경로 | 내용 |
 |---|---|
-| `baselines/square_padding/` | 흰색 정사각형 패딩을 사용한 이전 512차원 모델. |
-| `baselines/center_crop_after_augmentation/` | 증강 후 FVC2004 중앙 Crop을 적용했던 단계의 512차원 모델. |
-| `baselines/center_crop_before_augmentation/` | FVC2004를 먼저 중앙 Crop한 뒤 증강한 512차원 기준 모델. 현재 30차원 방식과 비교할 때 사용합니다. |
+| `baselines/square_padding/` | 흰색 정사각형 패딩을 사용했던 512차원 모델의 설정·학습 로그. |
+| `baselines/center_crop_after_augmentation/` | 증강 후 FVC2004 중앙 Crop을 적용했던 단계의 모델 정보·학습 로그. |
+| `baselines/center_crop_before_augmentation/` | FVC2004를 먼저 중앙 Crop한 뒤 증강한 512차원 기준 모델의 설정·학습 로그. 이전 비교 수치는 평가 CSV에 남아 있습니다. |
 | `validation/code_cleanup/` | 이전 코드 정리 후 재학습·회귀 검증 기록. |
 | `validation/oop_refactor/` | 수업 개념에 맞춘 소유권·헤더·제어 흐름 정리 후 네 모델을 재학습한 기록. `oop_review.json`에 비교 결과가 있습니다. |
 | `validation/directory_layout/` | 이번 폴더 정리 전후의 전체 파일 해시, 빌드·GUI 경로·등록·비교·리포트 저장 검증 기록. |
@@ -64,10 +64,10 @@ calibration.json
 ./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01
 ```
 
-현재 로컬에 보존된 캐시와 512차원 기준 모델을 함께 사용하려면 다음과 같이 실행할 수 있습니다. 캐시의 원본·전처리·사전학습 Weight가 일치하는지는 프로그램에서 검사합니다.
+현재 로컬에 보존된 특징 캐시를 재사용하려면 다음과 같이 실행할 수 있습니다. 캐시의 원본·전처리·사전학습 Weight가 일치하는지는 프로그램에서 검사합니다.
 
 ```sh
-./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_02 --feature-cache models/experiments/parameter_efficient_tuning --baseline models/baselines/center_crop_before_augmentation
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_02 --feature-cache models/experiments/parameter_efficient_tuning
 ```
 
 학습 설정과 검증 범위는 [Algorithm README](../src/Algorithm/readme.md), GUI 조작은 [GUI README](../src/GUI/readme.md)를 참고합니다.
@@ -91,8 +91,24 @@ calibration.json
 | `experiments/preprocessing_20261118` | `experiments/preprocessing/` |
 | `experiments/source_archive_20261118` | `experiments/source_archive/` |
 
-과거 로그·리포트·소스 스냅샷은 실행 당시의 기록이므로 내용에 이전 경로가 남아 있을 수 있습니다. 다시 실행할 때는 위 표의 현재 경로로 바꿔 사용합니다. 운영 코드와 문서의 실행 명령은 현재 경로를 사용합니다. 문서용 캡처 도구는 정리했으며, 기존 화면과 결과는 보존합니다.
+과거 로그·리포트·소스 스냅샷은 실행 당시의 기록이므로 내용에 이전 경로가 남아 있을 수 있습니다. 다시 실행할 때는 위 표의 현재 경로로 바꾸고, 필요한 Weight를 다시 학습해야 합니다. 운영 코드와 문서의 실행 명령은 현재 보존된 파일을 기준으로 작성합니다. 문서용 캡처 도구는 정리했으며, 기존 화면과 결과는 보존합니다.
+
+## 완료된 실험 Weight 정리 (2026-11-19)
+
+설정·평가 기록을 확인한 뒤, 운영에 사용하지 않는 실험 체크포인트 969개와 이전·검증용 모델 20개를 삭제해 약 **15.7 GiB**를 확보했습니다. `current/`의 네 모델, `pretrained/`의 사전학습 파일과 원본 체크포인트는 유지합니다.
+
+| 확인·보존한 기록 | 위치 |
+|---|---|
+| 전처리 방식·설정·점수 | `experiments/preprocessing/*/protocol.json`, `metrics.csv` |
+| Partial FT·Adapter·LoRA 설정과 비교 | `experiments/parameter_efficient_tuning/plan.json`, `summary.csv` |
+| Adapter 추가 비교와 채택 판단 | `experiments/adapter_comparison/plan.json`, `summary.csv`, `decision.json` |
+| MLP·Cosine 구조·학습률·Seed 비교 | `experiments/mlp_3layer`, `mlp_depth`, `output_dimensions`의 `plan.json`·평가 CSV |
+| 512차원 / 30차원 비교·임계값 검토 | `experiments/output_dimensions/retention_review`, `threshold_review`, `current/validation_metrics.csv` |
+| 모델별 학습 설정·Epoch 로그와 코드 정리 검증 | 이전 모델의 `.json`·`*_training.csv`, `validation/*`의 검증 기록 |
+| 삭제 파일 목록·크기·SHA-256·대응 기록 | `archive/weight_cleanup.json` |
+
+학습 로그 620개와 설정·결과 파일을 확인했으며, JSON·CSV·HTML·그래프·특징 캐시·소스 스냅샷은 그대로 보존했습니다. 삭제된 모델은 더 이상 직접 불러오거나 출력 비교를 다시 실행할 수 없습니다. 숫자 검토에는 남아 있는 결과를 사용하고, 모델 자체가 필요하면 재학습합니다. `--baseline`은 실제 512차원 Weight를 별도로 준비했을 때만 사용할 수 있습니다.
 
 ## Git 관리
 
-이 README와 `pretrained/deepprint.bin`·`deepprint.json`만 저장소에 포함합니다. 사전학습 `.bin`은 기존 Git LFS 정책을 유지합니다. `current`의 학습 Weight, 이전 모델, 캐시, 실험·검증 결과와 원본 `best_model.pyt`는 로컬에 보존하고 Git에서 제외합니다. 따라서 새 Clone에는 `current/`가 없으며 직접 학습하거나 별도로 받은 모델 폴더를 선택해야 합니다.
+이 README와 `pretrained/deepprint.bin`·`deepprint.json`만 저장소에 포함합니다. 사전학습 `.bin`은 기존 Git LFS 정책을 유지합니다. `current`의 학습 Weight, 캐시, 실험·검증 기록과 원본 `best_model.pyt`는 로컬에 보존하고 Git에서 제외합니다. 완료된 실험의 Weight는 위 정책에 따라 정리했습니다. 따라서 새 Clone에는 `current/`가 없으며 직접 학습하거나 별도로 받은 모델 폴더를 선택해야 합니다.
