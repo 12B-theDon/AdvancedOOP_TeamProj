@@ -90,6 +90,7 @@ private:
     QTabWidget* resultTabs_ = nullptr;
     bool comparisonsExecuted_ = false;
     QTableWidget* metrics_ = nullptr;
+    std::vector<QCheckBox*> metricChoices_;
     QLabel* stepIndicator_ = nullptr;
 
     QWizardPage* DatabasePage();

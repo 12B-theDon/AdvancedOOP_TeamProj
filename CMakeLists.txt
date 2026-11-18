@@ -24,7 +24,6 @@ target_link_libraries(FingerprintTrain PRIVATE Engine Qt${QT_VERSION_MAJOR}::Gui
 
 add_executable(FingerprintGUI WIN32 src/main.cpp src/GUI/GUI.cpp src/GUI/report.cpp)
 target_link_libraries(FingerprintGUI PRIVATE Engine Qt${QT_VERSION_MAJOR}::Widgets)
-target_compile_definitions(FingerprintGUI PRIVATE FINGERPRINT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_custom_command(TARGET FingerprintGUI POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

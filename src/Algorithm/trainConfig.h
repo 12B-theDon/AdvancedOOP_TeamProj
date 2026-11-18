@@ -6,7 +6,7 @@
 // Independent fine-tuning starts from the same pretrained checkpoint.
 namespace algorithm {
 inline constexpr unsigned int TrainSeed = 42; // Model initialization and batch shuffle seed.
-inline constexpr int Epochs = 20; // [epochs] Training passes.
+inline constexpr int Epochs = 40; // [epochs] Training passes.
 inline constexpr int BatchSize = 32; // [images/batch] Projection training.
 inline constexpr int FeatureBatchSize = 4; // [images/batch] Frozen feature extraction.
 inline constexpr double LearningRate = 0.0001; // Optimizer step size.

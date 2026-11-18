@@ -47,9 +47,9 @@ cmake --build build --target FingerprintTrain FingerprintGUI --parallel 2
 ./build/FingerprintGUI
 ```
 
-Clone에는 **학습 초기 파일**만 포함됩니다. 학습이 끝나면 GUI의 Step 3에서 출력 폴더 `models/run_01`을 선택합니다. 이미 학습한 호환 모델이 있다면 그 폴더를 선택하고 학습을 생략할 수 있습니다. 재학습에는 새 출력 폴더명을 사용합니다. [학습·검증 옵션](src/Algorithm/readme.md#conversion--offline-run) · [모델 준비와 보관](models/readme.md)
+Clone에는 **학습 초기 파일**만 포함됩니다. 기본 학습은 40 Epoch이며, 학습이 끝나면 GUI의 Step 3에서 **Select weights folder...**로 출력 폴더 `models/run_01`을 선택합니다. 이미 학습한 호환 모델이 있다면 그 폴더를 선택하고 학습을 생략할 수 있습니다. 재학습에는 새 출력 폴더명을 사용합니다. [학습·검증 옵션](src/Algorithm/readme.md#conversion--offline-run) · [모델 준비와 보관](models/readme.md)
 
-macOS arm64에서 빌드·학습·추론을 확인했으며 GUI 검증은 Qt offscreen으로 수행했습니다. Windows/Linux 실행과 실제 데스크톱 창 조작은 아직 검증하지 않았습니다.
+macOS arm64에서 빌드·학습·추론과 GUI 데모 녹화를 수행했으며, 자동 GUI 검증은 Qt offscreen으로 진행했습니다. Windows/Linux 실행은 아직 검증하지 않았습니다.
 
 ## 2. Architecture
 
@@ -85,7 +85,7 @@ Backbone을 고정하고 Texture·Minutia Projection과 Cosine Classifier를 학
 
 ![GUI demo](demo.gif)
 
-GIF와 [리포트 예시](Report_example/readme.md)는 이전 512차원 버전의 실행 기록입니다. 현재 화면은 [전체 흐름](docs/GUI_flows/00_overview.png) · [한 장 등록](docs/GUI_flows/01_single_enrollment.png) · [여러 장 등록](docs/GUI_flows/02_multiple_enrollment.png) · [외부 DB](docs/GUI_flows/03_external_db.png)에서 확인할 수 있습니다.
+위 GIF는 **40 Epoch로 학습한 Cosine Classifier·30차원 Template 모델**의 등록·비교 흐름입니다. [리포트 예시](Report_example/report.html)는 별도의 20 Epoch 모델로 저장한 30차원 Genuine 비교 기록이며, 데모와 학습 실행이 다릅니다. 단계별 화면은 [전체 흐름](docs/GUI_flows/00_overview.png) · [한 장 등록](docs/GUI_flows/01_single_enrollment.png) · [여러 장 등록](docs/GUI_flows/02_multiple_enrollment.png) · [외부 DB](docs/GUI_flows/03_external_db.png)에서 확인할 수 있습니다.
 
 점수는 동일 지문일 확률이 아닙니다. 성능 수치는 학습에 등장한 손가락의 다른 촬영본 평가이며, 독립 Test나 미학습 손가락 성능과 구분합니다. [평가 결과와 한계](src/Algorithm/readme.md#final-production-run--calibration)
 

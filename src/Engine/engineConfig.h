@@ -18,7 +18,6 @@ inline constexpr double TargetFar = 0.01; // Validation operating-point target, 
 inline constexpr double MetricTolerance = 1e-12; // [ratio] Floating-point comparison tolerance.
 inline constexpr int CsvPrecision = 17; // Significant digits in raw results.
 inline constexpr const char* ImagesFolder = "data/original";
-inline constexpr const char* WeightsFolder = "models/current";
 inline constexpr const char* WeightExtension = ".bin";
 inline constexpr const char* TemplateExtension = ".fpt";
 inline constexpr const char* ScoreType = "probability30_cosine_01";

@@ -18,7 +18,7 @@
 
 모델 입출력에 관한 공통 구현은 `encoder.cpp`에, 학습 데이터 준비와 학습 후 평가는 `train.cpp`에 모았다. 학습 데이터 구조와 함수 선언은 `train.h`에 둔다. 전역 `main()`은 `algorithm::RunTraining()`으로 학습 실행을 위임한다. 별도의 보조 소스 파일 없이 위 파일들로 알고리즘을 구성한다.
 
-`export_features.cpp`와 `predict_id.cpp`에서 필요했던 기능은 `FingerprintTrain`의 캐시·검증 경로로 통합했다. 더 이상 쓰지 않는 MLP 학습·비교 스크립트도 운영 소스에서 제거했다. 기존 실험 결과와 소스 스냅샷은 로컬 `models/experiments/source_archive` 등에 보존하며 Git에는 포함하지 않는다.
+`export_features.cpp`와 `predict_id.cpp`에서 필요했던 기능은 `FingerprintTrain`의 캐시·검증 경로로 통합했다. 더 이상 쓰지 않는 MLP 학습·비교 스크립트도 운영 소스에서 제거했다. 기존 실험 설정과 결과는 로컬 `models/validation/experiments`에 보존하며 Git에는 포함하지 않는다. 이전 소스 스냅샷과 실험 전용 코드는 결과를 확인한 뒤 정리했다.
 
 [prepare_deepprint.py](../../tools/prepare_deepprint.py)는 공개 체크포인트를 C++ 학습 초기 파일로 변환하는 데 사용하므로 유지한다. 디버깅 도구가 아니라 입력 모델을 준비하는 변환 도구이며, 이미 제공된 `deepprint.bin`으로 학습할 때는 필요하지 않다. 별도 검증 전용이던 `tests/`와 CMake 검사 대상은 제거했다. 모델 저장 검증과 학습 후 평가는 `train.cpp`의 운영 경로에 남아 있다. 원본·증강 파일의 해시와 오류 검사에는 Encoder의 공통 함수를 재사용한다. 입력·템플릿 오류는 실패 상태로 반환하고, LibTorch 실행과 학습 파일 입출력의 실제 예외만 호출 경계에서 처리한다.
 
@@ -125,9 +125,13 @@ flowchart LR
 
 촬영본 1–6번과 그 증강본으로 학습하고, 촬영본 7–8번의 원본으로 검증한다. 검증 촬영본의 증강본은 학습과 검증 어디에도 넣지 않는다. 학습과 검증에 같은 손가락 ID가 등장하므로, 이 결과는 다른 촬영본에 대한 성능이다. 독립 테스트나 미학습 손가락·외부 DB에 대한 검증으로 해석하지 않는다.
 
-네 모델은 원래 사전학습 파일에서 각각 새로 시작한다. Adam, 학습률 0.0001, Weight decay 0.0001, Batch 32, 20 Epoch, Seed 42로 학습한다. Logit은 `16 × embedding @ normalized_classifier_weight.T`로 계산하며, CE에는 Softmax 이전 값을 넣는다. 추론 모델에는 Softmax까지 포함한다. 마지막 Epoch의 모델을 저장하고 조기 종료나 최적 Epoch 선택은 하지 않는다. 이미지 순서는 이전 비교 실험과 같게 유지한다. Encoder와 Classifier를 모두 저장하되, Optimizer 상태를 저장하는 학습 재개 기능은 제공하지 않는다.
+네 모델은 원래 사전학습 파일에서 각각 새로 시작한다. Adam, 학습률 0.0001, Weight decay 0.0001, Batch 32, 40 Epoch, Seed 42로 학습한다. Logit은 `16 × embedding @ normalized_classifier_weight.T`로 계산하며, CE에는 Softmax 이전 값을 넣는다. 추론 모델에는 Softmax까지 포함한다. 마지막 Epoch의 모델을 저장하고 조기 종료나 최적 Epoch 선택은 하지 않는다. 이미지 순서는 이전 비교 실험과 같게 유지한다. Encoder와 Classifier를 모두 저장하되, Optimizer 상태를 저장하는 학습 재개 기능은 제공하지 않는다.
+
+기본 학습 횟수는 동일 조건의 5개 Seed(42–46), 네 모델을 각각 100 Epoch까지 학습한 비교를 바탕으로 40 Epoch로 정했다. 20→40 Epoch에서 평균 EER은 FVC2002 1.148→0.815%, FVC2004 1.444→0.889%, 통합 0.475→0.370%로 낮아졌고, FVC2000은 0%를 유지했다. 100 Epoch에서는 FVC2002가 0.667%로 더 개선됐지만 FVC2004·통합은 40 Epoch와 같았다. 네 모델의 최고 점수를 사용하는 집계의 전체 EER은 40 Epoch 4.444%에서 100 Epoch 4.722%로 높아져, 공통 기본값은 학습 비용과 집계 성능을 함께 고려한 40으로 선택했다. 이는 학습 ID의 다른 촬영본을 평가한 결과이며, 모든 모델·지표에서 40이 최적이라는 뜻은 아니다. 실험용 임시 파일은 확인 후 삭제했다.
 
 특징 캐시는 원본·학습 증강 이미지, 매니페스트, 전처리 설정, 사전학습 파일과 특징 데이터의 SHA-256을 검사한 뒤 재사용한다. 또한 2400×2560 Float32 크기와 각 행의 ID·학습/검증 구분·순서를 확인한다. 캐시를 재사용해도 두 Projection과 Classifier는 새로 학습한다. 캐시 크기는 약 25MB이며, 전체 프로세스의 메모리 사용량을 뜻하지 않는다.
+
+콘솔의 `validation CE loss`는 Epoch마다 검증 원본으로 계산한 평균 Cross Entropy 손실이다. ID 분류 정확도와 지문쌍 비교의 EER·FAR는 별도 지표이며, 손실 감소만으로 최적 Epoch을 결정하지 않는다. 학습 CSV에는 `train_loss`, `validation_loss`, `validation_classification_accuracy`를 기록한다.
 
 ## Template / Model Compatibility
 
@@ -167,7 +171,7 @@ FVC2004는 중앙 480×480 영역을 먼저 자른 뒤 증강하고, 다른 DB�
 
 ## Final Production Run / Calibration
 
-최종 모델은 로컬 `models/current`에 보관한다. 이 폴더는 Clone에 포함되지 않는다. 네 모델 모두 기존 사전학습 파일에서 새로 시작해 Seed 42로 20 Epoch 학습한 **단일 실행 결과**이며, 앞선 5개 Seed 평균과 구분한다. 각 `.bin`은 약 254MiB다. 이전 동일 조건 실험과 마지막 검증 손실의 최대 차이는 7.5e-8 이하였다.
+이전 20 Epoch 실행 기록은 로컬 `models/validation/runs/cosine30_seed42_20epoch`에 보관한다. 학습 Weight는 배포 시 직접 준비하는 방식에 맞춰 정리했으며, 이 기록도 Clone에는 포함되지 않는다. 아래 기록은 네 모델 모두 기존 사전학습 파일에서 새로 시작해 Seed 42로 20 Epoch 학습한 **단일 실행 결과**이며, 앞선 5개 Seed 평균과 구분한다. 별도로 수행한 40 Epoch 실행의 기록은 `models/validation/runs/cosine30_seed42_40epoch`에 보존한다. 아래 수치는 20 Epoch 결과이며 40 Epoch 결과로 해석하지 않는다. 학습 시 생성되는 각 `.bin`은 약 254MiB다. 이전 동일 조건 실험과 마지막 검증 손실의 최대 차이는 7.5e-8 이하였다.
 
 아래 표는 기존에 실제 저장했던 512차원 모델, 새 모델에서 분류기 직전의 512차원 특징, 새 모델의 최종 30차원 출력을 비교한다. 새 모델의 512차원과 30차원을 비교하면 분류기를 유지한 효과를 분리해 볼 수 있다.
 
@@ -252,6 +256,8 @@ FVC2004에서 여백 채우기와 중앙 자르기를 비교한 결과, 검증 E
 
 먼저 `512→256→128→K` 구조의 MLP와 Cosine Classifier를 같은 데이터에서 비교했다. 출력층을 포함해 Linear가 3개인 구조이며, 3개 Seed와 3개 학습률 조합으로 총 72회 학습했다. 통합 모델의 ID 분류 정확도는 Cosine 96.67%, 선택한 학습률의 MLP 94.44%였다. 이어 0·1·2·3-layer 조건을 5개 Seed로 총 200회 비교하고, 통합 모델은 60 Epoch 조건도 20회 추가했다. 3-layer의 통합 EER은 20 Epoch의 1.556%에서 60 Epoch의 2.340%로 오히려 높아졌다.
 
+같은 추가 실험에서 Cosine 확률 출력의 통합 EER은 20 Epoch의 0.475%에서 60 Epoch의 0.370%로 낮아졌다. 이는 당시 5개 Seed 평균이며, 현재 최종 Seed 42 모델의 최적 Epoch을 확정한 결과는 아니다. 학습 시간을 늘린 효과는 구조와 비교 벡터에 따라 달랐으므로 CE 손실과 지문쌍 평가를 함께 확인해야 한다.
+
 여기서 층수는 전체 Linear 수다. 1-layer는 `512→K`, 2-layer는 `512→256→K`, 3-layer는 `512→256→128→K`이며, 은닉층에 ReLU를 적용하고 마지막에 Softmax를 둔다. 0-layer는 별도 분류기를 학습한다는 뜻이 아니라, 기존 512차원 특징을 직접 비교하는 조건이다.
 
 ### 네 모델의 출력을 30개로 통일한 재학습
@@ -282,7 +288,7 @@ FVC2004에서 여백 채우기와 중앙 자르기를 비교한 결과, 검증 E
 
 임계값 0.60에서 30차원 방식의 Genuine 통과율은 100%, 평균 FAR은 0.914%였지만, 이를 모든 모델에 그대로 적용하지 않았다. 최종 저장 모델과 GUI의 최고 점수 집계 방식에 맞춰 모델 조합별로 다시 산정했다.
 
-실험용 학습·비교 스크립트와 두 보조 실행 파일은 운영 소스에서 제거했다. 설정·결과 CSV와 이전 소스·문서 스냅샷은 Git에서 제외한 로컬 폴더에 보존했다. 2026-11-19에 기록을 확인한 뒤 완료된 실험·이전 모델·회귀 검증의 Weight를 정리했으며, 현재 운영 모델과 사전학습 파일은 유지했다. 주요 기록은 `models/experiments/` 아래의 `mlp_3layer`, `mlp_depth`, `output_dimensions`에 있으며 새 Clone에는 포함되지 않는다.
+실험용 학습·비교 스크립트와 두 보조 실행 파일은 운영 소스에서 제거했다. 설정·결과 CSV는 Git에서 제외한 로컬 폴더에 보존했다. 2026-11-19에 기록을 확인한 뒤 완료된 학습 Weight·캐시·실험 코드와 이전 소스 스냅샷을 정리했으며, 재학습에 필요한 사전학습 파일은 유지했다. 주요 기록은 `models/validation/experiments/` 아래의 `mlp_3layer`, `mlp_depth`, `output_dimensions`에 있으며 새 Clone에는 포함되지 않는다.
 
 ## Conversion / Offline Run
 
@@ -347,13 +353,9 @@ GUI Step 3에서 `models/run_01` 등 학습을 완료한 폴더를 선택한다.
 ./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01 --verify-only --feature-cache models/run_01/feature_cache
 ```
 
-이전 512차원 Weight를 별도로 준비했다면 `--baseline <folder>`로 같은 이미지쌍의 비교를 추가한다. 보관하던 이전 모델의 Weight는 정리했으므로 현재 `models/baselines`에는 설정·로그만 있다. 새 모델의 진단용 512차원 특징과 이전에 저장한 512차원 모델을 구분해 기록한다. 기본 Cache는 출력 폴더의 `feature_cache`이며 운영 추론에는 필요하지 않다.
+이전 512차원 Weight를 별도로 준비했다면 `--baseline <folder>`로 같은 이미지쌍의 비교를 추가한다. 보관하던 이전 모델의 Weight는 정리했으므로 현재 `models/validation/baselines`에는 설정·로그만 있다. 새 모델의 진단용 512차원 특징과 이전에 저장한 512차원 모델을 구분해 기록한다. 기본 Cache는 출력 폴더의 `feature_cache`이며 운영 추론에는 필요하지 않다.
 
-기존 검증 Cache를 재사용하려면 아래처럼 실행한다. 현재 모델을 덮어쓰지 않도록 새 출력 폴더를 지정하며, 이 로컬 자료는 Clone에 포함되지 않는다.
-
-```sh
-./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_03 --feature-cache models/experiments/parameter_efficient_tuning
-```
+과거 실험의 특징 캐시는 정리했다. 위 재사용·검증 예시는 직접 학습해 `models/run_01/feature_cache`를 생성한 뒤 사용할 수 있다. 캐시가 없다면 기본 학습 명령으로 새로 생성한다.
 
 ## Windows / Visual Studio
 

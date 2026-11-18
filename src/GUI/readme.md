@@ -36,13 +36,29 @@ GUI는 DB와 등록 이미지를 선택하고 비교를 실행하는 화면이�
 | 6. Run | 비교 개수를 확인하고 `Run selected comparisons`로 실행한다. |
 | 7. Results | 점수와 판정 기준을 확인한다. `Metrics and report` 탭에서 지표를 선택한 뒤 `Save all`로 저장한다. |
 
-학습된 네 `.bin`과 `calibration.json`을 같은 폴더에 둔다. 모델 파일명은 `fvc2000_db3.bin`, `fvc2002_db3.bin`, `fvc2004_db1.bin`, `combined.bin`이다. GUI의 초기 경로는 `models/current`이며, 다른 위치에 학습한 모델은 폴더 선택으로 불러온다. `models/run_01`은 학습 명령이 생성하는 출력 폴더의 예시다. Clone 직후에는 직접 학습하거나 별도로 받은 모델이 필요하며, `models/pretrained`는 GUI 비교용 폴더가 아니다. 구형 512차원 모델을 선택하면 재학습 안내를 표시한다.
+학습된 네 `.bin`과 `calibration.json`을 같은 폴더에 둔다. 모델 파일명은 `fvc2000_db3.bin`, `fvc2002_db3.bin`, `fvc2004_db1.bin`, `combined.bin`이다. GUI는 시작할 때 모델 폴더를 비워 두며, **Select weights folder...**로 직접 학습한 출력 폴더를 선택한다. `models/run_01`은 학습 명령이 생성하는 출력 폴더의 예시다. Clone 직후에는 직접 학습하거나 별도로 받은 모델이 필요하며, `models/pretrained`는 GUI 비교용 폴더가 아니다. 구형 512차원 모델을 선택하면 재학습 안내를 표시한다.
 
 GUI의 모델 선택은 호환되는 Cosine30 v2 Weight를 바꾸는 기능이다. 외부 알고리즘 DLL을 교체하는 기능은 현재 제공하지 않으며, 확장 방법은 [Engine 안내](../Engine/readme.md#dll-backend--extension)를 참고한다.
 
-[한 장 등록](../../docs/GUI_flows/01_single_enrollment.png) · [여러 장 등록](../../docs/GUI_flows/02_multiple_enrollment.png) · [외부 DB](../../docs/GUI_flows/03_external_db.png) · [이전 리포트 미리보기](../../Report_example/report_preview.png)
+[한 장 등록](../../docs/GUI_flows/01_single_enrollment.png) · [여러 장 등록](../../docs/GUI_flows/02_multiple_enrollment.png) · [외부 DB](../../docs/GUI_flows/03_external_db.png) · [저장 리포트 예시](../../Report_example/report.html)
 
 사용자 안내에는 템플릿의 역할, 점수의 의미와 조절 방법만 간단히 설명한다. HTML의 자세한 실행 설정은 `Run settings`를 펼쳐 볼 수 있다. 모델 형식과 평가 근거는 [Algorithm README](../Algorithm/readme.md)에 정리하고, 실제 모델 정보는 원시 결과에도 보존한다.
+
+### 데모와 저장 리포트
+
+[메인 데모 GIF](../../demo.gif)는 40 Epoch로 학습한 Cosine30 모델을 사용한 macOS GUI 녹화다. 녹화용 실행은 `models/run_check_20261119_011503`에서 네 모델의 학습·저장·재로딩 검증을 마쳤으며, 실제 이미지 기반 모델 비교 24건과 DB·모델 조합별 임계값 60개를 확인했다. 통합 모델의 마지막 Validation CE loss는 0.138468이었다. 이는 분류 손실이며 지문쌍의 오인식률이나 일치 확률이 아니다. 이후 Weight를 정리하고 학습·평가 기록은 `models/validation/runs/cosine30_seed42_40epoch`로 옮겼다.
+
+다시 실행할 때는 새 출력 폴더에 학습하고 GUI에서 해당 폴더를 선택한다. 아래는 프로젝트 루트에서 사용하는 터미널 예시다. 학습이 끝나면 `validation_report.html`을 브라우저로 열어 평가 결과를 확인할 수 있다.
+
+```sh
+FINGERPRINT_RUN=models/run_01
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin "$FINGERPRINT_RUN"
+./build/FingerprintGUI
+```
+
+빠른 기능 시연에는 FVC2000 DB3, 해당 개별 모델 하나, 등록 이미지 `101_1.tif`, Genuine 촬영 번호 `7,8`, Impostor의 손가락당 한 장을 권장한다. 총 11쌍이며 전체 성능 평가를 대신하지 않는다. 여러 모델을 선택하면 같은 쌍을 각 모델로 비교하고 Best/Worst 점수를 보여 준다. 화면의 점수는 소수점 6자리로 표시한다.
+
+[저장 리포트 예시](../../Report_example/report.html)는 데모와 별도로, 이전 20 Epoch의 FVC2000·통합 모델로 Genuine 2쌍을 비교한 기록이다. `settings.txt`와 `models.csv`의 실행 당시 경로·Weight 해시는 그대로 보존한다. Impostor를 실행하지 않아 FMR·EER은 계산할 수 없고, CSV에는 그 사유가 남아 있다. 포함된 `.fpt`는 30차원 출력과 모델 식별 정보를 담은 등록 템플릿이며 학습 Weight가 아니다.
 
 ### 이미지와 비교 대상
 
@@ -70,7 +86,7 @@ CSV는 `enrollment,attempt`와 선택적인 `type` 열을 받으며, 파일명�
 | Impostor | 점수 ≥ Impostor 기준 | FA: 타인 지문 오수락 |
 | 공통 | 추론 실패 | ERR |
 
-모델을 불러오면 `calibration.json`의 실제 가중치 해시·ID 순서·FAR 정책·정밀도를 검사하고, 입력 DB와 선택 모델 조합에 맞는 추천값을 적용한다. 해당 개별 모델의 초기값은 FVC2000 0.5603, FVC2002 0.6648, FVC2004 0.7235다. 모델 선택이 바뀌면 새 조합의 추천값을 불러온다.
+모델을 불러오면 `calibration.json`의 실제 가중치 해시·ID 순서·FAR 정책·정밀도를 검사하고, 입력 DB와 선택 모델 조합에 맞는 추천값을 적용한다. 이전 20 Epoch 실행의 개별 모델 추천값은 FVC2000 0.5603, FVC2002 0.6648, FVC2004 0.7235였으며, 재학습한 모델에는 해당 출력 폴더의 보정값을 사용한다. 모델 선택이 바뀌면 새 조합의 추천값을 불러온다.
 
 두 기준은 같은 값으로 시작하지만 각각 독립적으로 조절할 수 있다. 입력 범위는 [0, 1]이며, 기준 변경은 재추론 없이 판정·색상·지표만 갱신한다. 서로 다른 기준에서 얻은 두 정확도를 하나의 공통 경계에서 측정한 정확도로 합치지 않는다.
 
@@ -79,6 +95,8 @@ CSV는 `enrollment,attempt`와 선택적인 `type` 열을 받으며, 파일명�
 ## Metrics / Report
 
 화면과 HTML에는 선택한 지표를, CSV에는 전체 17개 지표를 저장한다. 판정 기준을 바꾸면 FMR·FNMR 등을 다시 계산한다. EER과 고정 오류율 지표는 현재 입력한 기준과 별개다. 점수를 한 번 정렬하고 중복 임계값을 제거한 뒤, 이진 탐색으로 각 기준의 오류 수를 구해 반복 계산을 줄인다. 그래프도 같은 점수 집계와 오류율 함수를 재사용하며, 비정상 점수를 만났을 때의 기존 표시 규칙을 유지한다.
+
+현재 선택과 실행 결과로 계산할 수 없는 지표는 체크박스를 흐리게 표시하고 선택을 막으며, 마우스를 올리면 필요한 조건을 안내한다. FMR에는 Impostor 결과, FNMR에는 Genuine 결과, EER 등 두 분포를 비교하는 지표에는 양쪽 결과가 필요하다. 실제 값이 0인 지표는 정상적으로 선택할 수 있다. 비활성 지표는 화면 표와 HTML에서 제외하고, 이전 체크 상태는 보존해 다시 계산할 수 있게 되면 복원한다. CSV에는 계산 불가 사유를 포함한 전체 지표를 계속 남긴다.
 
 | 지표 | 계산 기준 |
 |---|---|
@@ -121,14 +139,14 @@ CSV는 `enrollment,attempt`와 선택적인 `type` 열을 받으며, 파일명�
 | Window / Preview | 900×720 / 340×340px |
 | MetricColumns / DefaultMetrics | 3열 / FTE·EER·Matching time |
 | ThresholdMinimum/Maximum / Step / Precision | 0~1 / 0.01 / 소수점 4자리 |
-| Score / Time / Metric 정밀도 | 소수점 4자리 / 3자리 / 유효숫자 6자리 |
+| Score / Time / Metric 정밀도 | 소수점 6자리 / 3자리 / 유효숫자 6자리 |
 | GraphWidth/Height / HistogramBins | 840×320px / 10개 |
 | CurveSteps / CurvePadding | 40 / 0.05 |
 
 ## Status / Evidence
 
-운영 전환과 파일 통합 후 `QT_QPA_PLATFORM=offscreen`에서 실제 Window와 위젯으로 제공 DB 7개 흐름·140쌍과 외부 파일명 ID 1개 흐름·2쌍을 확인했다. 등록, 비교, 독립 기준 변경, `.fpt`·CSV·HTML 저장이 정상 동작했다. 검증 전용 `tests/`와 별도 CMake 대상은 이후 정리했으며, 이 검증 기록은 `models/current` 아래에 보존한다. 이후 코드 정리·폴더 이동 검증은 `models/validation`에, 화면 예시는 `docs/GUI_flows`에 보관한다. 외부 검사는 기능 확인이며 미학습 손가락의 정확도 측정이 아니다. 학습에 포함된 검증과 재평가 명령은 [Algorithm README](../Algorithm/readme.md#verification--limits)에 정리했다.
+운영 전환과 파일 통합 후 `QT_QPA_PLATFORM=offscreen`에서 실제 Window와 위젯으로 제공 DB 7개 흐름·140쌍과 외부 파일명 ID 1개 흐름·2쌍을 확인했다. 등록, 비교, 독립 기준 변경, `.fpt`·CSV·HTML 저장이 정상 동작했다. 검증 전용 `tests/`와 별도 CMake 대상은 이후 정리했으며, 이 검증 기록은 `models/validation/runs/cosine30_seed42_20epoch` 아래에 보존한다. 이후 코드 정리·폴더 이동 검증은 `models/validation`에, 화면 예시는 `docs/GUI_flows`에 보관한다. 외부 검사는 기능 확인이며 미학습 손가락의 정확도 측정이 아니다. 학습에 포함된 검증과 재평가 명령은 [Algorithm README](../Algorithm/readme.md#verification--limits)에 정리했다.
 
 당시 검증은 Qt offscreen으로 수행했으며, 실제 데스크톱 창 조작은 확인하지 못했다. 추론은 GUI 스레드에서 순차 실행하며, 실행 중 강제 취소와 오류 격리는 미구현이다. 진행 표시는 단계 번호이며 이미지쌍별 실시간 진행률이 아니다. Word/PDF 리포트, 정규편차 DET, 지표 수식 선택, KISA DLL은 미구현이고 Windows 배포도 미검증이다.
 
-[GUI 화면 예시](../../docs/GUI_flows/00_overview.png)와 [캡처 기록 안내](../../docs/GUI_flows/captures/readme.md)를 참고한다. [Report_example](../../Report_example/readme.md)은 이전 리포트 예시로 보존한다.
+[GUI 화면 예시](../../docs/GUI_flows/00_overview.png)와 [캡처 기록 안내](../../docs/GUI_flows/captures/readme.md)를 참고한다. [Report_example](../../Report_example/report.html)은 별도의 30차원 Genuine 비교 실행 기록으로 보존한다.

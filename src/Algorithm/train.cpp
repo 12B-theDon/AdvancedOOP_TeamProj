@@ -346,7 +346,7 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
     Write(QDir(folder).filePath("frozen_backbone_verification.json"), QJsonDocument(frozenChecks).toJson());
     QString report = "<!doctype html><html lang='ko'><meta charset='utf-8'><title>Final production validation</title>"
         "<style>body{font:15px/1.6 system-ui;max-width:1300px;margin:30px auto}table{border-collapse:collapse;width:100%;margin:20px 0}td,th{border:1px solid #ccd5df;padding:6px;text-align:right}td:first-child{text-align:left}pre{white-space:pre-wrap}</style>"
-        "<h1>Production Cosine30 validation — Seed42,20Epoch</h1><p>확률 Template: normalized512 embedding → retained cosine classifier ×16 → Softmax30. "
+        "<h1>Production Cosine30 validation</h1><p>확률 Template: normalized512 embedding → retained cosine classifier ×16 → Softmax30. "
         "같은 Weight의512 특징 및 실제 이전 저장512 Weight와 구분해 비교한다. 학습 ID의 다른 촬영본 검증이며 독립 Test가 아니다. "
         "아래 임계값은 같은 Validation의 FAR1% 목표로 고른 값이다. 5Seed 실험 평균과 섞지 않는다.</p>"
         "<table><tr><th>Representation / model / DB</th><th>EER % ↓</th><th>AUC ↑</th><th>Threshold</th><th>Genuine %</th><th>FAR %</th></tr>";
@@ -488,7 +488,7 @@ int RunTraining(int argc, char** argv) {
                     accuracy = scores.argmax(1).eq(targets.index_select(0, val)).to(torch::kFloat64).mean().item<double>();
                 }
                 history += QString("%1,%2,%3,%4\n").arg(epoch + 1).arg(lossSum / train.numel(), 0, 'g', 17).arg(valLoss, 0, 'g', 17).arg(accuracy, 0, 'g', 17).toUtf8();
-                output << id << " epoch " << epoch + 1 << "/" << Epochs << " validation=" << valLoss << Qt::endl;
+                output << id << " epoch " << epoch + 1 << "/" << Epochs << " validation CE loss=" << valLoss << Qt::endl;
             }
             for (int index = 0; index < int(initialProjections.size()); ++index)
                 Require(!torch::equal(parameters[index], initialProjections[index]), "Projection parameter did not update.");

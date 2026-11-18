@@ -6,7 +6,7 @@
 CMakeUserPresets.json
 
 # Generated data, all fine-tuned/experimental weights, caches and validation outputs.
-# Keep these files locally; only the README and pretrained exceptions below are versioned.
+# Retain local result records as needed; only the README and pretrained exceptions below are versioned.
 /data/augmented/
 /model/
 /models/*

@@ -220,18 +220,18 @@ Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명�
 | 저장소에 포함 | 로컬에 보존하고 제외 |
 |---|---|
 | C++ 소스·CMake·원본 TIFF DB | 빌드·IDE·Python 캐시, 증강 이미지 |
-| 학습 초기 `.bin`과 정보 JSON, `models/readme.md` | `models/current`, 이전 학습·실험·검증 기록, 원본 체크포인트 |
+| 학습 초기 `.bin`과 정보 JSON, `models/readme.md` | 직접 생성한 학습 모델·특징 캐시, `models/validation`의 결과 기록, 원본 체크포인트 |
 | 구조도 SVG·PNG, GUI 화면 모음 PNG | `docs/GUI_flows/captures`의 원본 화면·실행 결과·샘플 이미지·요약 JSON |
-| `docs/GUI_flows/captures/readme.md`, 이전 `Report_example` | `tools/readme.md`의 로컬 스타일 기록 |
+| `docs/GUI_flows/captures/readme.md`, `Report_example` | `tools/readme.md`의 로컬 스타일 기록 |
 
-`Report_example/templates/*.bin`은 작은 출력 특징 벡터이며 학습 Weight가 아닙니다. 완료된 실험·이전 모델·회귀 검증의 Weight는 설정·결과를 확인한 뒤 정리했으며, 현재 운영 모델과 사전학습 파일은 유지합니다. 현재 폴더의 역할은 [모델 안내](../models/readme.md)를 참고합니다.
+`Report_example/templates/*.fpt`는 30차원 출력과 모델 식별 정보를 담은 작은 등록 템플릿이며 학습 Weight가 아닙니다. 완료된 학습 Weight·캐시·실험 코드는 설정·결과를 확인한 뒤 정리하고, 기록은 `models/validation`에 모았습니다. 재학습용 사전학습 파일은 유지하며, GUI용 모델은 직접 학습한 출력 폴더에서 선택합니다. 현재 폴더의 역할은 [모델 안내](../models/readme.md)를 참고합니다.
 
 ## 6. 예시와 검증 기록
 
 `docs/GUI_flows`의 화면 모음은 2026-11-18의 30차원 모델 실행을 보여줍니다. 원본 캡처와 원시 결과는 로컬 자료이며 [캡처 기록 안내](GUI_flows/captures/readme.md)에서 범위를 설명합니다. 문서용 그림·캡처 생성 도구는 정리했고 결과 이미지는 유지합니다.
 
-`Report_example`은 이전 512차원 방식으로 저장한 HTML·CSV·SVG와 미리보기입니다. 당시 경로·수치·판정을 보존하며 현재 모델 결과로 해석하지 않습니다. [리포트 설명](../Report_example/readme.md)을 참고합니다.
+[메인 데모 GIF](../demo.gif)는 40 Epoch 학습을 완료한 Cosine30 모델의 macOS GUI 녹화입니다. [Report_example](../Report_example/report.html)은 별도의 20 Epoch 모델로 저장한 30차원 Genuine 2쌍의 비교 결과이며, 두 자료의 실행 조건을 구분합니다. 리포트의 당시 경로·수치·판정은 보존합니다. 녹화 실행 로그와 재현 방법은 [GUI 안내](../src/GUI/readme.md#데모와-저장-리포트)를 참고합니다.
 
-현재 최종 모델의 학습과 코드를 정리한 뒤 수행한 검증은 [Algorithm의 검증 범위](../src/Algorithm/readme.md#verification--limits)에 구분해 기록했습니다. 예시는 독립 Test 성능을 뜻하지 않습니다. Train/Validation은 같은 손가락의 촬영본 1–6 / 7–8로 나뉘며, 별도 Test 분할은 없습니다. Windows/Linux 실행과 실제 데스크톱 창 조작은 아직 검증하지 않았습니다.
+현재 최종 모델의 학습과 코드를 정리한 뒤 수행한 검증은 [Algorithm의 검증 범위](../src/Algorithm/readme.md#verification--limits)에 구분해 기록했습니다. 예시는 독립 Test 성능을 뜻하지 않습니다. Train/Validation은 같은 손가락의 촬영본 1–6 / 7–8로 나뉘며, 별도 Test 분할은 없습니다. 자동 GUI 검증은 Qt offscreen으로 수행했고 macOS에서는 데모를 직접 녹화했습니다. Windows/Linux 실행은 아직 검증하지 않았습니다.
 
 배포 전에는 staged 파일에 로컬 산출물이 들어가지 않았는지, 문서의 상대 링크가 커밋될 파일을 가리키는지, Submodule Commit과 Git LFS 설정이 유지되는지 확인합니다. 처음 실행할 때는 [메인 README](../readme.md#1-build--run)의 순서를 따라가며, 플랫폼별 세부 설정은 이 문서를 참고합니다.

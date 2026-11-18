@@ -89,7 +89,7 @@ GUI는 이미지 목록·등록 선택·모델 ID·비교 규칙을 전달한다
 | `TargetFar`, `ThresholdPrecision` | 검증 목표 FAR 0.01, 소수점 네 자리 올림 |
 | `MetricTolerance`, `CsvPrecision` | 비율 비교 허용 오차 1e-12, 원시 숫자 유효숫자 17자리 |
 | `TimeoutMs`, `Concurrency` | 0ms, 1. 시간 제한 없이 순차 실행하며 다른 값은 실행 오류로 처리한다. |
-| `ImagesFolder`, `WeightsFolder` | `data/original`, `models/current` |
+| `ImagesFolder` | `data/original`. Weight 폴더는 GUI에서 선택한 학습 출력 경로를 사용한다. |
 | `WeightExtension`, `TemplateExtension` | 전체 모델 `.bin`, 템플릿 `.fpt` |
 | `DatabaseIds` | FVC2000_DB3_B, FVC2002_DB3_B, FVC2004_DB1_B |
 | `ModelIds` | fvc2000_db3, fvc2002_db3, fvc2004_db1, combined |

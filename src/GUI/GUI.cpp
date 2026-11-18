@@ -283,11 +283,7 @@ QWizardPage* Window::TemplatePage() {
     weightPath_ = new QLineEdit;
     weightPath_->setObjectName("weightsFolder");
     weightPath_->setReadOnly(true);
-    weightPath_->setText(QDir(QCoreApplication::applicationDirPath()).filePath(engine::WeightsFolder));
-#ifdef FINGERPRINT_SOURCE_DIR
-    if (!QDir(weightPath_->text()).exists())
-        weightPath_->setText(QDir(QString::fromUtf8(FINGERPRINT_SOURCE_DIR)).filePath(engine::WeightsFolder));
-#endif
+    weightPath_->setPlaceholderText("Select the output folder from FingerprintTrain...");
     QPushButton* browse = new QPushButton(BrowseWeights);
     browse->setObjectName("browseWeights");
     createTemplates_ = new QPushButton(CreateTemplates);
@@ -504,13 +500,15 @@ QWizardPage* Window::ResultsPage() {
     for (int i = 0; i < MetricNames.size(); ++i) {
         AddRow(metrics_, {MetricNames[i], "N/A (not run)"});
         QCheckBox* check = new QCheckBox(MetricNames[i]);
+        check->setObjectName("metric_" + QString::number(i));
+        metricChoices_.push_back(check);
         bool selected = false;
         for (int index : DefaultMetrics) if (index == i) selected = true;
         check->setChecked(selected);
         metrics_->setRowHidden(i, !check->isChecked());
         checks->addWidget(check, i / MetricColumns, i % MetricColumns);
         connect(check, &QCheckBox::toggled, this, [this, i](bool checked) {
-            metrics_->setRowHidden(i, !checked);
+            metrics_->setRowHidden(i, !checked || !metricChoices_[i]->isEnabled());
         });
     }
     QPushButton* save = new QPushButton(SaveAll);
@@ -640,7 +638,7 @@ void Window::ClearTemplates() {
 void Window::ReloadModels() {
     std::vector<std::string> ids;
     for (int index = 0; index < ModelIds.size(); ++index)
-        if (modelChoices_[index]->isChecked()) ids.push_back(ModelIds[index].toStdString());
+        if (!weightPath_->text().isEmpty() && modelChoices_[index]->isChecked()) ids.push_back(ModelIds[index].toStdString());
     engine_.LoadSelectedModels(ids, weightPath_->text().toStdString(), algorithm_);
     modelTable_->setRowCount(0);
     int loaded = 0;
@@ -1028,7 +1026,30 @@ engine::EvaluationRun Window::Snapshot() const {
 
 void Window::UpdateMetrics() {
     const QStringList values = CalculateMetrics(Snapshot());
-    for (int row = 0; row < metrics_->rowCount(); ++row) metrics_->item(row, 1)->setText(values[row]);
+    for (int row = 0; row < metrics_->rowCount(); ++row) {
+        metrics_->item(row, 1)->setText(values[row]);
+        const bool available = !values[row].startsWith("N/A");
+        QString reason;
+        if (!available) {
+            if (values[row] == "N/A (no crossing)")
+                reason = "EER cannot be determined from the current score distributions.";
+            else if (values[row] == "N/A")
+                reason = "Successful Genuine and Impostor comparisons are required.";
+            else if (row >= 5 && row <= 10)
+                reason = "Run both Genuine and Impostor comparisons to calculate this metric.";
+            else if (row == 1 || row == 4 || row == 13)
+                reason = "Run Genuine comparisons to calculate this metric.";
+            else if (row == 2 || row == 3 || row == 14)
+                reason = "Run Impostor comparisons to calculate this metric.";
+            else if (row == 12)
+                reason = "Run at least one comparison to calculate this metric.";
+            else
+                reason = "Enrollment results are required to calculate this metric.";
+        }
+        metricChoices_[row]->setEnabled(available);
+        metricChoices_[row]->setToolTip(reason);
+        metrics_->setRowHidden(row, !available || !metricChoices_[row]->isChecked());
+    }
 }
 
 bool Window::SaveResults(const QString& folder) {
