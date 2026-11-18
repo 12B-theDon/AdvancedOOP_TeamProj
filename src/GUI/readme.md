@@ -58,11 +58,11 @@ FINGERPRINT_RUN=models/run_01
 
 빠른 기능 시연에는 FVC2000 DB3, 해당 개별 모델 하나, 등록 이미지 `101_1.tif`, Genuine 촬영 번호 `7,8`, Impostor의 손가락당 한 장을 권장한다. 총 11쌍이며 전체 성능 평가를 대신하지 않는다. 현재 GUI는 선택한 모델마다 점수 열을 하나씩 표시하며, 화면의 점수는 소수점 6자리다. GIF와 기존 캡처에는 변경 전 Best/Worst 열이 남아 있을 수 있다.
 
-[저장 리포트 예시](../../Report_example/report.html)는 40 Epoch로 학습한 네 모델을 FVC2000 DB3에 적용한 GUI 실행 기록이다. 손가락마다 촬영본 1번을 한 장씩 등록해 총 10장·모델별 템플릿 40개를 만들고, 전체 후보 규칙으로 Genuine 70쌍과 Impostor 720쌍을 비교했다. 실행 당시에는 **모든 선택 모델의 최댓값**과 임계값 0.9993을 사용했다.
+[저장 리포트 예시](../../Report_example/report.html)는 40 Epoch로 학습한 네 모델을 FVC2000 DB3에 적용한 현재 최솟값 방식의 GUI 실행 기록이다. `101_1.tif`, `102_1.tif`, `103_3.tif`, `103_8.tif` 네 장을 등록해 모델별 템플릿 16개를 만들고, 전체 후보 규칙으로 Genuine 28쌍과 Impostor 288쌍을 비교했다. 모든 모델의 점수를 저장하지만 최종 판정에는 FVC2000·통합 모델의 최솟값만 사용하며, 두 임계값은 모두 0.5133이다.
 
-해당 기록의 판정은 Genuine PASS 62·MISS 8, Impostor REJ 719·FA 1이며, FMR 0.138889%·FNMR 11.4286%다. 이 수치는 변경 전 집계의 결과이므로 현재의 같은 DB·통합 모델 최솟값 방식의 성능으로 해석하지 않는다. `settings.txt`, `models.csv`, 원시 점수·시간·HTML·그래프는 실제 저장된 값을 보존한다. 전체 후보에는 학습에 사용한 촬영본도 포함되므로 별도 검증 프로토콜이나 독립 Test 평가를 대신하지 않는다.
+판정은 Genuine PASS 28·MISS 0, Impostor REJ 280·FA 8이다. FMR은 2.77778%, FNMR은 0%, EER은 0%다. EER은 공통 임계값을 순회해 계산하므로 현재 선택한 임계값에서의 FMR과 같을 필요는 없다. 추천 임계값은 별도의 촬영본 1–6 등록·7–8 비교 프로토콜에서 선정했으며, 이번처럼 등록 이미지와 비교 쌍을 바꾸면 같은 FAR을 보장하지 않는다. 전체 후보에는 학습 촬영본도 포함되므로 이 예시는 독립 Test나 전체 검증 성능을 대신하지 않는다.
 
-포함된 `.fpt` 40개는 각 등록 이미지·모델에서 나온 30차원 출력과 모델 식별 정보를 담은 템플릿이며 학습 Weight가 아니다. 현재 방식의 리포트는 새 GUI에서 모델 폴더를 불러와 비교한 뒤 별도 실행 폴더에 저장한다.
+`settings.txt`, `models.csv`, 원시 점수·시간·HTML·그래프는 실제 저장된 값을 보존한다. `.fpt` 16개는 각 등록 이미지·모델의 30차원 출력과 식별 정보를 담은 템플릿이며 학습 Weight가 아니다. 새 비교는 별도 실행 폴더에 저장해 각 실행의 입력·모델·임계값을 구분한다.
 
 ### 이미지와 비교 대상
 
@@ -163,4 +163,4 @@ CSV는 `enrollment,attempt`와 선택적인 `type` 열을 받으며, 파일명�
 
 당시 검증은 Qt offscreen으로 수행했으며, 실제 데스크톱 창 조작은 확인하지 못했다. 추론은 GUI 스레드에서 순차 실행하며, 실행 중 강제 취소와 오류 격리는 미구현이다. 진행 표시는 단계 번호이며 이미지쌍별 실시간 진행률이 아니다. Word/PDF 리포트, 정규편차 DET, 지표 수식 선택, KISA DLL은 미구현이고 Windows 배포도 미검증이다.
 
-[GUI 화면 예시](../../docs/GUI_flows/00_overview.png)와 [캡처 기록 안내](../../docs/GUI_flows/captures/readme.md)를 참고한다. [Report_example](../../Report_example/report.html)은 40 Epoch 모델·이전 최댓값 집계의 Genuine/Impostor 실행 기록으로 보존한다.
+[GUI 화면 예시](../../docs/GUI_flows/00_overview.png)와 [캡처 기록 안내](../../docs/GUI_flows/captures/readme.md)를 참고한다. [Report_example](../../Report_example/report.html)은 40 Epoch 모델·현재 최솟값 집계의 Genuine/Impostor 실행 기록으로 보존한다.

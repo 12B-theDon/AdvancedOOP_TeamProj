@@ -230,7 +230,7 @@ Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명�
 
 `docs/GUI_flows`의 화면 모음은 2026-11-18의 30차원 모델 실행을 보여줍니다. 원본 캡처와 원시 결과는 로컬 자료이며 [캡처 기록 안내](GUI_flows/captures/readme.md)에서 범위를 설명합니다. 문서용 그림·캡처 생성 도구는 정리했고 결과 이미지는 유지합니다.
 
-[메인 데모 GIF](../demo.gif)는 40 Epoch 학습을 완료한 Cosine30 모델의 macOS GUI 녹화입니다. [Report_example](../Report_example/report.html)은 40 Epoch의 네 모델로 Genuine 70쌍·Impostor 720쌍을 비교한 기록입니다. 실행 당시에는 전체 모델 최댓값·임계값 0.9993을 사용했으므로 현재 최솟값 방식과 구분합니다. 리포트의 당시 경로·수치·판정은 보존합니다. 녹화 실행 로그와 재현 방법은 [GUI 안내](../src/GUI/readme.md#데모와-저장-리포트)를 참고합니다.
+[메인 데모 GIF](../demo.gif)는 40 Epoch 학습을 완료한 Cosine30 모델의 macOS GUI 녹화입니다. [Report_example](../Report_example/report.html)은 40 Epoch의 네 모델로 Genuine 28쌍·Impostor 288쌍을 비교한 기록입니다. FVC2000·통합 모델의 최솟값과 임계값 0.5133을 사용하며, 다른 DB 모델은 참고용입니다. 리포트의 당시 경로·수치·판정은 보존합니다. 녹화 실행 로그와 재현 방법은 [GUI 안내](../src/GUI/readme.md#데모와-저장-리포트)를 참고합니다.
 
 현재 최종 모델의 학습과 코드를 정리한 뒤 수행한 검증은 [Algorithm의 검증 범위](../src/Algorithm/readme.md#verification--limits)에 구분해 기록했습니다. 예시는 독립 Test 성능을 뜻하지 않습니다. Train/Validation은 같은 손가락의 촬영본 1–6 / 7–8로 나뉘며, 별도 Test 분할은 없습니다. 자동 GUI 검증은 Qt offscreen으로 수행했고 macOS에서는 데모를 직접 녹화했습니다. Windows/Linux 실행은 아직 검증하지 않았습니다.
 

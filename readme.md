@@ -85,7 +85,7 @@ Backbone을 고정하고 Texture·Minutia Projection과 Cosine Classifier를 학
 
 ![GUI demo](demo.gif)
 
-위 GIF는 **40 Epoch로 학습한 Cosine Classifier·30차원 Template 모델**의 등록·비교 흐름입니다. [리포트 예시](Report_example/report.html)는 40 Epoch 모델 4개로 Genuine 70쌍·Impostor 720쌍을 비교한 저장 기록입니다. 리포트는 변경 전 최댓값 집계이며, 현재 최솟값 방식의 결과와 구분합니다. 단계별 화면은 [전체 흐름](docs/GUI_flows/00_overview.png) · [한 장 등록](docs/GUI_flows/01_single_enrollment.png) · [여러 장 등록](docs/GUI_flows/02_multiple_enrollment.png) · [외부 DB](docs/GUI_flows/03_external_db.png)에서 확인할 수 있습니다.
+위 GIF는 **40 Epoch로 학습한 Cosine Classifier·30차원 Template 모델**의 등록·비교 흐름입니다. [리포트 예시](Report_example/report.html)는 40 Epoch 모델 4개로 Genuine 28쌍·Impostor 288쌍을 비교한 저장 기록입니다. 같은 DB·통합 모델의 최솟값과 임계값 0.5133을 사용합니다. 단계별 화면은 [전체 흐름](docs/GUI_flows/00_overview.png) · [한 장 등록](docs/GUI_flows/01_single_enrollment.png) · [여러 장 등록](docs/GUI_flows/02_multiple_enrollment.png) · [외부 DB](docs/GUI_flows/03_external_db.png)에서 확인할 수 있습니다.
 
 점수는 동일 지문일 확률이 아닙니다. 성능 수치는 학습에 등장한 손가락의 다른 촬영본 평가이며, 독립 Test나 미학습 손가락 성능과 구분합니다. [평가 결과와 한계](src/Algorithm/readme.md#final-production-run--calibration)
 
