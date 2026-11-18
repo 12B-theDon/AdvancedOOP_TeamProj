@@ -157,6 +157,8 @@ Padding과 중앙 Crop을 비교한 결과 FVC2004의 Validation EER이 13.33%�
 
 학습 데이터가 적어 Overfitting(과적합)이 우려되므로, Backbone을 고정하고 두 Projection만 조정하는 **Partial fine-tuning**을 적용했습니다. 학습 범위·증강 범위·Train/Validation 구분은 [Algorithm README](src/Algorithm/readme.md#fine-tuning--data-split)에 있습니다. 별도 Test split은 없습니다.
 
+Adapter와 추가 비교한 결과, 같은 손가락의 촬영본 검증에서는 개선됐지만 미학습 손가락 검증에서는 일관된 우위가 확인되지 않아 Partial fine-tuning을 유지했습니다. [추가 비교 설정과 결과](src/Algorithm/readme.md#adapter와-partial-ft-상세-비교-2026-11-18)
+
 ## GUI Guide
 
 | 단계 | 목적과 선택지 |
