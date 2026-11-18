@@ -107,6 +107,8 @@ Upstream의 Constant-image normalization을 `torch.where`로 바꾸고 불필요
 
 ## Fine-tuning / Data Split
 
+학습 데이터가 적어 Overfitting(과적합)이 우려되므로 **Partial fine-tuning**을 적용한다. 사전학습된 Backbone을 고정하고 Texture·Minutia의 두 Projection만 조정해 학습 Parameter 수를 제한한다. 학습 중에는 별도의 임시 Classifier도 함께 학습한다.
+
 원본은 [data/original](../../data/original)에 보존한다. 각 DB는 10 fingers × 8 captures = 80장이다. 먼저 Capture ID 1–6을 Training, 7–8을 Validation으로 나눈다. 모든 Augmentation은 원본의 Split을 상속한다. Validation에는 원본만 사용한다. 같은 손가락의 촬영본을 나누는 방식이며, 손가락 ID를 분리한 학습이나 별도 Test split은 없다.
 
 학습 결과는 새 폴더에 저장하며 기존 Weight를 덮어쓰지 않는다. 모델·Metadata·학습 CSV는 Git에 포함하지 않으므로 Clone 후 준비해야 한다.
@@ -196,6 +198,21 @@ FVC2004는 원본 640×480의 중앙 480×480을 먼저 Crop한 뒤 증강한다
 | Combined | 0.247110 | 98.3333% | `models/combined_training.csv` |
 
 표의 수치는 이전 실행 기록이며, 작은 FVC_B Validation에서 임시 Classifier를 평가한 결과다. 독립 Finger/Sensor Test의 FAR·FRR·EER를 뜻하지 않는다. 저장된 모델의 파라미터가 서로 다른 Score 분포를 가질 수 있으며 Calibration은 미구현이다.
+
+### SupCon 비교 실험 (2026-11-18)
+
+현재 전처리·증강·Pretrained 초기값을 유지하고 Backbone은 고정한 채 두 Projection만 학습하여 CE와 `CE + 0.1 × SupCon`을 비교했다. SupCon은 최종 512차원 Embedding에 적용했으며 Temperature는 0.1이다. 두 조건에 동일한 초기 분류기와 Batch(손가락 8개 × 서로 다른 촬영본 4개, 원본 또는 증강본 선택)를 사용했다. Seed 42·43·44, Adam(LR·Weight decay 각각 0.0001), 20 Epoch으로 실행하고 마지막 Epoch을 평가했다.
+
+등록은 원본 촬영본 1–6번, Probe는 7–8번으로 DB별 Genuine 120쌍·Impostor 1,080쌍을 비교했다. 아래는 세 Seed의 평균 Validation EER이며, 낮을수록 좋다. 통합 결과는 각 DB 내부의 비교 쌍만 합산했다.
+
+| 평가 대상 | CE | CE + SupCon |
+|---|---:|---:|
+| FVC2000 전용 모델 | 2.593% | 2.593% |
+| FVC2002 전용 모델 | 7.716% | 7.685% |
+| FVC2004 전용 모델 | 6.667% | 6.667% |
+| 통합 모델 | 6.512% | 6.512% |
+
+임계값 0.75에서 통합 모델의 오수락률은 27.006% → 26.975%, 오거절률은 모두 1.111%였다. 개선이 작아 기존 CE와 Weight를 유지하고 실험용 코드·생성물은 제거했다. 위 CE는 SupCon과 Batch를 맞춘 비교 조건으로, 기존 무작위 Batch 학습과 구분한다. 이 결과는 같은 손가락의 촬영본을 나눈 작은 Validation에 한정하며 독립 Test 성능을 뜻하지 않는다.
 
 ## API / Data Exchange
 

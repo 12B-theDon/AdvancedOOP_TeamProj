@@ -153,7 +153,9 @@ Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명�
 
 Padding과 중앙 Crop을 비교한 결과 FVC2004의 Validation EER이 13.33%에서 6.67%로 개선되어 중앙 Crop을 채택했습니다.
 
-학습 범위·증강 범위·Train/Validation 구분은 [Algorithm README](src/Algorithm/readme.md#fine-tuning--data-split)에 있습니다. 별도 Test split은 없습니다.
+동일 배치·초기값으로 CE와 CE+SupCon을 3개 Seed에서 비교했으나 통합 모델의 Validation EER은 모두 6.512%였고, 오수락률 개선도 0.031%p에 그쳐 기존 CE를 유지했습니다. [실험 설정과 결과](src/Algorithm/readme.md#supcon-비교-실험-2026-11-18)
+
+학습 데이터가 적어 Overfitting(과적합)이 우려되므로, Backbone을 고정하고 두 Projection만 조정하는 **Partial fine-tuning**을 적용했습니다. 학습 범위·증강 범위·Train/Validation 구분은 [Algorithm README](src/Algorithm/readme.md#fine-tuning--data-split)에 있습니다. 별도 Test split은 없습니다.
 
 ## GUI Guide
 
