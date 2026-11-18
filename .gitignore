@@ -5,10 +5,13 @@
 /.vscode/
 CMakeUserPresets.json
 
-# Generated data and training outputs.
+# Generated data, all fine-tuned/experimental weights, caches and validation outputs.
+# Keep these files locally; only the README and pretrained exceptions below are versioned.
 /data/augmented/
 /model/
 /models/*
+!/models/readme.md
+*.partial
 
 # Include only the pretrained encoder needed for team fine-tuning.
 !/models/pretrained/
@@ -26,3 +29,10 @@ CMakeUserPresets.json
 *.pyo
 .DS_Store
 __pycache__/
+
+# Local drawing rules; keep generated figures and the model conversion tool versioned.
+/tools/readme.md
+
+# Local raw GUI verification outputs; keep the explanatory README.
+/GUI_flows/captures/*
+!/GUI_flows/captures/readme.md

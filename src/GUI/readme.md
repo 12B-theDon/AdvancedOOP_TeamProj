@@ -2,153 +2,129 @@
 
 [Root](../../readme.md) · [Algorithm](../Algorithm/readme.md) · [Engine](../Engine/readme.md)
 
-Source diagram: [SVG](../../docs/diagrams/gui.svg) · [PNG](../../docs/diagrams/gui.png). 화면 입력이 Engine 호출과 결과·지표·리포트로 이어지는 흐름을 보여준다.
+GUI는 DB와 등록 이미지를 선택하고 비교를 실행하는 화면이다. 추론과 원시 결과 저장은 Engine에 요청한다. 리포트는 화면 위젯 대신 `EvaluationRun`을 받아 지표·그래프·HTML을 만든다.
 
 ![GUI and report structure](../../docs/diagrams/gui.png)
 
+[구조도 SVG](../../docs/diagrams/gui.svg)
+
+등록 이미지마다 선택한 모델의 30차원 템플릿을 생성하고, 비교 점수와 판정을 표시한다. 리포트는 같은 실행 기록에서 계산하므로 화면과 저장 결과에 같은 기준을 적용한다.
+
 ## Responsibility / Files
 
-사용자가 DB와 등록 이미지를 고르고, 비교 규칙을 설정해 결과를 확인하는 화면이다. 추론과 원시 결과 저장은 Engine에 요청한다. Report는 화면 Widget 대신 `EvaluationRun`을 받아 지표·그래프·HTML을 만든다.
+화면과 리포트의 자료형·함수·설정값은 `gui` namespace에 둔다. `Window`와 지표·리포트 함수가 같은 범위를 사용하므로 별도 Report namespace는 없다. 리포트에는 실행 기록과 선택 지표를 직접 전달하며 별도 포장 구조는 사용하지 않는다. Engine 결과는 `engine::EvaluationRun`처럼 모듈을 명시해 참조한다.
 
 | 파일 | 역할 |
 |---|---|
-| [GUI.h](GUI.h) | `Window : QWizard`와 Image·ComparisonControls·Widget·Cache를 선언한다. |
-| [GUI.cpp](GUI.cpp) | 7개 Page, DB/모델/이미지 선택, Event, Comparison plan 표시, Snapshot, Save 흐름을 구현한다. |
-| [guiConfig.h](guiConfig.h) | 기본 Label·화면 크기·Metric 선택·표시 정밀도·Graph 설정이다. |
-| [report.h](report.h) | `ReportData`와 Metric·Graph·HTML 함수 선언이다. |
-| [report.cpp](report.cpp) | Metric 계산, SVG 문자열 생성, 전체 Metric CSV와 선택 Metric HTML을 저장한다. |
-| [main.cpp](../main.cpp) | QApplication·FingerprintEncoder·Window를 만들고 Backend를 연결한다. |
+| [GUI.h](GUI.h) | `Window : QWizard`, 비교 설정과 화면 상태 선언 |
+| [GUI.cpp](GUI.cpp) | 7단계 화면, 이미지·모델 선택, 비교 실행, 결과 갱신과 저장 |
+| [guiConfig.h](guiConfig.h) | 안내 문구, 화면 크기, 지표 선택과 표시 정밀도 |
+| [report.h](report.h), [report.cpp](report.cpp) | 지표 계산, SVG 생성, CSV·HTML 저장 |
+| [main.cpp](../main.cpp) | Encoder와 Window를 생성하고 연결하는 진입점 |
 
-## Includes
-
-| Include | 사용 이유 |
-|---|---|
-| `QWizard`, `QLabel`, `QPushButton`, `QCheckBox`, `QComboBox`, `QSpinBox`, `QDoubleSpinBox` | Page 전환, 선택, Rule 입력, 실행 버튼을 구성한다. |
-| `QListWidget`, `QTableWidget`, `QHeaderView`, `Q*Layout`, `QStackedWidget`, `QGroupBox`, `QTabWidget` | Enrollment list·결과 표·Rule별 입력 화면을 배치한다. |
-| `QBrush` | 판정별 Row 배경색과 검정 글씨를 지정한다. |
-| `QImageReader`, `QImage` | TIFF resolution·Pixel을 읽고 Preview와 동일 이미지 검사를 수행한다. |
-| `QDir`, `QFileInfo`, `QFile`, `QFileDialog` | 폴더·CSV 탐색과 Pair CSV 읽기, 새 Run folder를 처리한다. |
-| `QEvent`, `QVariant`, `QMessageBox`, Qt Signal/Slot | Hover 정보, Widget property, 입력 변화와 Exit 확인을 처리한다. |
-| [Engine.h](../Engine/Engine.h) | Plan·Inference·Raw export API와 Result type을 사용한다. |
-| report.cpp의 `QDir`, `QFile`, `cmath`, `limits` | Report 파일과 Rate·Finite·관측 Threshold 계산을 처리한다. |
-| `QStringList`, `vector` | Metric name/value와 Selection flag를 전달한다. |
-
-Qt Widgets로 화면을 구성한다. 그래프는 SVG를 직접 생성하므로 별도의 Chart/PDF Library를 연결하지 않는다. 사용하는 Library와 License는 [Root README](../../readme.md#libraries--headers)를 참고한다.
+이미지 정보는 `engine::ImageInfo`로 한 번만 저장하고 등록·비교·CSV·리포트에서 공유한다. 화면 위젯은 명시적 타입으로 선언하며 이벤트 연결에 필요한 짧은 람다를 사용한다. Qt Widgets를 사용하며 별도의 차트 라이브러리 없이 SVG를 생성한다. 페이지는 Window를 부모로 생성하고, 레이아웃에 넣은 위젯은 Qt의 부모·자식 소유권으로 해제한다. 멤버 위젯 포인터는 소유하지 않는 참조이며 nullptr로 초기화한다. Window 복사는 금지한다. Qt 이벤트 연결의 짧은 람다는 Window를 연결 문맥으로 사용하므로 Window가 소멸하면 연결도 해제된다. 이미지 읽기에는 Qt TIFF 플러그인이 필요하다. 사용하는 라이브러리와 라이선스는 [Root README](../../readme.md#libraries--headers)에 정리했다.
 
 ## Pages / Actual Flow
 
-| Page | 선택·동작 |
+| 단계 | 동작 |
 |---|---|
-| 1. DB | 세 Built-in tile 또는 External folder를 선택한다. Hover는 기본 Resolution을 보여준다. 선택 후 TIFF 총수와 Resolution별 수를 표시한다. |
-| 2. Enrollment | Single 또는 Ctrl/Shift 기반 Multiple selection이다. 각 Image가 별도 Template을 만든다. |
-| 3. Templates | 학습을 완료했거나 공유받은 Fine-tuned Weight 폴더와 Model을 선택한다. Built-in은 해당 모델 하나, External은 네 개가 기본 선택된다. `Create enrollment templates`로 Template을 생성한다. |
-| 4. Comparison type | Genuine, Impostor, Both 중 하나를 선택한다. 선택 전에는 Next가 비활성화된다. |
-| 5. Comparison rules | 선택한 Type의 Rule만 표시한다. Both는 Genuine/Impostor를 각각 설정한다. Pair 수만 표시하며 결과 표는 아직 보여주지 않는다. |
-| 6. Run | 선택 Type·Rule·Pair 수를 확인하고 `Run selected comparisons`를 누른다. 선택한 Type만 한 번에 실행한다. 실행 전에는 Results로 넘어갈 수 없다. |
-| 7. Results | 선택 Type의 결과 Tab과 Metrics and report Tab을 표시한다. 선택 Metric만 화면·HTML에 표시한다. 저장은 전체 Metric CSV·선택 Comparison의 Raw CSV·필요한 SVG를 포함한다. |
+| 1. DB | 제공 DB 세 개 중 하나를 선택하거나 외부 TIFF 폴더를 연다. 이미지 수와 해상도를 표시한다. |
+| 2. Enrollment | 한 장 또는 여러 장을 선택한다. 여러 이미지는 Ctrl/Shift로 선택하며, 이미지마다 별도 템플릿을 만든다. |
+| 3. Templates | 학습된 모델 폴더와 사용할 모델을 선택하고 `Create enrollment templates`를 누른다. 제공 DB는 대응 개별 모델, 외부 DB는 네 모델이 기본 선택된다. |
+| 4. Comparison type | 같은 손가락인 Genuine, 다른 손가락인 Impostor, 또는 Both를 고른다. |
+| 5. Comparison rules | 비교 대상을 고르는 규칙을 설정한다. Both는 두 종류를 각각 설정한다. |
+| 6. Run | 비교 개수를 확인하고 `Run selected comparisons`로 실행한다. |
+| 7. Results | 점수와 판정 기준을 확인한다. `Metrics and report` 탭에서 지표를 선택한 뒤 `Save all`로 저장한다. |
 
-GUI는 `models/pretrained/deepprint.bin`을 비교용 모델로 사용하지 않는다. Clone 직후에는 Fine-tuning을 먼저 실행하거나 학습된 모델을 별도로 받아야 한다. Root의 `models/run_01`은 학습 명령의 출력 예시이며, GUI에서는 실제 네 `.bin`이 생성된 폴더를 선택한다.
+학습된 네 `.bin`과 `calibration.json`을 같은 폴더에 둔다. GUI의 초기 경로는 `models/current`이며, 다른 위치에 학습한 모델은 폴더 선택으로 불러온다. `models/run_01`은 학습 명령이 생성하는 출력 폴더의 예시다. Clone 직후에는 직접 학습하거나 별도로 받은 모델이 필요하며, `models/pretrained`는 GUI 비교용 폴더가 아니다. 구형 512차원 모델을 선택하면 재학습 안내를 표시한다.
 
-GUI는 입력 DB ID를 Engine에 전달하고 학습과 같은 전처리 함수를 사용한다. FVC2004는 중앙 Crop 후 299×299로 축소하며, 다른 DB는 Padding한다. 기존 Weight와 Combined에도 같은 규칙을 적용하므로 별도 Crop 조작은 필요 없다. External 폴더는 알려진 DB 폴더 이름으로 식별하고, 출처가 불명확하면 Padding한다. 전처리가 변경된 프로그램에서는 Enrollment template을 다시 생성한다.
+사용자 안내에는 템플릿의 역할, 점수의 의미와 조절 방법만 간단히 설명한다. HTML의 자세한 실행 설정은 `Run settings`를 펼쳐 볼 수 있다. 모델 형식과 평가 근거는 [Algorithm README](../Algorithm/readme.md)에 정리하고, 실제 모델 정보는 원시 결과에도 보존한다.
 
-DB의 바로 아래 `.tif`·`.tiff`를 읽으며 Subfolder는 재귀 탐색하지 않는다. 총수 표시는 TIFF 파일 기준이고 선택 List에는 Decode 가능한 이미지만 넣는다. 이름이 `finger_capture`이면 Known ID로 해석한다. 그 외 파일명도 Enrollment는 가능하지만 자동 Genuine/Impostor 후보에서는 제외한다. 이 경우 해당 Type의 Rule에서 CSV로 Label을 지정한다.
+### 이미지와 비교 대상
 
-모델을 하나 선택하면 `Model / Score`, 두 개 이상 선택하면 `Best model / Best score / Worst model / Worst score`를 표시한다. Best/Worst는 성공한 모델의 최고/최저 유사도다. 성공 모델이 하나뿐이면 Worst는 비워 둔다. `#`는 각 비교 종류에서 1부터 Pair 수까지 증가한다. 화면의 값은 중앙 정렬하며, 모든 모델별 점수·오류는 Result Tooltip과 원시 CSV에 남긴다. Metric과 Report는 Best score를 사용한다.
+DB 폴더 바로 아래의 `.tif`·`.tiff`를 읽고 하위 폴더는 재귀 탐색하지 않는다. 파일 수는 TIFF 전체를 기준으로 표시하되, 선택 목록에는 읽을 수 있는 이미지만 넣는다. 파일명이 `finger_capture` 형식이면 손가락과 촬영 번호를 읽는다. 다른 파일명도 등록할 수 있지만 자동 Genuine/Impostor 후보에서는 제외하며, 이때는 CSV로 비교 쌍과 종류를 지정한다.
 
-각 결과 탭의 Threshold 입력 범위는 `[0,1]`, 기본값은 `0.75`다. Genuine·Impostor 기준은 각각 조절할 수 있으며, [판정과 색상](#result-labels--thresholds)은 실제 손가락 ID와 Best score로 결정한다. Unknown ID의 CSV 비교는 사용자가 지정한 Group label을 Ground truth로 사용한다. Save all 버튼은 Metrics and report 탭에서만 활성화된다. 동일 이미지의 비교 제외와 점수 집계는 Engine 규칙을 따른다.
+GUI는 입력 DB 정보를 Engine에 전달한다. FVC2004는 중앙을 자른 뒤 299×299로 줄이고, 다른 DB는 여백을 채운다. 외부 폴더도 알려진 DB 이름이면 해당 규칙을 적용하며, 출처가 불명확하면 여백을 채운다. 등록과 비교에 같은 함수를 사용하므로 사용자가 별도로 자를 필요는 없다. 모델이나 전처리가 바뀌면 템플릿을 다시 만든다.
 
-Comparison selection은 비교 대상을 고르는 기준이다. All eligible images는 조건에 맞는 전체 이미지, One image per finger는 손가락당 첫 Capture, Selected capture numbers는 지정 번호, Random images per enrollment는 지정 개수, Comparison pairs from CSV는 저장된 Pair 순서다. Self-image 제외 규칙은 모든 선택에 적용한다. 한 장 등록한 Built-in DB에서 Impostor의 All eligible images는 72쌍, One image per finger는 9쌍이다.
+비교 규칙은 전체 후보, 손가락당 한 장, 지정 촬영 번호, 등록 이미지당 무작위 개수, CSV 순서 중에서 선택한다. 같은 이미지와 동일 픽셀의 복제본은 제외한다. 제공 DB에서 한 장을 등록했을 때 Impostor 전체 후보는 72쌍, 손가락당 한 장은 9쌍이다.
 
-Template 생성 전에는 Type 선택으로 진행할 수 없다. 활성 Rule이 잘못됐거나 Pair가 없으면 실행할 수 없다. DB·Enrollment·Model·Type·Rule을 변경하면 이전 Comparison 결과를 초기화하며 다시 실행해야 저장할 수 있다. 미선택 Type의 Rule·Pair는 실행·저장하지 않는다. 한 Type만 실행하면 두 Group이 필요한 EER 등의 Metric은 N/A다.
+CSV는 `enrollment,attempt`와 선택적인 `type` 열을 받으며, 파일명은 현재 DB에 있어야 한다. 따옴표 이스케이프·BOM·CRLF를 지원하지만 한 레코드는 한 줄이어야 한다. 저장한 `comparisons.csv`도 다시 입력할 수 있다. 잘못된 쌍의 처리 기준은 [Engine 비교 규칙](../Engine/readme.md#comparison-rules)을 따른다.
 
-Pair CSV는 `enrollment,attempt`, 선택적 `type`을 지원한다. 파일명은 현재 DB의 이름이어야 한다. Quote escape·BOM·CRLF를 처리하지만 한 Record는 한 Line이어야 한다. 저장한 `comparisons.csv`도 다시 입력할 수 있다. Self·동일 Pixel·잘못된 Label 검사는 [Engine 규칙](../Engine/readme.md#comparison-rules)을 따른다.
-
-## Functions / Inputs / Outputs
-
-| 함수 | 입력 | 출력·목적 |
-|---|---|---|
-| `DatabasePage / EnrollmentPage / TemplatePage / ComparisonTypePage / ComparisonRulesPage / ExecutionPage / ResultsPage` | 현재 설정 | 7개 `QWizardPage*`와 Event 연결을 만든다. |
-| `ComparisonPanel / ComparisonSelected / UpdateWorkflow` | Genuine 여부·Type·Template/Plan/실행 상태 | Type별 Rule Widget을 만들고 표시·Next·Run 가능 여부를 갱신한다. |
-| `LoadDatabase` | Folder, 선택적 Built-in DB ID | Image list·Source ID·Resolution 표시·기본 Model 선택을 갱신한다. 빈 DB ID는 External이다. |
-| `SetAlgorithm` | Caller가 소유하는 Algorithm pointer | Engine 연결 후 Model 상태를 다시 읽는다. Window는 Backend를 삭제하지 않는다. |
-| `ReloadModels / ClearTemplates` | 현재 Model/Weight 선택 | Model Load 상태를 표시하고 이전 Template·실행 가능 상태를 초기화한다. |
-| `CreateEnrollmentTemplates` | 선택 Image list | Engine::Enroll 결과를 Image별 Cache와 표에 보관한다. |
-| `ReadPairCsv` | CSV path, Genuine 여부 | Pair index vector·Error, `bool`을 반환한다. |
-| `UpdateComparisons / UpdateEnrollment` | 현재 Rule·Enrollment 선택 | 선택 Type의 Engine plan을 만들고 Pair 수·가능 여부·Metric 상태를 갱신한다. 기존 Comparison 결과는 초기화한다. |
-| `RunSelectedComparisons` | 선택 Type·Plan·Template | 선택한 Group만 실행한 뒤 Results로 이동한다. |
-| `ApplyThreshold` | Cache된 Result, 해당 Tab의 Threshold | PASS/MISS/REJ/FA/ERR·Row color·요약·Metric을 갱신한다. |
-| `RunComparisons` | Genuine/Impostor Controls | Engine::Execute의 Score·Time·최고 Model·Model별 Error를 표시한다. |
-| `SelectedMetrics / Snapshot` | 현재 Widget/Cache 상태 | Metric flag vector와 UI 독립 `EvaluationRun`을 반환한다. |
-| `UpdateMetrics` | 현재 Snapshot | Report::CalculateMetrics의 17개 값을 표에 넣는다. |
-| `SaveResults` | Output parent folder | 새 `run_N`에 Engine Raw export → Report Save. 실패하면 이번에 만든 폴더만 지우고 `false`다. |
-| `done / validateCurrentPage / eventFilter / resizeEvent` | Exit·전환·Hover·Resize event | Exit 확인, 필수 선택 검사, DB 설명, 우측 상단 Step counter 위치를 처리한다. |
-
-| Report 함수 | 입력 | 출력·목적 |
-|---|---|---|
-| `CalculateMetrics` | EvaluationRun | Metric name 순서의 `QStringList` 17개. 미실행·불충분한 Group은 N/A다. |
-| `GraphFiles / GraphTitle` | Metric selection, File name | 선택에 맞는 SVG 파일명과 Title을 반환한다. |
-| `WriteGraphs` | ReportData, Folder | Score histogram·Error rate curve·Linear trade-off SVG를 저장한다. |
-| `Save` | ReportData, Folder | `metrics.csv` 전체, `report.html` 선택 항목, 관련 SVG를 저장한다. |
+템플릿을 만들기 전에는 다음 단계로 진행할 수 없다. 규칙이 잘못되었거나 비교 쌍이 없으면 실행을 막는다. DB·등록 이미지·모델·비교 종류·규칙을 바꾸면 이전 비교 결과를 초기화한다. 실행하지 않은 종류는 저장하지 않으며, 두 종류가 필요한 지표는 결과가 부족하면 N/A로 표시한다.
 
 ## Result Labels / Thresholds
 
-Genuine은 같은 손가락, Impostor는 다른 손가락이라는 실제 Group label을 뜻한다. 단순히 점수가 높다고 모든 비교에 PASS를 붙이지 않는다. GUI와 CSV는 `Engine::ClassifyComparison`을 함께 사용한다.
+점수는 높을수록 두 지문이 비슷하다는 뜻이며 동일 지문일 확률은 아니다. 현재 모델은 30차원 Softmax 출력의 코사인 유사도를 `(cos+1)/2`로 바꿔 [0.5, 1] 점수를 만든다. 정답은 원본 손가락 ID 또는 CSV 종류로 결정한다.
 
-| 실제 Group | Best score | 표시 / 색상 |
+모델 하나를 선택하면 `Model / Score`를, 여러 개를 선택하면 `Best model / Best score / Worst model / Worst score`를 표시한다. Best/Worst는 성공한 모델의 최고·최저 점수이며 판정과 지표에는 최고 점수를 사용한다. 성공한 모델이 하나면 Worst는 비워 둔다. 모델별 점수와 오류는 툴팁과 CSV에 남긴다.
+
+| 종류 | 조건 | 표시 |
 |---|---|---|
-| Genuine | Threshold 이상 | PASS / 연한 초록 — 올바르게 수락 |
-| Genuine | Threshold 미만 | MISS / 연한 빨강 — 본인을 잘못 거절 |
-| Impostor | Threshold 미만 | REJ / 연한 파랑 — 타인을 올바르게 거절 |
-| Impostor | Threshold 이상 | FA / 연한 주황 — 타인을 잘못 수락 |
-| 어느 Group이든 추론 실패 | 유효한 점수 없음 | ERR / 회색 |
+| Genuine | 점수 ≥ Genuine 기준 | PASS |
+| Genuine | 점수 < Genuine 기준 | MISS: 본인 지문 오거절 |
+| Impostor | 점수 < Impostor 기준 | REJ: 타인 지문 거절 |
+| Impostor | 점수 ≥ Impostor 기준 | FA: 타인 지문 오수락 |
+| 공통 | 추론 실패 | ERR |
 
-Threshold를 바꾸면 저장된 점수로 다시 판정하고 색상·요약·FMR/FNMR을 갱신한다. Encoder를 다시 실행하지는 않는다. Metrics의 `REJ genuine/impostor`는 계산 실패율이며, 위 표의 올바른 타인 거절 `REJ`와 다른 항목이다.
+모델을 불러오면 `calibration.json`의 실제 가중치 해시·ID 순서·FAR 정책·정밀도를 검사하고, 입력 DB와 선택 모델 조합에 맞는 추천값을 적용한다. 해당 개별 모델의 초기값은 FVC2000 0.5603, FVC2002 0.6648, FVC2004 0.7235다. 모델 선택이 바뀌면 새 조합의 추천값을 불러온다.
 
-## Metrics / Interpretation
+두 기준은 같은 값으로 시작하지만 각각 독립적으로 조절할 수 있다. 입력 범위는 [0, 1]이며, 기준 변경은 재추론 없이 판정·색상·지표만 갱신한다. 서로 다른 기준에서 얻은 두 정확도를 하나의 공통 경계에서 측정한 정확도로 합치지 않는다.
 
-현재 계산 방식은 [report.cpp](report.cpp)의 `Rates`, `Thresholds`, `EerBounds`, `CalculateMetrics`가 기준이다. Score는 해당 Group의 입력 Threshold 이상일 때 Accept다. FMR은 Impostor 기준, FNMR은 Genuine 기준을 사용한다. EER·파생 Metric·Curve는 별도로 공통 Threshold를 순회하므로 입력 기준 변경에 영향받지 않는다. Model을 여러 개 선택하면 Engine이 고른 최고 Score를 사용한다.
+추천값을 읽을 수 없으면 안내와 함께 초기값 0.5954를 사용한다. 외부 DB는 제공 DB에서 얻은 보수적인 값을 적용하고 외부 이미지에서 미검증임을 안내한다. 추천값은 검증에 사용한 이미지쌍에 대한 결과이며, 임의의 비교 규칙에서 같은 FAR을 보장하지 않는다. [임계값 산정 근거](../Algorithm/readme.md#판정-임계값-보정-2026-11-18)
 
-| Metric | 현재 계산 |
+## Metrics / Report
+
+화면과 HTML에는 선택한 지표를, CSV에는 전체 17개 지표를 저장한다. 판정 기준을 바꾸면 FMR·FNMR 등을 다시 계산한다. EER과 고정 오류율 지표는 현재 입력한 기준과 별개다. 점수를 한 번 정렬하고 중복 임계값을 제거한 뒤, 이진 탐색으로 각 기준의 오류 수를 구해 반복 계산을 줄인다. 그래프도 같은 점수 집계와 오류율 함수를 재사용하며, 비정상 점수를 만났을 때의 기존 표시 규칙을 유지한다.
+
+| 지표 | 계산 기준 |
 |---|---|
-| FTE [%] | 선택 Enrollment가 모두 실행됐을 때 실패 Image 수 / 실행 Image 수. Model 하나 이상이 성공하면 해당 Image는 성공이다. |
-| REJ genuine / impostor [%] | 해당 Group이 모두 실행됐을 때 실패 Comparison 수 / Planned pairs. |
-| FMR [%] | Impostor false accept 수 / Planned impostor pairs. 실패 Impostor는 False accept로 세지 않는다. |
-| FNMR [%] | (Genuine false reject 수 + 실패 Genuine 수) / Planned genuine pairs. |
-| EER / EER* [%] | 관측 Score와 최고 Score 바로 위 Threshold를 순회한다. 두 Rate가 같으면 단일 값, 교차하면 Bounds를 표시한다. EER*는 성공 Pair만 분모로 사용한다. |
-| ZeroFMR / ZeroFNMR [%] | 관측 Threshold에서 FMR=0일 때 최소 FNMR / FNMR=0일 때 최소 FMR이다. 불가능하면 N/A다. |
-| FMR100 / FMR1000 [%] | FMR ≤ 0.01 / 0.001 조건에서 최소 FNMR이다. 표시는 [%]다. |
-| Enrollment / Matching / Genuine / Impostor time [ms] | 실행한 항목의 평균 경과 시간. Matching은 두 Comparison group을 합친 평균이다. |
-| Mean / Max template size [bytes] | 성공한 Image/Model Template들의 평균·최대 크기다. |
+| FTE | 등록 실행이 모두 끝났을 때 실패 이미지 수 / 실행 이미지 수. 모델 하나 이상이 성공하면 해당 이미지는 성공이다. |
+| REJ genuine / impostor | 해당 종류의 비교가 모두 끝났을 때 실패 비교 수 / 계획한 쌍 수 |
+| FMR | Impostor 오수락 수 / 계획한 Impostor 쌍 수. 추론 실패는 오수락으로 세지 않는다. |
+| FNMR | Genuine 오거절과 추론 실패 수 / 계획한 Genuine 쌍 수 |
+| EER / EER* | 관측 점수와 최고 점수 바로 위의 기준을 순회한다. 일치하면 단일 값, 교차하면 범위를 표시한다. EER*는 성공한 쌍만 분모로 사용한다. |
+| ZeroFMR / ZeroFNMR | FMR=0일 때 최소 FNMR / FNMR=0일 때 최소 FMR. 불가능하면 N/A다. |
+| FMR100 / FMR1000 | FMR ≤ 0.01 / 0.001일 때 최소 FNMR. 표시는 %다. |
+| 처리 시간 | 실행한 등록·비교의 평균 ms. 실패한 실행도 포함하며, 비교 시간에는 비교 이미지의 인코딩이 포함된다. |
+| 템플릿 크기 | 성공한 템플릿의 실제 평균·최대 bytes. 120bytes의 확률 값과 식별 정보를 모두 포함한다. |
 
-비교계획이 없는 Group, 아직 Pending인 Group, EER 교차가 없는 경우는 구분해 N/A를 반환한다. Mean time은 실패한 실행도 포함한다. 여기서 Matching time에는 Attempt Encoding이 포함되며 Image decoding·Model Load는 포함되지 않는다.
+비교 계획이 없거나 아직 실행 중인 경우, 필요한 종류가 부족한 경우와 EER 교차가 없는 경우를 구분해 N/A로 표시한다. 이미지 읽기와 모델 로딩 시간은 위 처리 시간에 포함하지 않는다.
 
-Accuracy Metric을 선택하면 Histogram·Threshold curve를 만든다. EER 계열 또는 FMR/FNMR 동시 선택이면 Trade-off graph도 만든다. FMR 또는 FNMR만 선택한 경우 해당 Curve만 그린다. Timing-only 또는 선택 없음이면 Graph를 만들지 않는다. CSV는 항상 17개 Metric을 보관한다.
+정확도 지표를 고르면 점수 분포와 임계값 곡선을 만든다. EER 계열 또는 FMR·FNMR을 함께 선택하면 오류율 상관 그래프도 만든다. 시간 지표만 선택하거나 아무 지표도 고르지 않으면 그래프를 저장하지 않는다. 그래프는 관측 범위를 확장한 41개 임계값을 사용하며, 지표 계산의 관측값 순회와는 다르다. 두 축은 선형 %이며 정규편차 DET 그래프는 아니다.
 
-Graph는 관측 범위를 확장한 41개 Threshold sample을 사용한다. Metric의 관측 Threshold sweep과는 다르다. Trade-off의 두 축은 Linear [%]이며 Normal-deviate DET graph는 아니다. 실패율·Bounds 처리의 구현은 확인했지만 과제의 모든 수식 선택 기능이나 외부 인증 적합성 검증을 구현한 것은 아니다.
+`Save all`은 Metrics 탭에서 활성화된다. 새 `run_N` 폴더에 원시 결과를 저장한 뒤 지표·HTML·SVG를 저장하며, 실패하면 이번에 만든 폴더만 지운다. 상세 실행 설정은 HTML에서 펼쳐 볼 수 있고 `settings.txt`에도 남긴다.
+
+## Functions / Inputs / Outputs
+
+| 함수 | 역할 |
+|---|---|
+| `*Page`, `ComparisonPanel` | 화면과 이벤트 연결 생성 |
+| `LoadDatabase`, `ReloadModels`, `CreateEnrollmentTemplates` | 입력과 모델 로딩, 템플릿 생성 |
+| `UpdateWorkflow`, `UpdateComparisons`, `UpdateEnrollment` | 진행 가능 여부와 비교 계획 갱신 |
+| `ReadPairCsv`, `RunSelectedComparisons`, `RunComparisons` | CSV 읽기와 선택한 비교 실행 |
+| `ApplyThreshold`, `UpdateMetrics` | 저장된 점수로 판정과 지표 갱신 |
+| `SelectedMetrics`, `Snapshot`, `SaveResults` | 선택 지표와 실행 기록을 모아 저장 |
+| `CalculateMetrics`, `GraphFiles`, `GraphTitle`, `WriteGraphs`, `Save` | Report의 지표·그래프·파일 생성 |
+
+`SetAlgorithm`으로 연결한 알고리즘 객체는 호출자가 소유하며 Window보다 오래 유지해야 한다. Window는 Backend를 삭제하지 않는다. `validateCurrentPage`는 필수 선택을 검사하고, `eventFilter`와 `resizeEvent`는 안내와 단계 표시를 처리한다. `done`은 종료 확인을 처리한다.
 
 ## Hyperparameters / Display Defaults
 
-설정은 [guiConfig.h](guiConfig.h), 비교 기준은 [engineConfig.h](../Engine/engineConfig.h)에 있다. 모든 기본 Label이 외부 번역 파일에 있는 구조는 아니다. 상태·Error 문구와 일부 Layout/CSS/SVG 좌표는 `.cpp`에도 남아 있다.
+설정은 [guiConfig.h](guiConfig.h)에, 비교 기준은 [engineConfig.h](../Engine/engineConfig.h)에 둔다. 일부 상태·오류 문구와 배치/CSS/SVG 좌표는 `.cpp`에도 있다.
 
-| 설정 | 현재 값 | 의미 |
-|---|---|---|
-| Window / Preview | 900×720 / 340×340 [px] | 시작 Window와 Image preview 크기다. |
-| StepWidth/Height, StepRight/Top | 90×20, 20/14 [px] | 우측 상단 `Step N / 7` 표시 위치다. |
-| ModelTableHeight / OptionsHeight | 165 / 36 [px] | Model 상태 표와 Rule 입력 영역 높이다. |
-| MetricColumns / DefaultMetrics | 3 / FTE·EER·Matching time | Checkbox 배치와 초기 선택이다. |
-| MaxRandomCount / DefaultCaptures | 1,000,000 / `1` | Random count 상한과 Capture 입력 초기값이다. |
-| ThresholdMinimum/Maximum / ThresholdStep / ThresholdPrecision | 0~1 / 0.01 / 4 decimal | 기준 입력 범위·증감 폭·정밀도다. |
-| PassColor / MissColor / RejectColor / FalseAcceptColor / ErrorColor | `#e5f3e8` / `#fbe5e5` / `#e5effa` / `#fff0d9` / `#f2f2f2` | PASS·MISS·REJ·FA·ERR Row 음영이다. |
-| ScorePrecision / TimePrecision / MetricPrecision | 4 decimal / 3 decimal / 6 significant | 화면의 Score·Time·Metric 문자열 정밀도다. |
-| GraphWidth/Height / HistogramBins | 840×320 [px] / 10 | SVG 표시 크기와 Histogram bin 수다. Logical viewBox 좌표는 현재 840×320이다. |
-| CurveSteps / CurvePadding | 40 / 0.05 [ratio] | 41개 Threshold sample과 관측 범위의 여유 폭이다. |
-| GraphPrecision / EmptyScoreLow/High | 5 significant / 0, 1 [normalized score] | SVG 숫자 정밀도와 빈 Plot의 기본 범위다. |
-| Engine default | Seed 42, Count 10, Threshold 0.75 | [Engine 설명](../Engine/readme.md#hyperparameters--paths)을 따른다. |
+| 설정 | 기본값 |
+|---|---|
+| Window / Preview | 900×720 / 340×340px |
+| MetricColumns / DefaultMetrics | 3열 / FTE·EER·Matching time |
+| ThresholdMinimum/Maximum / Step / Precision | 0~1 / 0.01 / 소수점 4자리 |
+| Score / Time / Metric 정밀도 | 소수점 4자리 / 3자리 / 유효숫자 6자리 |
+| GraphWidth/Height / HistogramBins | 840×320px / 10개 |
+| CurveSteps / CurvePadding | 40 / 0.05 |
 
 ## Status / Evidence
 
-macOS Offscreen GUI에서 Built-in 기본 Model, Combined 선택, External 네 Model, 실제 Template·Genuine/Impostor·Raw CSV 저장을 확인했다. 합성 사례로 실패 분모·Time·Template size·EER Bounds/EER*·선택 Metric·SVG 저장을 확인했다. 이전 학습/Inference 기록은 `models/implementation_check.json`에 있다. Source 재구성 이후 검증 Log는 당시 임시 Build 환경에 있으며 영구 Test target은 CMake에 없다.
+운영 전환과 파일 통합 후 `QT_QPA_PLATFORM=offscreen`에서 실제 Window와 위젯으로 제공 DB 7개 흐름·140쌍과 외부 파일명 ID 1개 흐름·2쌍을 확인했다. 등록, 비교, 독립 기준 변경, `.fpt`·CSV·HTML 저장이 정상 동작했다. 검증 전용 `tests/`와 별도 CMake 대상은 이후 정리했으며, 이 검증 기록은 `models/current` 아래에 보존한다. 이후 코드 정리·폴더 이동 검증은 `models/validation`에, 화면 예시는 `GUI_flows`에 보관한다. 외부 검사는 기능 확인이며 미학습 손가락의 정확도 측정이 아니다. 학습에 포함된 검증과 재평가 명령은 [Algorithm README](../Algorithm/readme.md#verification--limits)에 정리했다.
 
-7단계 순서, 세 Comparison type, 비활성 Type 제외, 입력 변경 후 결과 초기화, Rule 오류 차단, 실제 Model의 Template·Score·선택 Pair 저장을 Offscreen GUI에서 확인했다.
+당시 검증은 Qt offscreen으로 수행했으며, 실제 데스크톱 창 조작은 확인하지 못했다. 추론은 GUI 스레드에서 순차 실행하며, 실행 중 강제 취소와 오류 격리는 미구현이다. 진행 표시는 단계 번호이며 이미지쌍별 실시간 진행률이 아니다. Word/PDF 리포트, 정규편차 DET, 지표 수식 선택, KISA DLL은 미구현이고 Windows 배포도 미검증이다.
 
-현재 Progress는 Page counter이며 실행 Pair별 Live progress가 아니다. Inference가 GUI thread에서 순차 실행되므로 실행 중 UI 응답·Cancel의 즉시 강제 종료는 지원하지 않는다. Exit 확인창과 Yes 후 종료는 구현돼 있다. Word/PDF Report, Normal-deviate DET, Metric 수식 선택 UI, KISA DLL 선택·호출, Windows 배포는 미구현 또는 실행 미확인이다. [GUI_flows](../../GUI_flows/readme.md)와 [Report_example](../../Report_example/readme.md)은 2026-11-18의 실제 재학습 Weight로 갱신한 예시다. 촬영 조건과 Threshold는 각 폴더 문서에 남겼으며, 독립 Test-set 성능을 의미하지 않는다.
+[GUI 화면 예시](../../GUI_flows/00_overview.png)와 [캡처 기록 안내](../../GUI_flows/captures/readme.md)를 참고한다. [Report_example](../../Report_example/readme.md)은 이전 리포트 예시로 보존한다.

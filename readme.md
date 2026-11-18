@@ -6,11 +6,9 @@
 
 ![GUI demo](demo.gif)
 
-## GUI Flow
+현재 모델은 등록 이미지와 비교 이미지에서 각각 30차원 템플릿을 만들고 유사도를 비교합니다. 점수는 동일 지문일 확률이 아니며, 판정 기준은 결과 화면에서 조절할 수 있습니다. 구조도와 `GUI_flows`는 현재 흐름을 설명하고, `demo.gif`와 `Report_example`은 이전 실행 예시로 보존합니다.
 
-**1. DB 선택 → 2. 등록 이미지 선택 → 3. Template 생성 → 4. 비교 종류 선택 → 5. 비교 규칙 선택 → 6. 실행 → 7. 결과 확인**
-
-한 장 또는 여러 장을 등록한 뒤, 같은 손가락인 **Genuine**, 다른 손가락인 **Impostor**, 또는 둘 다 비교할 수 있습니다. 마지막 화면에서 판정 기준을 조절하고 필요한 지표를 골라 저장합니다. [단계별 선택지](#gui-guide) · [화면 예시](GUI_flows/00_overview.png)
+처음 사용하는 경우 **의존성 설치 → 빌드 → 사전학습 파일로 Fine-tuning → GUI에서 학습 결과 선택** 순서로 진행합니다. Clone에는 학습 초기 파일이 포함되지만, GUI용으로 학습된 네 모델은 포함되지 않습니다. [Windows](#windows--visual-studio) · [macOS/Linux](#macos--linux) · [GUI 사용법](#gui-guide)
 
 ## Windows / Visual Studio
 
@@ -54,7 +52,7 @@ copy /Y "C:\deps\libtorch\lib\*.dll" "build-vs\Release\" && "C:\deps\Qt\msvc2022
 build-vs\Release\FingerprintTrain.exe data\original models\pretrained\deepprint.bin models\run_01
 ```
 
-세 DB의 개별 모델과 통합 모델을 각각 학습합니다. 재학습에는 `run_02`처럼 **새 출력 폴더명**을 사용합니다. 이미 학습된 네 모델을 별도로 받은 경우에는 이 단계를 생략할 수 있습니다. [IDE에서 학습하기](src/Algorithm/readme.md#windows--visual-studio)
+세 DB의 개별 모델과 통합 모델을 각각 학습합니다. 네 모델 모두 30개 값을 출력하며, 판정 기준을 담은 `calibration.json`도 함께 저장합니다. 재학습에는 `run_02`처럼 **새 출력 폴더명**을 사용합니다. 이미 학습된 네 모델을 별도로 받은 경우에는 이 단계를 생략할 수 있습니다. [IDE에서 학습하기](src/Algorithm/readme.md#windows--visual-studio)
 
 #### 4. Inference
 
@@ -100,7 +98,7 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH="/usr;/opt/libtorch" -DCMAKE_BUILD_TYPE=
 ./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01
 ```
 
-증강부터 네 모델의 학습까지 순서대로 진행합니다. 학습이 완료되면 출력 폴더에 GUI용 모델이 저장됩니다. 재학습에는 새 출력 폴더명을 사용합니다. `--augment-only`를 붙이면 증강만 생성하며, GUI용 모델은 생성하지 않습니다.
+데이터 증강, 네 모델의 학습과 저장, 저장된 모델의 검증, 판정 기준 산정까지 차례로 진행합니다. 출력 폴더의 네 `.bin`과 `calibration.json`을 함께 GUI에 사용합니다. 재학습에는 새 출력 폴더명을 사용합니다. `--augment-only`를 붙이면 증강만 생성하며, GUI용 모델은 생성하지 않습니다.
 
 #### 4. Inference
 
@@ -114,15 +112,17 @@ Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명�
 
 **현재 외부 알고리즘 DLL을 교체하는 기능은 미구현입니다.** Algorithm과 Engine은 실행 파일에 정적으로 연결됩니다.
 
-지금은 Step 3에서 **호환되는 `.bin` weight**를 바꿔 다른 학습 모델로 실행할 수 있습니다. 폴더 안의 파일명은 `fvc2000_db3.bin`, `fvc2002_db3.bin`, `fvc2004_db1.bin`, `combined.bin`입니다. 모델을 바꾸면 Template을 다시 생성합니다.
+지금은 Step 3에서 **호환되는 `.bin` weight**를 바꿔 다른 학습 모델로 실행할 수 있습니다. 폴더 안의 파일명은 `fvc2000_db3.bin`, `fvc2002_db3.bin`, `fvc2004_db1.bin`, `combined.bin`이며 `calibration.json`도 함께 둡니다. 현재 모델 형식인 Cosine30 v2만 지원합니다. 이전 512차원 모델을 선택하면 재학습 안내가 표시됩니다. 모델을 바꾸면 템플릿을 다시 생성해야 합니다.
 
 외부 DLL을 사용하려면 DLL 로더와 함수 규격을 연결하는 Adapter, GUI의 선택 기능을 추가해야 합니다. Qt·LibTorch DLL 교체는 실행 의존성을 바꾸는 작업이며, 지문 알고리즘 선택과는 별개입니다. [Engine 확장 안내](src/Engine/readme.md#dll-backend--extension)
 
 ## Architecture
 
+`algorithm`은 전처리·학습·특징 추출을, `engine`은 모델 실행과 비교를, `gui`는 사용자 입력·결과 표시·리포트를 담당합니다. Qt와 LibTorch를 사용하며, 이미지 정보와 실행 기록은 모듈 간에 공유합니다. 객체의 소유권과 수업 개념을 적용한 설계는 [소유권 설명](src/Algorithm/readme.md#course-concepts--ownership)에 정리했습니다.
+
 ### Algorithm
 
-이미지를 전처리하고 512차원 특징 벡터를 생성합니다. 두 벡터의 Cosine을 0~1 유사도로 정규화하며, 데이터 증강과 Fine-tuning도 담당합니다. [상세 설명](src/Algorithm/readme.md)
+사전학습 모델의 일부만 미세 조정하는 Partial FT를 사용합니다. 학습한 Cosine Classifier를 추론에도 유지하고, Softmax 출력으로 30차원 템플릿을 만듭니다. 등록 이미지와 비교 이미지는 같은 모델로 처리합니다. [상세 설명](src/Algorithm/readme.md)
 
 [![Algorithm](docs/diagrams/algorithm.png)](docs/diagrams/algorithm.svg)
 
@@ -144,22 +144,25 @@ Step 3에서 **학습이 완료된 모델 폴더**를 선택합니다. 위 명�
 
 | 항목 | 기본값 | 설정 파일 |
 |---|---|---|
-| Encoder 입력 / 특징 차원 | 299×299 [px] / 512 | [encoderConfig.h](src/Algorithm/encoderConfig.h) |
+| Encoder 입력 / 중간 특징 | 299×299 [px] / 512 | [encoderConfig.h](src/Algorithm/encoderConfig.h) |
+| 템플릿 / 분류기 출력 | 30차원 Softmax / 네 모델 공통 | [encoderConfig.h](src/Algorithm/encoderConfig.h) |
 | 정사각형 변환 | FVC2004 중앙 Crop, 나머지 Padding | [전처리 설명](src/Algorithm/readme.md#encoder-architecture--preprocessing) |
 | 원본당 증강 수 / Seed | 12장 / 42 | [augmentConfig.h](src/Algorithm/augmentConfig.h) |
 | Optimizer / Learning rate | Adam / 0.0001 | [trainConfig.h](src/Algorithm/trainConfig.h) |
 | Batch / Epoch | 32 / 20 | [trainConfig.h](src/Algorithm/trainConfig.h) |
-| Similarity threshold | Genuine·Impostor 각각 0.75 | [engineConfig.h](src/Engine/engineConfig.h) |
+| 유사도 판정 기준 | DB·선택 모델별 추천값, 추천값이 없을 때 초기값 0.5954 | [engineConfig.h](src/Engine/engineConfig.h) |
 
-Padding과 중앙 Crop을 비교한 결과 FVC2004의 Validation EER이 13.33%에서 6.67%로 개선되어 중앙 Crop을 채택했습니다.
+**Partial FT와 Cosine Classifier를 유지하고, 30차원 Softmax 출력끼리 비교하는 구조를 채택했습니다.** 전처리 비교에서는 FVC2004의 중앙 자르기가 더 우수해 이를 적용했습니다. 이후 학습 방식과 분류기 구조를 비교한 결과, 통합 모델의 지문 비교 성능과 기존 구조의 활용을 고려해 현재 방식을 선택했습니다. [실험 과정과 결과](src/Algorithm/readme.md#experiments--selection-history)
 
-동일 배치·초기값으로 CE와 CE+SupCon을 3개 Seed에서 비교했으나 통합 모델의 Validation EER은 모두 6.512%였고, 오수락률 개선도 0.031%p에 그쳐 기존 CE를 유지했습니다. [실험 설정과 결과](src/Algorithm/readme.md#supcon-비교-실험-2026-11-18)
+최종 Seed 42 모델에서 통합 EER은 기존 512차원 방식의 6.512%에서 30차원 방식의 0.617%로 낮아졌습니다. 이는 학습에 사용한 손가락의 다른 촬영본으로 평가한 결과이며, 새로운 손가락이나 외부 DB에서의 성능을 뜻하지 않습니다. [네 모델의 결과와 판정 기준](src/Algorithm/readme.md#final-production-run--calibration)
 
-학습 데이터가 적어 Overfitting(과적합)이 우려되므로, Backbone을 고정하고 두 Projection만 조정하는 **Partial fine-tuning**을 적용했습니다. 학습 범위·증강 범위·Train/Validation 구분은 [Algorithm README](src/Algorithm/readme.md#fine-tuning--data-split)에 있습니다. 별도 Test split은 없습니다.
-
-Adapter와 추가 비교한 결과, 같은 손가락의 촬영본 검증에서는 개선됐지만 미학습 손가락 검증에서는 일관된 우위가 확인되지 않아 Partial fine-tuning을 유지했습니다. [추가 비교 설정과 결과](src/Algorithm/readme.md#adapter와-partial-ft-상세-비교-2026-11-18)
+학습된 모델과 실험 결과는 로컬에 보존하고 Git에서 제외합니다. 현재 로컬 모델 폴더는 `models/current`이며, [모델 폴더 안내](models/readme.md)에서 용도와 보관 위치를 확인할 수 있습니다. 재학습에 필요한 사전학습 파일은 기존 Git LFS 정책으로 배포합니다.
 
 ## GUI Guide
+
+**DB 선택 → 등록 이미지 선택 → Template 생성 → 비교 종류·규칙 선택 → 실행 → 결과 확인**
+
+한 장 또는 여러 장을 등록하고 Genuine(같은 손가락), Impostor(다른 손가락), 또는 두 종류를 함께 비교합니다.
 
 | 단계 | 목적과 선택지 |
 |---|---|
@@ -171,13 +174,21 @@ Adapter와 추가 비교한 결과, 같은 손가락의 촬영본 검증에서�
 | 6. Run | 비교 개수를 확인하고 `Run selected comparisons`를 누릅니다. |
 | 7. Results | 결과와 Threshold를 확인합니다. `Metrics and report` 탭에서 지표를 선택하고 `Save all`로 저장합니다. |
 
-유사도는 **0~1이며 높을수록 비슷합니다. 확률값은 아닙니다.** 여러 모델을 선택하면 성공한 모델 중 Best/Worst 점수를 표시하고, 판정에는 Best score를 사용합니다.
+등록 이미지마다 별도의 템플릿을 만듭니다. 비교 점수는 높을수록 두 지문이 비슷하다는 뜻이며, 동일 지문일 확률은 아닙니다. 여러 모델을 선택하면 가장 높은 점수로 판정합니다. 결과 표의 Best/Worst는 모델별 최고·최저 점수입니다.
+
+판정 기준은 학습 결과 폴더의 `calibration.json`에서 불러옵니다. DB와 선택 모델에 따라 추천값이 달라지며, Genuine과 Impostor의 기준은 결과 화면에서 각각 조절할 수 있습니다. 외부 DB에 적용하는 값은 제공 DB의 검증 결과를 참고한 값으로, 외부 이미지에서의 정확도를 보장하지 않습니다.
 
 Genuine은 기준 이상이면 **PASS**, 미만이면 **MISS**입니다. Impostor는 기준 미만이면 **REJ**, 이상이면 **FA**입니다. Threshold를 바꾸면 재추론 없이 판정이 갱신됩니다.
 
-화면과 HTML에는 선택한 지표를 표시하고, CSV에는 전체 지표와 원시 결과를 저장합니다. 재학습용 사전학습 모델은 Git LFS로 포함하며, Fine-tuned weight·증강 데이터·빌드 결과는 제외합니다.
+화면과 HTML에는 선택한 지표를 표시하고, CSV에는 전체 지표와 원시 결과를 저장합니다. 학습 초기 파일은 Git LFS로 배포하며, 학습된 Weight·증강 데이터·빌드 결과는 제외합니다.
 
 [한 장 등록](GUI_flows/01_single_enrollment.png) · [여러 장 등록](GUI_flows/02_multiple_enrollment.png) · [외부 DB](GUI_flows/03_external_db.png) · [리포트 미리보기](Report_example/report_preview.png)
+
+## Training / Runtime Files
+
+증강·학습·모델 저장·성능 평가·임계값 산정·GUI 추론은 C++에서 수행합니다. 검증 전용이던 `tests/`와 별도 검사 실행 대상은 정리했으며, 학습 과정의 저장·재로딩·출력 검사는 그대로 유지합니다. 저장된 모델의 성능과 판정 기준을 다시 계산하려면 학습 명령에 `--verify-only`를 붙입니다. [평가 명령과 한계](src/Algorithm/readme.md#verification--limits)
+
+[prepare_deepprint.py](tools/prepare_deepprint.py)는 공개 원본 체크포인트를 C++ 학습 초기 파일로 변환하는 도구이므로 유지합니다. 준비된 `models/pretrained/deepprint.bin`으로 학습할 때는 실행할 필요가 없습니다. 그림·화면 생성용 보조 도구는 정리했으며, 기존 SVG·PNG와 캡처 결과는 보존합니다.
 
 ## License / Submodule
 
@@ -202,7 +213,7 @@ Genuine은 기준 이상이면 **PASS**, 미만이면 **MISS**입니다. Imposto
 | LibTorch | `torch/script.h`, `torch/torch.h` | 모델 로드·저장, Tensor 연산, Fine-tuning |
 | ATen | `ATen/ops/_upsample_bilinear2d_aa.h` | 전처리의 Antialiased bilinear resize |
 
-Python의 PyTorch·torchvision·NumPy·Pillow는 최초 checkpoint 변환에만 사용합니다. 증강·학습·추론은 C++로 실행하며, 실제 빌드 의존성은 [CMakeLists.txt](CMakeLists.txt)에 있습니다.
+사전학습 Archive를 받은 이후 증강·학습·Classifier 포함 저장·보정·GUI 추론은 모두 C++입니다. Python 변환 도구는 공개 원본 체크포인트에서 학습 초기 파일을 직접 준비할 때만 필요합니다. 사용하지 않는 MLP/비교 스크립트와 별도 export_features/predict_id 실행 파일은 운영 소스에서 제거했습니다. 실제 빌드 의존성은 [CMakeLists.txt](CMakeLists.txt)에 있습니다.
 
 ## Detailed Documentation
 

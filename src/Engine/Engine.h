@@ -5,6 +5,8 @@
 #include "../Algorithm/Algorithm.h"
 #include "engineConfig.h"
 
+namespace engine {
+
 // One DB image; source_id groups identical pixel copies.
 struct ImageInfo {
     std::string name;
@@ -27,8 +29,8 @@ enum class ComparisonRule { All, FirstCapture, CaptureNumbers, RandomCount, From
 struct ComparisonOptions {
     ComparisonRule rule = ComparisonRule::All;
     std::vector<int> captures;
-    int count = EngineConfig::RandomCount; // [pairs/enrollment]
-    unsigned int seed = EngineConfig::Seed;
+    int count = RandomCount; // [pairs/enrollment]
+    unsigned int seed = Seed;
     std::vector<ComparisonPair> csv_pairs;
 };
 
@@ -38,6 +40,15 @@ struct ModelState {
     std::string weight_file;
     bool loaded = false;
     std::string error;
+    algorithm::AlgorithmModelInfo info;
+};
+
+struct ThresholdRecommendation {
+    bool available = false;
+    double threshold = GenuineThreshold;
+    bool target_met = false;
+    bool external_fallback = false;
+    std::string note;
 };
 
 // One image template for one model.
@@ -48,6 +59,7 @@ struct ModelTemplate {
     double time_ms = 0; // [ms] Preprocessing + encoding.
     std::string stage;
     std::string error;
+    int dimensions = 0;
 };
 
 // All model templates from one enrollment image.
@@ -82,7 +94,6 @@ struct SimilarityResult {
 struct EnrollmentRecord {
     int image_index = 0;
     std::string name;
-    bool executed = false;
     EnrollmentTemplates result;
 };
 
@@ -103,13 +114,16 @@ struct EvaluationRun {
     std::vector<ModelState> models;
     std::vector<EnrollmentRecord> enrollments;
     std::vector<ComparisonRecord> comparisons;
-    double genuine_threshold = EngineConfig::DecisionThreshold; // [0,1] Accept score >= cutoff.
-    double impostor_threshold = EngineConfig::DecisionThreshold; // [0,1] Accept score >= cutoff.
+    double genuine_threshold = GenuineThreshold; // [0,1] Accept score >= cutoff.
+    double impostor_threshold = ImpostorThreshold; // [0,1] Accept score >= cutoff.
 };
 
 // Comparison planning, Algorithm calls, timing and raw export.
 class Engine {
 public:
+    Engine() = default;
+    Engine(const Engine&) = delete;
+    Engine& operator=(const Engine&) = delete;
     static bool PlanComparisons(const std::vector<ImageInfo>& images,
                                 const std::vector<int>& enrollments, bool genuine,
                                 const ComparisonOptions& options,
@@ -117,14 +131,13 @@ public:
     static std::vector<ModelState> SelectModels(const std::string& database_id, bool external,
                                                 const std::string& weights_folder);
     // The caller owns the backend and keeps it alive while Engine uses it.
-    bool LoadModels(const std::string& database_id, bool external, const std::string& weights_folder,
-                    Algorithm* backend);
     bool LoadSelectedModels(const std::vector<std::string>& model_ids, const std::string& weights_folder,
-                            Algorithm* backend);
+                            algorithm::Algorithm* backend);
     const std::vector<ModelState>& Models() const { return models_; }
-    EnrollmentTemplates Enroll(const AlgorithmImage& image);
-    SimilarityResult Compare(const EnrollmentTemplates& enrollment, const AlgorithmImage& attempt);
-    static AlgorithmImage ReadImage(const std::string& path, const std::string& database_id = "");
+    ThresholdRecommendation RecommendedThreshold(const std::string& database_id) const;
+    EnrollmentTemplates Enroll(const algorithm::AlgorithmImage& image);
+    SimilarityResult Compare(const EnrollmentTemplates& enrollment, const algorithm::AlgorithmImage& attempt);
+    static algorithm::AlgorithmImage ReadImage(const std::string& path, const std::string& database_id = "");
     std::vector<SimilarityResult> Execute(const std::vector<ComparisonPair>& pairs,
                                          const std::vector<ImageInfo>& images,
                                          const std::vector<EnrollmentTemplates>& templates);
@@ -134,8 +147,11 @@ public:
     static bool SaveRawResults(const EvaluationRun& run, const std::string& folder);
 
 private:
-    Algorithm* backend_ = nullptr;
+    algorithm::Algorithm* backend_ = nullptr; // Borrowed; never deleted by Engine.
     std::vector<ModelState> models_;
     int revision_ = 0;
-    ModelTemplate MakeTemplate(const ModelState& model, const AlgorithmImage& image);
+    std::string weights_folder_;
+    ModelTemplate MakeTemplate(const ModelState& model, const algorithm::AlgorithmImage& image);
 };
+
+} // namespace engine

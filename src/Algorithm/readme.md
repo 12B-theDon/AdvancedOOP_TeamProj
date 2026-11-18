@@ -2,46 +2,49 @@
 
 [Root](../../readme.md) · [Engine](../Engine/readme.md) · [GUI](../GUI/readme.md)
 
-Source diagram: [SVG](../../docs/diagrams/algorithm.svg) · [PNG](../../docs/diagrams/algorithm.png). 증강·학습 과정과 실행 중 특징을 추출하는 경로를 함께 보여준다.
-
-![Algorithm structure](../../docs/diagrams/algorithm.png)
-
 ## Responsibility / Files
 
-지문 이미지의 전처리와 특징 추출을 담당한다. Enrollment와 Attempt에 같은 처리를 적용하고, 두 벡터의 Cosine을 `(cosine + 1) / 2`로 바꿔 0~1 유사도로 반환한다. 이 값은 동일 지문일 확률이 아니다. 증강과 Fine-tuning은 GUI 추론과 분리된 C++ 프로그램 `FingerprintTrain`에서 수행한다.
+현재 운영 모델은 **Partial FT로 두 Projection과 Cosine Classifier를 학습하고, 추론에서도 Classifier를 유지해 30차원 Softmax 출력끼리 비교하는 구조**다. 데이터 증강·학습·모델 저장·등록·비교는 C++/LibTorch로 수행한다. 준비된 사전학습 파일을 사용하면 Python 실행은 필요하지 않다.
+
+알고리즘의 자료형·함수·설정은 `algorithm` namespace에 둔다. `.cpp` 내부에서만 쓰는 함수는 익명 namespace로 제한한다. 증강과 학습의 난수 Seed는 `AugmentSeed`와 `TrainSeed`로 구분한다.
 
 | 파일 | 역할 |
 |---|---|
-| [Algorithm.h](Algorithm.h) | Engine이 사용하는 Abstract API와 `AlgorithmImage`, `PreparedImage`를 정의한다. |
-| [encoder.h](encoder.h) | `FingerprintEncoder` 선언이다. PImpl로 Torch type을 다른 Header에서 숨긴다. |
-| [encoder.cpp](encoder.cpp) | Weight/Metadata 확인, 동일 Preprocessing, Encoding, Template 직렬화, Cosine comparison을 구현한다. |
-| [encoderConfig.h](encoderConfig.h) | Architecture·Input size·Feature size·Gabor·검증 Tolerance·CPU thread 설정이다. |
-| [augment.h](augment.h) | 원본·증강본의 경로, Identity, Split을 담는 `TrainingImage`와 준비 함수를 선언한다. |
-| [augment.cpp](augment.cpp) | 설정에 맞는 Cache를 찾고 PNG·Manifest를 생성하거나 재사용한다. |
-| [augmentConfig.h](augmentConfig.h) | 변형 범위·확률·개수·Seed·Clipping 제한을 정한다. |
-| [train.cpp](train.cpp) | `FingerprintTrain` 진입점이다. 네 조건의 독립 학습·저장·Reload·Engine 검증을 수행한다. |
-| [trainConfig.h](trainConfig.h) | 학습 Layer 범위·Optimizer·LR·Batch·Epoch·Split 설정이다. |
-| [prepare_deepprint.py](../../tools/prepare_deepprint.py) | 원본 Python checkpoint를 Trainable TorchScript로 1회 변환한다. |
+| [Algorithm.h](Algorithm.h) | Engine이 사용하는 추상 인터페이스와 이미지·전처리·모델 정보 자료형 |
+| [encoder.h](encoder.h), [encoder.cpp](encoder.cpp) | 모델 로딩과 호환성 검사, 전처리, 템플릿 생성·비교, SHA-256 및 모델 저장 공통 함수 |
+| [encoderConfig.h](encoderConfig.h) | 512차원 중간 특징과 30차원 출력의 설정, 파일 형식과 전처리 상수 |
+| [augment.h](augment.h), [augment.cpp](augment.cpp), [augmentConfig.h](augmentConfig.h) | 데이터 증강과 설정, 입력·출력 이력을 담은 매니페스트 |
+| [train.h](train.h), [train.cpp](train.cpp), [trainConfig.h](trainConfig.h) | 학습 데이터와 캐시 준비, 네 모델의 독립 학습, 분류기를 포함한 모델 저장, 성능 평가와 임계값 산정 |
 
-## Includes
+모델 입출력에 관한 공통 구현은 `encoder.cpp`에, 학습 데이터 준비와 학습 후 평가는 `train.cpp`에 모았다. 학습 데이터 구조와 함수 선언은 `train.h`에 둔다. 전역 `main()`은 `algorithm::RunTraining()`으로 학습 실행을 위임한다. 별도의 보조 소스 파일 없이 위 파일들로 알고리즘을 구성한다.
 
-| 사용 위치 | 주요 Include | 사용 이유 |
-|---|---|---|
-| API | `string`, `vector` | 모델 ID·오류 문자열·Pixel·Feature buffer를 주고받는다. |
-| encoder.h | `memory` | `unique_ptr<State>`로 Module 보관부의 수명을 관리한다. |
-| encoder.cpp | `torch/script.h`, `torch/torch.h` | TorchScript Module, Tensor, `NoGradGuard`, CPU thread를 사용한다. |
-| encoder.cpp | `ATen/ops/_upsample_bilinear2d_aa.h` | Antialiased bilinear resize를 원본 Preprocessing과 맞춘다. |
-| encoder.cpp | `QJsonDocument`, `QJsonObject`, `cmath`, `cstring` | Metadata 확인, Norm/Sqrt, Float32와 Byte buffer 간 복사를 수행한다. `QFile`은 현재 Include만 있고 직접 사용하지 않는다. |
-| augment.cpp | `QImage`, `QPainter`, `random` | Gray8 image의 기하 변환과 Gaussian noise를 만든다. |
-| augment.cpp | `QDir`, `QFile`, `QCryptographicHash`, `QJson*`, `QSaveFile`, `QtEndian` | Cache 탐색, SHA-256, Manifest, 안전한 기록, 파일별 Seed 구성을 처리한다. |
-| train.cpp | `torch/*`, `QCoreApplication`, `QSaveFile`, `QCryptographicHash` | Autograd·Optimizer, CLI 인자, Log/Metadata 저장, Checkpoint 식별을 처리한다. |
-| Offline 경로 | [Engine.h](../Engine/Engine.h), [engineConfig.h](../Engine/engineConfig.h) | DB·모델 ID를 공유하고 같은 Engine 경로로 저장 결과를 검증한다. |
+`export_features.cpp`와 `predict_id.cpp`에서 필요했던 기능은 `FingerprintTrain`의 캐시·검증 경로로 통합했다. 더 이상 쓰지 않는 MLP 학습·비교 스크립트도 운영 소스에서 제거했다. 기존 실험 결과와 소스 스냅샷은 로컬 `models/experiments/source_archive` 등에 보존하며 Git에는 포함하지 않는다.
+
+[prepare_deepprint.py](../../tools/prepare_deepprint.py)는 공개 체크포인트를 C++ 학습 초기 파일로 변환하는 데 사용하므로 유지한다. 디버깅 도구가 아니라 입력 모델을 준비하는 변환 도구이며, 이미 제공된 `deepprint.bin`으로 학습할 때는 필요하지 않다. 별도 검증 전용이던 `tests/`와 CMake 검사 대상은 제거했다. 모델 저장 검증과 학습 후 평가는 `train.cpp`의 운영 경로에 남아 있다. 원본·증강 파일의 해시와 오류 검사에는 Encoder의 공통 함수를 재사용한다. 입력·템플릿 오류는 실패 상태로 반환하고, LibTorch 실행과 학습 파일 입출력의 실제 예외만 호출 경계에서 처리한다.
+
+## Course Concepts / Ownership
+
+공통 인터페이스 `Algorithm`과 구현 `FingerprintEncoder`는 추상 클래스·상속·virtual 소멸자·override/final을 사용한다. `Engine`은 이 인터페이스의 포인터를 빌려 호출하며, 알고리즘 객체를 삭제하지 않는다. `main.cpp`는 Encoder를 지역 객체로 먼저 생성하고 Window를 나중에 생성하므로, Encoder가 Window보다 오래 유지된다. Encoder·Engine·Window는 독립적인 실행 상태를 관리하므로 복사 생성자와 복사 대입을 `= delete`로 금지한다. 이미지·설정·실행 기록처럼 값으로 다루는 구조체는 기존 컨테이너의 복사 규칙을 따른다.
+
+큰 읽기 전용 입력은 const 참조로, 결과를 채우는 인자는 일반 참조로 전달한다. `RetainClassifier`는 원본 Encoder를 공유하고 추론 모드로 바꾸므로 일반 참조를 받는다. 증강 중에는 원본 목록에 새 항목이 추가되어 참조가 무효화될 수 있어 현재 원본 정보를 값으로 보관한다. 기능에 필요한 복사까지 제거하지 않는다. 프로젝트에는 별도 `Array<T>` 구현이 없어 기존 `vector`와 Qt 컨테이너를 유지한다.
+
+수업 범위 밖에서 유지한 기능과 이유는 다음과 같다.
+
+| 기능 | 동작과 유지 이유 |
+|---|---|
+| `unique_ptr<State>`와 전방 선언 | Encoder만 State를 소유하며 소멸할 때 자동 해제한다. Torch 구현을 헤더 밖에 숨긴다. 수동 new/delete와 별도 복사 관리로 바꾸지 않는다. |
+| LibTorch Module/Tensor | 복사는 내부 저장 공간을 공유할 수 있다. 래퍼는 Encoder를 공유하고 Classifier 가중치는 명시적으로 복제한다. 임시 픽셀·파일 버퍼를 가리키는 `from_blob` 결과는 `clone()`하여 버퍼 소멸 후에도 유효하게 만든다. |
+| 지역 람다 | 학습의 점수·CSV 집계와 Logits 계산에 필요한 지역 상태를 참조한다. 즉시 사용하고 외부에 저장하지 않으며 인자·반환 타입을 명시한다. 별도 상태 클래스와 긴 인자 목록을 추가하는 대신 유지한다. |
+| `inline constexpr` | C++17에서 설정 상수를 헤더에 정의한다. 학습 설정·기본값을 표현하며 GUI에서 조절하는 실제 임계값은 별도 실행 상태다. |
+| Tensor 전용 헤더 | `train.h`는 `torch::Tensor`와 같은 타입인 `at::Tensor`의 전용 헤더만 포함한다. JIT·학습 API는 `.cpp`에서 포함해 Qt의 `slots` 매크로와 충돌하지 않게 한다. |
+
+잘못된 명령행 인자는 오류 메시지와 실패 코드로 반환한다. 모델 실행·파일 입출력의 실제 오류는 호출 경계에서 처리하고, 모델 형식·차원·확률·Weight/Label 호환성 검사는 유지한다.
 
 ## Pretrained Model / Training Provenance
 
 ### Original DeepPrint
 
-아래는 [Engelsma·Cao·Jain의 원본 논문](https://arxiv.org/html/1909.09901v2) III·XIII 절의 내용이다. 현재 파일을 학습한 기록과 구분한다.
+아래는 [Engelsma·Cao·Jain의 원본 논문](https://arxiv.org/html/1909.09901v2) III·XIII 절에 보고된 내용이다. 프로젝트가 실제로 사용하는 공개 재구현과는 구분한다.
 
 | 항목 | 논문에 보고된 내용 |
 |---|---|
@@ -51,7 +54,7 @@ Source diagram: [SVG](../../docs/diagrams/algorithm.svg) · [PNG](../../docs/dia
 | Training | RMSProp, Batch 30, 140K steps, 약 25시간. Dropout keep probability 0.8, Weight decay 0.00004. |
 | Resource | TensorFlow 1.14.0, NVIDIA GeForce RTX 2080 Ti 2대. Search/Authentication 실험용 Core i9-7900X·RAM 32 GB는 Training 자원과 구분한다. |
 
-이 프로젝트는 이 논문의 원본 Weight를 로드하지 않는다. 논문의 200-byte 압축 Template도 구현하지 않는다.
+이 프로젝트는 원 논문의 가중치 대신 공개 재구현의 체크포인트를 사용하며, 논문의 200byte 압축 템플릿은 구현하지 않는다.
 
 ### Public Reimplementation / Checkpoint
 
@@ -64,7 +67,7 @@ Source diagram: [SVG](../../docs/diagrams/algorithm.svg) · [PNG](../../docs/dia
 | [deep_print_loss.py](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/flx/models/deep_print_loss.py) | Branch별 Cross entropy + Center loss, Minutiae map MSE를 사용한다. 구현의 계수는 각각 1, 0.125, 0.3이다. 원본 논문 계수와 다르다. |
 | [model_training.py](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/flx/models/model_training.py) | Adam을 사용한다. 저장 Code는 Validation EER가 가장 좋은 시점의 Checkpoint를 보관한다. README의 종료 설명만으로 정확한 학습 Epoch을 확정할 수 없다. |
 
-논문의 4,000 synthetic fingers와 저장소의 6,000은 다르다. 다운로드 파일의 Classifier shape은 `[8000,256]`이므로 저장소 설정과는 부합한다. 그러나 Class 수만으로 실제 Training image 목록을 증명할 수는 없다. 이 Checkpoint의 완전한 Dataset manifest·Training log는 제공 파일에서 확인되지 않았다.
+논문에는 합성 손가락 4,000개, 저장소에는 6,000개로 서로 다르게 기재되어 있다. 내려받은 파일의 분류기 크기는 `[8000,256]`으로 저장소 설정과 맞지만, 클래스 수만으로 실제 학습 이미지 목록을 확정할 수는 없다. 해당 체크포인트의 전체 데이터 매니페스트와 학습 로그는 제공 파일에서 확인되지 않았다.
 
 | 실제 다운로드 파일 | 확인 내용 |
 |---|---|
@@ -84,87 +87,69 @@ Source diagram: [SVG](../../docs/diagrams/algorithm.svg) · [PNG](../../docs/dia
 
 ## Encoder Architecture / Preprocessing
 
-근거는 [원본 Architecture](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/flx/models/deep_print_arch.py), [InceptionV4](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/flx/models/InceptionV4.py), [Conversion wrapper](../../tools/prepare_deepprint.py)다. 선택한 `TexMinu` 변형에는 `Loc` Alignment network가 없다.
+아래는 전처리부터 최종 출력까지의 현재 구조다. Inception·Reduction 블록은 사전학습 모델의 구조를 유지한다.
 
-| 경로 | 구성·출력 | 이번 Fine-tuning |
-|---|---|---|
-| Input | Gray image `N×1×299×299` | 공통 형식을 유지한다. |
-| Stem | 3개 BasicConv와 Mixed_3a/4a/5a, 공통 Feature map | 고정한다. |
-| Texture backbone | Inception-A×4 → Reduction-A → Inception-B×7 → Reduction-B → Inception-C×3 → Average pool → 1,536 features | 고정한다. |
-| Texture projection | Linear `1536→256` + L2 normalize | Weight·Bias를 학습한다. |
-| Minutia backbone | Inception-A×6 → Conv `384→768→768→896→1024` → Max pool → 1,024 features | 고정한다. |
-| Minutia projection | Linear `1024→256` + L2 normalize | Weight·Bias를 학습한다. |
-| Output | 두 Vector concatenate → L2 normalize → 512 features | Float32 512개, 현재 2,048 [bytes]다. |
-| Pretraining 전용 | 두 8,000-class head와 Minutiae map decoder | 변환된 Encoder에서 제외한다. |
+[모델·Fine-tuning 구조도](../../docs/diagrams/deepprint_finetuning.svg) · [PNG](../../docs/diagrams/deepprint_finetuning.png) · [Inception·Reduction 내부 구조](../../docs/diagrams/deepprint_blocks.svg) · [PNG](../../docs/diagrams/deepprint_blocks.png)
 
-Preprocessing은 `Gray8/255 → DB별 정사각형 변환 → Antialiased bilinear 299×299 resize → Gabor binarization`이다. **FVC2004_DB1_B는 중앙 Crop**으로 640×480의 좌우 80 [px]를 잘라 480×480으로 만들고, FVC2000·FVC2002·출처가 불명확한 이미지는 White square padding을 사용한다. Gabor ridge width는 1.8 [px]다. Width/Height 차이가 홀수면 Right/Bottom에서 1 [px] 더 제거하거나 Padding한다.
+구조도의 `FC + Softmax`는 현재 Cosine Classifier와 Softmax를 묶은 표기이며 MLP를 추가한 구조가 아니다.
 
-학습·Enrollment·Attempt는 모두 `FingerprintEncoder::Preprocess`를 사용한다. `AlgorithmImage.database_id`로 입력 DB를 전달하며, 선택한 모델이나 Archive 버전에 관계없이 같은 규칙을 적용한다. Engine은 명시된 DB ID를 우선하고, 생략하면 알려진 부모 폴더 이름으로 식별한다. 기존 Archive도 호환되는 Encoder·Gabor 함수를 사용해 그대로 로드하며, Weight 파일은 변경하지 않는다.
+```mermaid
+flowchart LR
+  I[Gray image] --> P[DB geometry / AA299 / Gabor]
+  P --> B[Frozen backbone]
+  B --> T[Texture1536 → Projection256 / L2]
+  B --> M[Minutia1024 → Projection256 / L2]
+  T --> E[Concat / L2:512]
+  M --> E
+  E --> C[Normalized cosine weights30×512 / scale16]
+  C --> S[Softmax:30]
+  S --> F[Template:30 probabilities]
+```
 
-Padding과 중앙 Crop을 비교한 결과 FVC2004의 Validation EER이 13.33%에서 6.67%로 개선되어 중앙 Crop을 채택하였다.
+선택한 공개 `TexMinu` 모델에는 위치 정렬용 `Loc` 네트워크가 없다. Texture 분기는 Inception-A×4 → Reduction-A → Inception-B×7 → Reduction-B → Inception-C×3 → 평균 풀링을 거쳐 1,536개 특징을 만든다. Minutia 분기는 Inception-A×6 → Conv384→768→768→896→1024 → 최대 풀링을 거쳐 1,024개 특징을 만든다. 두 Projection은 각각 256차원으로 변환한 뒤 L2 정규화한다. 이를 이어 붙인 512차원 벡터를 다시 L2 정규화하고, 편향 없는 30개 클래스의 Cosine Classifier와 Softmax를 통과시킨다.
 
-Upstream의 Constant-image normalization을 `torch.where`로 바꾸고 불필요한 Display import를 제거했다. Texture branch의 Batch-one `squeeze` 문제를 Wrapper에서 피했다. BatchNorm은 Eval 상태이며 Wrapper에는 Dropout을 포함하지 않는다. [변경 고지](../../third_party/deepprint.NOTICE.txt)를 참고한다.
+전처리 순서는 `Gray8/255 → DB별 정사각형 변환 → 안티앨리어싱을 적용한 bilinear 299×299 축소 → Gabor(ridge width 1.8)`다. FVC2004는 640×480 이미지의 좌우 80px를 잘라 중앙 480×480 영역을 사용한다. FVC2000·FVC2002와 출처를 알 수 없는 이미지는 흰색 여백을 채워 정사각형으로 만든다. FVC2004는 증강하기 전에도 중앙 자르기를 먼저 적용한다. 학습·등록·비교는 같은 `FingerprintEncoder::Preprocess`를 사용하며, Gabor를 중복 적용하지 않는다. 원본 파일은 보존한다.
+
+현재 모델 형식은 `deepprint-cosine-probabilities-v2`다. Encoder의 중간 특징은 512차원, 최종 출력은 30차원이며 각각 별도 상수로 관리한다. 네 모델은 `DB:finger`로 구분한 동일한 30개 ID와 출력 순서를 공유한다. 개별 DB 모델도 30개 출력을 모두 Softmax와 CE 계산에 포함하지만, 정답에는 해당 DB의 10개 ID만 등장한다. 남은 20개를 0으로 덧붙이거나, 다른 DB의 같은 번호를 하나의 손가락으로 합치지 않는다.
 
 ## Fine-tuning / Data Split
 
-학습 데이터가 적어 Overfitting(과적합)이 우려되므로 **Partial fine-tuning**을 적용한다. 사전학습된 Backbone을 고정하고 Texture·Minutia의 두 Projection만 조정해 학습 Parameter 수를 제한한다. 학습 중에는 별도의 임시 Classifier도 함께 학습한다.
+학습 데이터가 적어 전체 모델을 학습할 때의 과적합이 우려되므로 Partial FT를 사용한다. 사전학습 Backbone과 BatchNorm 통계는 고정하고, 두 Projection의 파라미터 655,872개와 Cosine Classifier의 파라미터 15,360개만 학습한다. 변환한 모델에는 Dropout이 포함되지 않으며 Backbone은 평가 모드를 유지한다.
 
-원본은 [data/original](../../data/original)에 보존한다. 각 DB는 10 fingers × 8 captures = 80장이다. 먼저 Capture ID 1–6을 Training, 7–8을 Validation으로 나눈다. 모든 Augmentation은 원본의 Split을 상속한다. Validation에는 원본만 사용한다. 같은 손가락의 촬영본을 나누는 방식이며, 손가락 ID를 분리한 학습이나 별도 Test split은 없다.
+| 모델 | 출력 수 / 학습 ID 수 | 학습 원본 + 증강 | 검증 원본 |
+|---|---|---:|---:|
+| fvc2000_db3 | 30 / 10 | 60+720=780 | 20 |
+| fvc2002_db3 | 30 / 10 | 60+720=780 | 20 |
+| fvc2004_db1 | 30 / 10 | 60+720=780 | 20 |
+| combined | 30 / 30 | 180+2160=2340 | 60 |
 
-학습 결과는 새 폴더에 저장하며 기존 Weight를 덮어쓰지 않는다. 모델·Metadata·학습 CSV는 Git에 포함하지 않으므로 Clone 후 준비해야 한다.
+촬영본 1–6번과 그 증강본으로 학습하고, 촬영본 7–8번의 원본으로 검증한다. 검증 촬영본의 증강본은 학습과 검증 어디에도 넣지 않는다. 학습과 검증에 같은 손가락 ID가 등장하므로, 이 결과는 다른 촬영본에 대한 성능이다. 독립 테스트나 미학습 손가락·외부 DB에 대한 검증으로 해석하지 않는다.
 
-| 모델 | Classes | Training originals | 사용 Augmentation | Training 합계 | Validation originals |
-|---|---:|---:|---:|---:|---:|
-| `fvc2000_db3.bin` | 10 | 60 | 720 | 780 | 20 |
-| `fvc2002_db3.bin` | 10 | 60 | 720 | 780 | 20 |
-| `fvc2004_db1.bin` | 10 | 60 | 720 | 780 | 20 |
-| `combined.bin` | 30 | 180 | 2,160 | 2,340 | 60 |
+네 모델은 원래 사전학습 파일에서 각각 새로 시작한다. Adam, 학습률 0.0001, Weight decay 0.0001, Batch 32, 20 Epoch, Seed 42로 학습한다. Logit은 `16 × embedding @ normalized_classifier_weight.T`로 계산하며, CE에는 Softmax 이전 값을 넣는다. 추론 모델에는 Softmax까지 포함한다. 마지막 Epoch의 모델을 저장하고 조기 종료나 최적 Epoch 선택은 하지 않는다. 이미지 순서는 이전 비교 실험과 같게 유지한다. Encoder와 Classifier를 모두 저장하되, Optimizer 상태를 저장하는 학습 재개 기능은 제공하지 않는다.
 
-통합 Label은 `DB name:finger ID`다. 서로 다른 DB의 같은 숫자 ID를 다른 Class로 취급한다. 전체 원본에 대해 생성한 Augmentation은 2,880장이다. 이 중 Validation 소속 720장은 학습·검증에 넣지 않는다.
+특징 캐시는 원본·학습 증강 이미지, 매니페스트, 전처리 설정, 사전학습 파일과 특징 데이터의 SHA-256을 검사한 뒤 재사용한다. 또한 2400×2560 Float32 크기와 각 행의 ID·학습/검증 구분·순서를 확인한다. 캐시를 재사용해도 두 Projection과 Classifier는 새로 학습한다. 캐시 크기는 약 25MB이며, 전체 프로세스의 메모리 사용량을 뜻하지 않는다.
 
-1. 같은 `models/pretrained/deepprint.bin`에서 Frozen backbone feature를 추출한다. 2,400개 Sample의 2,560-dimensional feature를 기본 Batch 4로 준비한다.
-2. 각 모델마다 동일한 Archive를 다시 로드한다. 앞 모델의 학습 결과를 다음 모델에 넘기지 않는다.
-3. `TrainablePrefixes`에 해당하는 두 Projection의 Weight·Bias만 Gradient를 켠다. 학습 Encoder parameter는 655,872개다.
-4. 임시 Bias-free Linear classifier `512→10` 또는 `512→30`을 별도로 만든다. 이 Head는 각각 5,120·15,360개 Parameter를 추가로 학습한다.
-5. 정규화된 Embedding과 정규화된 Classifier Weight의 Cosine에 16을 곱해 Logit을 만든다. Finger ID의 Cross entropy로 Projection과 임시 Head를 학습한다.
-6. 고정 20 Epoch 후 Encoder만 저장한다. Validation loss로 Early stopping하거나 Best Epoch을 선택하는 코드는 없다. 임시 Classifier는 저장하지 않는다.
+## Template / Model Compatibility
 
-이번 Fine-tuning에는 Center loss·Minutiae map annotation·Map MSE·Genuine/Impostor pair loss를 사용하지 않는다. Pretrained branch가 학습한 Feature를 Finger classification으로 조정한다. Inference에서는 분류 Head 없이 Feature 간 Cosine을 `[0,1]`로 정규화해 사용한다.
+등록 템플릿은 학습한 30개 ID에 대한 Softmax 확률 분포다. 비교 이미지도 같은 모델과 전처리, 같은 ID 순서로 처리한다. Template은 Softmax 출력 자체이며, 비교는 모델의 순방향 실행이 끝난 뒤 수행한다. 두 확률 벡터의 점수는 `(cos(p_enroll,p_attempt)+1)/2`로 계산한다. 값이 음수가 아니므로 점수 범위는 [0.5, 1]이며, 동일 지문일 확률은 아니다. 가장 높은 확률의 ID가 같은지 판정하거나 Classifier 가중치끼리 비교하는 방식도 아니다. Genuine/Impostor 정답은 원본 손가락 ID 또는 명시한 CSV 그룹으로 결정하며, 예측 ID로 바꾸지 않는다.
 
-### Hyperparameters
+| 파일 | 저장 내용 |
+|---|---|
+| 모델 `.bin` | Encoder·Classifier·Softmax, 형식 버전, 모델 ID, 중간/출력 차원, ID 순서, 전처리와 학습 이력 |
+| 모델 `.json` 및 보정 파일 | 모델 정보와 실제 `.bin`의 SHA-256 |
+| 템플릿 `.fpt` | `fingerprint-probability-template-v2` 형식의 식별 정보와 30개 Float32 값 |
 
-설정은 현재 [trainConfig.h](trainConfig.h), [encoderConfig.h](encoderConfig.h), [augmentConfig.h](augmentConfig.h)에 있다. 현재 선언은 `inline constexpr` 또는 `inline const`다. Source 값을 수정한 뒤 다시 Build해야 반영된다.
+`.fpt`는 Magic·버전·모델 ID·실제 Weight SHA·전체 ID 순서와 해시·전처리·출력 차원을 기록한다. Qt 5.15 스트림의 Little endian 형식이며, 확률 값 자체는 120bytes다. 화면과 리포트에는 식별 정보까지 포함한 실제 템플릿 크기를 표시한다.
 
-| TrainConfig | 현재 값 | 의미 |
-|---|---|---|
-| `TrainablePrefixes` | `texture_projection.`, `minutia_projection.` | 두 마지막 Linear layer를 학습한다. |
-| `Optimizer`, `LearningRate`, `WeightDecay` | Adam, 0.0001, 0.0001 | Optimizer와 업데이트·정규화 강도다. |
-| `BatchSize`, `FeatureBatchSize`, `Epochs` | 32, 4, 20 | 학습 Batch·추출 Batch·반복 횟수다. |
-| `Seed`, `CosineLogitScale` | 42, 16 | 초기화/Shuffle Seed와 Logit 배율이다. |
-| `ValidationFirstCapture` | 7 | 해당 Capture ID부터 Validation으로 둔다. |
-| `Momentum` | 0.9 | SGD를 선택했을 때만 사용한다. |
-| `ReloadRtol`, `ReloadAtol`, `SelfScoreTolerance` | `1e-5`, `1e-6`, `1e-5` | Reload 출력과 Self comparison의 허용 오차다. |
+구형 512차원 모델과 템플릿은 운영 경로에서 안내와 함께 거절한다. 사전학습용 `pretrained` 모델만 학습 초기값으로 허용한다. 모델을 선택하거나 다시 불러오면 Engine의 모델 버전 번호가 갱신되고 등록 템플릿이 초기화된다. 서로 다른 모델·가중치·ID 순서·전처리의 템플릿은 Backend에서도 비교를 거절한다. 모델 재로딩에 실패해도 이전 모델을 재사용하지 않는다. 기존 로컬 파일은 삭제하지 않는다.
 
-기본 설정에서는 Frozen feature를 공유 Cache로 학습한다. Prefix를 다른 Layer로 확장하면 Full forward 경로를 사용한다. 해당 확장 설정은 실행 미확인이다. Optimizer/Classifier state를 저장하는 Resume 기능은 없다.
-
-| EncoderConfig | 현재 값 | 의미 |
-|---|---|---|
-| `InputSize`, `GrayMaximum` | 299 [px], 255 [gray8] | 공통 Input과 Pixel normalization이다. |
-| `EmbeddingSize`, `BranchEmbeddingSize` | 512, 256 [features] | 최종 Vector와 Branch Vector 크기다. |
-| `FeatureSize`, `TextureFeatureSize` | 2,560, 1,536 [features] | Frozen feature Cache의 크기다. |
-| `GaborRidgeWidth`, `NormEpsilon` | 1.8 [px], `1e-12` | Gabor 설정과 Zero-norm 검출 기준이다. |
-| `Threads` | 4 [threads] | C++ CPU 연산 Thread 수다. CUDA/MPS는 사용하지 않는다. |
-| `ExportAtol`, `ExportRtol` | `1e-5`, `1e-4` | Python/TorchScript 비교 허용 오차다. |
-| `CenterCropDatabase` | `FVC2004_DB1_B` | 중앙 정사각형 Crop을 적용할 입력 DB다. |
-| `Preprocessing`, `CompatibleArchivePreprocessing` | `…-v2`, `…-v1` | 저장할 전처리 식별자와 기존 Archive의 호환 식별자다. 실행 규칙은 입력 DB로 결정한다. |
-
-Architecture·Preprocessing을 바꾸면 Checkpoint 호환성과 재변환 여부도 확인해야 한다. Config 이름만 바꿔 기존 Weight의 Network 구조가 바뀌는 것은 아니다.
+진단용 `embed_features`와 `embedding` 메서드는 512차원 특징을 유지한다. GUI의 주 비교 경로는 30차원이다. 외부 이미지의 ID가 학습 목록에 없어도 등록과 비교는 가능하지만, 그 정확도가 검증되었다는 의미는 아니다.
 
 ### Augmentation
 
-| AugmentConfig | 현재 값·적용 확률 |
+| 증강 설정 | 현재 값·적용 확률 |
 |---|---|
-| `CopiesPerOriginal`, `Seed`, `Version` | 12 [images/original], 42, Cache format 2 |
+| `CopiesPerOriginal`, `AugmentSeed`, `Version` | 12 [images/original], 42, Cache format 2 |
 | `RotationDegrees`, `RotationProbability` | −15~+15 [deg], 0.9 |
 | `ScaleMin/Max`, `ScaleProbability` | 0.90~1.10 [ratio], 0.9 |
 | `Fvc2004ScaleMin/Max` | 1.00~1.30 [ratio]. 중앙 Crop 후 영역에서 Foreground 잘림 제한을 적용한다. |
@@ -175,35 +160,65 @@ Architecture·Preprocessing을 바꾸면 Checkpoint 호환성과 재변환 여�
 | `FolderPattern` | `crop_first_%1_per_image_seed%2`. 설정이 다르면 번호 Suffix를 붙인다. |
 | `SourceGeometry` | `fvc2004-center-square-before-augmentation` |
 
-FVC2004는 원본 640×480의 중앙 480×480을 먼저 Crop한 뒤 증강한다. 다른 DB는 기존 원본 영역에서 증강한다. 변형 적용 여부는 독립적으로 추첨한다. Rotation·Scale을 합성한 뒤 Brightness gain·Gaussian noise·Gray8 clamp를 적용한다. Foreground 잘림 검사도 Crop 후 영역을 기준으로 한다. 검사는 Threshold 기반 근사이며 정밀 Segmentation은 아니다. FVC2004 증강 PNG는 이미 정사각형이므로 Encoder에서 추가로 잘리는 영역이 없다.
+FVC2004는 중앙 480×480 영역을 먼저 자른 뒤 증강하고, 다른 DB는 원본 영역에서 증강한다. 각 변형은 독립적으로 적용 여부를 추첨한다. 회전·크기 변환을 합성한 뒤 밝기 조정과 Gaussian 잡음을 적용하고, 픽셀 값을 Gray8 범위로 제한한다. 지문 영역이 과도하게 잘리는지도 중앙 자르기 이후의 영역을 기준으로 검사한다. 이 검사는 밝기 임계값에 따른 근사이며 정밀한 지문 영역 분할은 아니다. FVC2004 증강 PNG는 이미 정사각형이므로 Encoder에서 추가로 잘리지 않는다.
 
-증강 결과는 `data/augmented/crop_first_12_per_image_seed42`처럼 설정을 알아볼 수 있는 폴더에 저장한다. 같은 설정과 원본으로 완성된 Cache만 Hash를 확인해 재사용한다. Manifest에는 설정, 원본·결과의 SHA-256, split, 실제 변형값과 Crop 위치·전후 크기를 기록한다. 설정이 달라지면 다른 번호의 폴더를 사용한다. 이 폴더는 Git에서 제외되며 추론 중에는 읽지 않는다.
+증강 결과는 `data/augmented/crop_first_12_per_image_seed42`처럼 설정을 알아볼 수 있는 폴더에 저장한다. 같은 설정과 원본으로 완성된 결과만 해시를 확인해 재사용한다. 매니페스트에는 설정, 원본·결과의 SHA-256, 학습/검증 구분, 실제 변형값, 자른 위치와 변환 전후 크기를 기록한다. 설정이 다르면 별도 번호의 폴더를 사용한다. 증강 폴더는 Git에서 제외하며 추론에는 사용하지 않는다.
 
-### Local Resource / Results
 
-| 항목 | 확인 내용 |
-|---|---|
-| 실행 환경 | 기록상 macOS arm64 CPU, LibTorch/PyTorch 2.15.0, Qt 5.15.17. Python 3.12.12에서도 Conversion·Reload를 확인했다. |
-| GPU / CPU | GPU·CUDA·MPS 미사용, C++ Thread 4. 정확한 CPU model·실제 Core 사용률은 학습 Log에 없다. |
-| Parameter / Cache | Exported encoder는 66,120,672 Parameters다. Feature Cache는 `2400×2560×4` = 24,576,000 [bytes], 약 23.44 MiB다. 이는 전체 Process RAM이 아니다. |
-| Update 횟수 | Source 설정상 개별 모델은 Epoch당 25 Batch × 20 = 500 updates, 통합은 74 × 20 = 1,480 updates다. |
-| Time / Peak memory | 총 Wall time·Peak RAM 측정 기록은 없다. Upstream A100 안내값을 이 실행 시간으로 사용하지 않는다. |
-| 검증 | `models/verification.json`: 네 Archive Reload 일치, 2,048-byte Template, Self/Genuine/Impostor inference 확인. `models/implementation_check.json`: Frozen parameter 일치, 두 Projection 변경 확인. |
+## Final Production Run / Calibration
 
-| 모델 | 마지막 Validation loss | Validation classification accuracy | Training log |
-|---|---:|---:|---|
-| FVC2000 | 0.100825 | 100% | `models/fvc2000_db3_training.csv` |
-| FVC2002 | 0.255753 | 95% | `models/fvc2002_db3_training.csv` |
-| FVC2004 | 0.506177 | 95% | `models/fvc2004_db1_training.csv` |
-| Combined | 0.247110 | 98.3333% | `models/combined_training.csv` |
+최종 모델은 로컬 `models/current`에 보관한다. 이 폴더는 Clone에 포함되지 않는다. 네 모델 모두 기존 사전학습 파일에서 새로 시작해 Seed 42로 20 Epoch 학습한 **단일 실행 결과**이며, 앞선 5개 Seed 평균과 구분한다. 각 `.bin`은 약 254MiB다. 이전 동일 조건 실험과 마지막 검증 손실의 최대 차이는 7.5e-8 이하였다.
 
-표의 수치는 이전 실행 기록이며, 작은 FVC_B Validation에서 임시 Classifier를 평가한 결과다. 독립 Finger/Sensor Test의 FAR·FRR·EER를 뜻하지 않는다. 저장된 모델의 파라미터가 서로 다른 Score 분포를 가질 수 있으며 Calibration은 미구현이다.
+아래 표는 기존에 실제 저장했던 512차원 모델, 새 모델에서 분류기 직전의 512차원 특징, 새 모델의 최종 30차원 출력을 비교한다. 새 모델의 512차원과 30차원을 비교하면 분류기를 유지한 효과를 분리해 볼 수 있다.
+
+| 모델 | 기존 저장 모델 512차원 EER | 새 모델의 512차원 EER | 최종 30차원 EER | 최종 30차원 AUC |
+|---|---:|---:|---:|---:|
+| FVC2000 |2.593% |2.593% |0.000% |1.000000 |
+| FVC2002 |7.685% |7.778% |0.556% |0.999722 |
+| FVC2004 |6.667% |6.667% |2.500% |0.998750 |
+| 통합 |6.512% |6.512% |0.617% |0.999816 |
+
+등록에는 원본 촬영본 1–6번, 비교에는 7–8번을 사용했다. DB별 Genuine 120쌍·Impostor 1,080쌍이며 통합 결과는 각 DB 내부의 쌍만 합산했다. 결과는 `validation_metrics.csv/json`, `validation_scores.csv`, `validation_report.html`에 보존했다. 이 EER은 C++ 평가에서 교차점을 보간한 값이다. GUI는 관측한 임계값에서 EER의 범위를 표시하므로 표기 방식이 다르며, 사용자가 고른 이미지쌍에 따라 결과도 달라질 수 있다.
+
+### 판정 임계값 보정 (2026-11-18)
+
+최종 저장 모델의 검증 점수로 FAR 1% 이하인 가장 낮은 임계값을 찾고, GUI 입력 정밀도에 맞춰 소수점 네 자리로 올림했다. 여러 모델을 선택하면 가장 높은 점수로 판정하므로, 단일 모델뿐 아니라 가능한 15개 모델 조합의 최고 점수도 각각 검증했다. 세 DB와 외부 입력용 항목을 합쳐 총 60개 설정을 `calibration.json/csv`에 저장했다.
+
+| 입력 DB / 선택 모델 | 두 조절기의 추천 초기값 | Genuine 통과율 | Impostor 오수락률 |
+|---|---:|---:|---:|
+| FVC2000 / 해당 개별 모델 | 0.5603 | 100.000% | 0.926% |
+| FVC2002 / 해당 개별 모델 | 0.6648 | 100.000% | 0.926% |
+| FVC2004 / 해당 개별 모델 | 0.7235 | 95.000% | 0.926% |
+| FVC2000 / 통합 모델 | 0.5258 | 100.000% | 0.926% |
+| FVC2002 / 통합 모델 | 0.5986 | 100.000% | 0.926% |
+| FVC2004 / 통합 모델 | 0.6286 | 96.667% | 0.926% |
+
+각 개별 모델은 해당 DB에서, 통합 모델은 세 DB 내부의 쌍을 합산해 비교한 결과다. 각 방식에서 FAR 1% 이하인 지점을 따로 찾아 비교했다.
+
+| 모델 | 기존 512차원 Genuine 통과율 | 최종 30차원 Genuine 통과율 | 최종 30차원 FAR / 거절률 |
+|---|---:|---:|---:|
+| FVC2000 | 89.167% | 100.000% | 0.926% / 99.074% |
+| FVC2002 | 75.833% | 100.000% | 0.926% / 99.074% |
+| FVC2004 | 77.500% | 95.000% | 0.926% / 99.074% |
+| 통합 | 77.222% | 100.000% | 0.988% / 99.012% |
+
+두 조절기는 같은 검증 지점에서 시작하지만 이후 독립적으로 바꿀 수 있다. 서로 다른 두 임계값에서 얻은 통과율·거절률을 하나의 공통 경계에서 측정한 전체 정확도로 합산하지 않는다. 초기 설정 0.5954는 통합 모델의 세 DB 합산 결과에서 구한 값이며, 정상 로딩 후에는 입력 DB와 모델 조합에 맞는 추천값을 우선한다.
+
+외부 입력에는 같은 모델 조합으로 검증한 세 DB의 임계값 중 최댓값을 사용한다. 예를 들어 네 모델을 모두 선택했을 때는 0.9983이며, 제공 DB에서도 Genuine 통과율 83.889%·FAR 0.586%다. 모델을 많이 선택한다고 항상 유리한 것은 아니다. 지원 정밀도에서 목표를 충족하지 못하면 `target_met=false`와 안내를 남긴다. 현재 60개 설정은 모두 검증 목표를 충족했다.
+
+이 값들은 학습에 등장한 ID의 검증 촬영본으로 선정했다. 독립 테스트, 외부 DB, 사용자가 구성한 임의의 비교 쌍에서 FAR 1%를 보장하지 않는다. GUI에는 추천값과 조절 방법을 짧게 안내하고, 구체적인 근거는 `validation_report.html`과 원시 결과에 남긴다.
+
+## Experiments / Selection History
+
+### 전처리와 Partial FT 선택
+
+FVC2004에서 여백 채우기와 중앙 자르기를 비교한 결과, 검증 EER이 13.33%에서 6.67%로 낮아져 중앙 자르기를 채택했다. FVC2002에서는 Gabor가 배경에도 반응하는 현상을 관찰했지만, 추가 보정의 일관된 이득을 확인하지 못해 기존 처리를 유지했다. 학습 데이터가 적다는 점을 고려해 Backbone 전체를 바꾸기보다 두 Projection을 조정하는 Partial FT를 기본으로 삼았다.
 
 ### SupCon 비교 실험 (2026-11-18)
 
 현재 전처리·증강·Pretrained 초기값을 유지하고 Backbone은 고정한 채 두 Projection만 학습하여 CE와 `CE + 0.1 × SupCon`을 비교했다. SupCon은 최종 512차원 Embedding에 적용했으며 Temperature는 0.1이다. 두 조건에 동일한 초기 분류기와 Batch(손가락 8개 × 서로 다른 촬영본 4개, 원본 또는 증강본 선택)를 사용했다. Seed 42·43·44, Adam(LR·Weight decay 각각 0.0001), 20 Epoch으로 실행하고 마지막 Epoch을 평가했다.
 
-등록은 원본 촬영본 1–6번, Probe는 7–8번으로 DB별 Genuine 120쌍·Impostor 1,080쌍을 비교했다. 아래는 세 Seed의 평균 Validation EER이며, 낮을수록 좋다. 통합 결과는 각 DB 내부의 비교 쌍만 합산했다.
+등록은 원본 촬영본 1–6번, Probe는 7–8번으로 DB별 Genuine 120쌍·Impostor 1,080쌍을 비교했다. 아래는 당시 기록한 세 Seed의 평균 Validation EER이며, 낮을수록 좋다. 통합 결과는 각 DB 내부의 비교 쌍만 합산했다.
 
 | 평가 대상 | CE | CE + SupCon |
 |---|---:|---:|
@@ -233,20 +248,41 @@ FVC2004는 원본 640×480의 중앙 480×480을 먼저 Crop한 뒤 증강한다
 
 이 추가 검증도 이전 탐색에 사용한 동일 DB의 소규모 교차 검증이며, 완전히 새로운 외부 Test를 뜻하지 않는다. C++ Adapter 시험 구현의 Python 출력 일치·전체 추론·저장·재로딩은 확인했으나 기본 학습 경로에는 적용하지 않았다.
 
-## API / Data Exchange
+### MLP 깊이 비교 (2026-11-18)
 
-| 함수·위치 | 입력 | 출력·목적 |
-|---|---|---|
-| `LoadModel` / encoder.cpp | Model ID, Archive 경로 | `bool`, Error. Embedded format·Architecture·Preprocessing·512 dimensions·Model ID와 Probe output을 확인한다. |
-| `Preprocess` / encoder.cpp | Model ID, tightly packed `AlgorithmImage`와 `database_id` | `PreparedImage`: 299×299 Float values. 입력 DB로 Crop/Padding을 결정한다. 실패하면 `false`와 Error를 준다. |
-| `CreateTemplate` / encoder.cpp | Model ID, `PreparedImage` | Float32 512개의 Byte buffer. Size·Finite·Norm을 확인한다. |
-| `Compare` / encoder.cpp | Model ID, Enrollment/Attempt Template | `double` Normalized similarity `[0,1]`, 성공 여부·Error. 높은 값이 더 유사하다. |
-| `PrepareAugmentations` / augment.cpp | Original DB root, Cache root, 선택적 Manifest 경로 포인터 | `QVector<TrainingImage>`. 원본·증강본 경로와 Split을 돌려준다. 오류는 Exception으로 전달한다. |
-| `main` / train.cpp | Original root, Pretrained archive, Output folder, 선택적 `--augment-only` | 준비 또는 네 모델 학습·저장·검증. 성공 0, 실패 1을 반환한다. |
-| `setting` / prepare_deepprint.py | Config Header와 상수 이름 | Python에서 동일한 Encoder/Seed 설정을 읽는다. 단순 Literal 선언 형식을 전제로 한다. |
-| `Encoder.features/embed_features/forward/preprocess` / prepare_deepprint.py | Image, Frozen feature 또는 Preprocessing input | Backbone Cache·Projection·전체 Encoder·Gabor 단계를 TorchScript method로 내보낸다. |
+먼저 `512→256→128→K` 구조의 MLP와 Cosine Classifier를 같은 데이터에서 비교했다. 출력층을 포함해 Linear가 3개인 구조이며, 3개 Seed와 3개 학습률 조합으로 총 72회 학습했다. 통합 모델의 ID 분류 정확도는 Cosine 96.67%, 선택한 학습률의 MLP 94.44%였다. 이어 0·1·2·3-layer 조건을 5개 Seed로 총 200회 비교하고, 통합 모델은 60 Epoch 조건도 20회 추가했다. 3-layer의 통합 EER은 20 Epoch의 1.556%에서 60 Epoch의 2.340%로 오히려 높아졌다.
 
-Engine은 Image buffer를 전달하고 Algorithm은 Model별 Template·Score·Error를 반환한다. GUI와 직접 통신하지 않는다. Offline trainer만 Engine을 호출해 같은 Inference 경로를 검사한다.
+여기서 층수는 전체 Linear 수다. 1-layer는 `512→K`, 2-layer는 `512→256→K`, 3-layer는 `512→256→128→K`이며, 은닉층에 ReLU를 적용하고 마지막에 Softmax를 둔다. 0-layer는 별도 분류기를 학습한다는 뜻이 아니라, 기존 512차원 특징을 직접 비교하는 조건이다.
+
+### 네 모델의 출력을 30개로 통일한 재학습
+
+개별 모델의 10개 출력과 통합 모델의 30개 출력이라는 차이를 없애기 위해, 모든 분류기의 출력을 30개로 맞추고 총 200회 다시 학습했다. 데이터·증강·Projection 초기값·배치 순서를 맞추고 Seed 42–46을 사용했다. MLP는 학습률 0.0001/0.0003/0.001을 비교했으며 Cosine은 0.0001로 고정했다. MLP에서 EER 기준으로 선택한 공통 학습률은 모두 0.001이었다. 아래 수치는 **당시 5개 Seed의 평균**이며 최종 Seed 42 단일 모델의 결과와 구분한다.
+
+### 최종 표기: Cosine 분류기 제거와 유지
+
+과거 실험 표의 `cosine`은 **분류기를 유지한 Softmax 출력**이었다. 반면 당시 GUI는 분류기를 제외한 **512차원 특징**을 비교했다. 따라서 기존 정의의 `0-layer`와 `cosine w/o classifier`는 같은 조건이다. 현재 GUI는 분류기를 유지하는 `w/ classifier` 방식으로 전환했다. 두 Cosine 조건은 같은 학습 가중치를 사용하되, 분류기 전의 512차원을 비교하는지 이후의 30차원 확률 벡터를 비교하는지가 다르다.
+
+| 조건 | FVC2000 EER | FVC2002 EER | FVC2004 EER | 통합 EER |
+|---|---:|---:|---:|---:|
+| 0-layer / cosine w/o | 2.593% | 7.778% | 6.667% | 6.512% |
+| 1-layer MLP | 0.000% | 0.556% | 3.444% | 0.809% |
+| 2-layer MLP | 0.000% | 0.778% | 1.111% | 1.111% |
+| 3-layer MLP | 0.000% | 1.352% | 2.407% | 1.556% |
+| cosine w/ classifier | 0.000% | 1.148% | 1.444% | 0.475% |
+
+네 모델을 같은 비중으로 평균하면 2-layer는 0.750%, Cosine은 0.767%로 거의 같았다. 차이 −0.017%p에 대한 Seed 재표집 95% 구간은 −0.338~+0.248%p로 0을 포함했다. 일부 개별 DB에서는 1·2-layer가 더 좋았고, 통합 모델의 NLL도 2-layer가 0.125로 Cosine의 0.185보다 낮았다. 따라서 MLP가 모든 지표에서 열세였다고 해석하지 않는다. 통합 모델의 지문쌍 비교 결과, 기존 학습 구조의 활용과 운영 인터페이스를 고려해 **Partial FT + Cosine Classifier 유지 + Softmax 출력 비교**를 채택했다.
+
+분류기를 유지한 통합 모델의 EER은 5개 Seed에서 평균 0.475%, 표준편차 0.119%였다. 분류기를 제외하면 6.512%였다. FVC2002는 1.148±1.966%로 초기값에 따른 변동이 컸다. 이 표준편차는 같은 검증 데이터에서의 학습 변동이며 일반화 성능의 신뢰구간은 아니다. 동일한 모델 파일 20개에서 두 경로를 다시 계산한 70개 지표도 기존 결과와 일치했다.
+
+재학습 없이 출력 후보만 해당 DB의 10개로 제한하는 대조 실험도 했다. 통합 Cosine 모델의 ID 정확도는 96.33%에서 97.67%로 달라졌지만, EER은 0.475%와 0.481%로 거의 같았다. 이는 출력 후보 제한 실험이며, 앞선 30개 출력 재학습과 구분한다. 출력 크기만으로 전체 성능 차이를 설명하기는 어려웠다.
+
+### 임계값에 따른 Genuine 통과율
+
+같은 통합 모델의 5개 Seed를 비교했을 때, 임계값 0.75에서 Genuine 통과율은 512차원 방식 98.889%, 30차원 방식 97.722%였다. 그러나 0.85에서는 각각 90.833%와 95.667%로 순위가 바뀌었다. FAR 1% 이하인 지점끼리 비교하면 77.222%와 100%였다. 고정 임계값 하나의 통과율만으로 구조의 우열을 판단하지 않은 이유다.
+
+임계값 0.60에서 30차원 방식의 Genuine 통과율은 100%, 평균 FAR은 0.914%였지만, 이를 모든 모델에 그대로 적용하지 않았다. 최종 저장 모델과 GUI의 최고 점수 집계 방식에 맞춰 모델 조합별로 다시 산정했다.
+
+실험용 학습·비교 스크립트와 두 보조 실행 파일은 운영 소스에서 제거했다. 결과·CSV·Weight와 이전 소스·문서 스냅샷은 Git에서 제외한 로컬 폴더에 보존했다. 주요 기록은 `models/experiments/` 아래의 `mlp_3layer`, `mlp_depth`, `output_dimensions`에 있으며 새 Clone에는 포함되지 않는다.
 
 ## Conversion / Offline Run
 
@@ -292,35 +328,60 @@ TorchScript는 Deprecated/Legacy API지만 현재 C++ 학습·재로딩 경로�
 
 ### C++ 증강·학습·추론
 
-Build 후 [Root 실행 순서](../../readme.md)를 따른다. 학습 입력은 Clone에 포함된 `models/pretrained/deepprint.bin`이다. 출력 폴더는 학습 명령이 자동 생성하며, 학습 완료 후 생성된 네 Fine-tuned 모델을 GUI에서 사용한다. 이 출력 폴더는 Clone에 포함되지 않는다.
+Project root에서 실행한다. 학습 결과와 가중치는 Git에서 제외하므로 새로 Clone했다면 먼저 학습해야 한다. 기존 모델이 있는 출력 폴더는 덮어쓰지 않는다.
 
-| 실행 | 입력과 결과 |
-|---|---|
-| `FingerprintTrain data/original models/pretrained/deepprint.bin models/retrain_01 --augment-only` | 원본을 보존하면서 증강만 준비한다. |
-| `FingerprintTrain data/original models/pretrained/deepprint.bin models/retrain_01` | 증강을 생성하거나 재사용한 뒤 네 모델을 독립 학습하고 재로딩·추론을 검증한다. |
-| `FingerprintGUI` | 위 학습을 완료했다면 `models/retrain_01`을 선택한다. 다른 출력 경로를 사용했다면 실제 모델 폴더를 선택한다. |
+```sh
+cmake --build build --target FingerprintTrain FingerprintGUI --parallel 2
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01
+./build/FingerprintGUI
+```
 
-위 표의 실행 파일은 macOS/Linux에서 `./build/`, Windows에서 `.\build-vs\Release\` 아래에 있다. Windows 파일명에는 `.exe`를 붙인다. 출력 폴더에 네 `.bin` 중 하나라도 있으면 기존 결과를 보호하기 위해 중단한다. 재학습은 새로운 폴더명으로 실행한다.
+GUI Step 3에서 `models/run_01` 등 학습을 완료한 폴더를 선택한다. 네 `.bin`과 `calibration.json`은 같은 폴더에 둔다. Windows에서는 `build-vs/Release` 아래 실행 파일을 사용하고 빌드 명령에 `--config Release`를 추가한다. IDE에서 학습을 실행할 때 작업 디렉터리는 프로젝트 루트로 설정한다.
 
-Fine-tuned Weight에는 Encoder·전처리와 Metadata가 들어가며 `.json`과 학습 CSV를 함께 저장한다. 임시 Classifier와 Optimizer state는 저장하지 않으므로 중간 학습을 이어가는 Resume 기능은 없다. Python은 최초 변환에만 필요하고, 증강·학습·추론은 C++로 실행한다.
+```sh
+# 증강만 준비: 운영 Weight는 생성하지 않는다.
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_02 --augment-only
+# 검증된 Frozen feature cache를 사용하되 Projection·Classifier는 새로 학습한다.
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_02 --feature-cache models/run_01/feature_cache
+# 기존 운영 Weight는 바꾸지 않고 보정·검증만 재생성한다.
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01 --verify-only --feature-cache models/run_01/feature_cache
+```
+
+이전 512차원 모델 폴더가 있으면 `--baseline <folder>`로 같은 이미지쌍의 비교를 추가한다. 새 모델의 진단용 512차원 특징과 이전에 저장한 512차원 모델을 구분해 기록한다. 기본 Cache는 출력 폴더의 `feature_cache`이며 운영 추론에는 필요하지 않다.
+
+기존 검증 Cache와 512차원 기준 모델을 재사용하려면 아래처럼 실행한다. 현재 모델을 덮어쓰지 않도록 새 출력 폴더를 지정하며, 이 로컬 자료는 Clone에 포함되지 않는다.
+
+```sh
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_03 --feature-cache models/experiments/parameter_efficient_tuning --baseline models/baselines/center_crop_before_augmentation
+```
 
 ## Windows / Visual Studio
 
-Visual Studio에서 `build-vs/FingerprintEvaluator.sln`을 열고 **Release / x64**를 선택한다. `FingerprintTrain`을 Startup Project로 설정한 뒤 **Properties → Debugging**에서 다음 값을 지정한다.
+Root의 Windows Build 설정으로 Release/x64를 사용한다. `FingerprintTrain`을 Startup Project로 설정하고 Working Directory를 Project root, Command Arguments를 `data\original models\pretrained\deepprint.bin models\run_01`로 지정하면 된다. Qt/LibTorch DLL과 TIFF plugin 준비는 [Root](../../readme.md#windows--visual-studio)를 따른다. Windows 실제 실행은 아직 확인하지 않았다.
 
-| 항목 | 설정 |
-|---|---|
-| Working Directory | Clone한 Project root의 절대 경로 |
-| Command Arguments | `"data\original" "models\pretrained\deepprint.bin" "models\retrain_vs_01"` |
-| Environment | 설치한 Qt `bin`·LibTorch `lib`를 PATH에 추가하고 `QT_PLUGIN_PATH`를 Qt의 `plugins`로 지정 |
-| 실행 | Ctrl+F5. 다음 학습에는 새 출력 폴더명을 사용 |
+모델 폴더의 용도와 이전 경로 대응은 [모델 보관 안내](../../models/readme.md)를 참고한다.
 
-DLL과 TIFF plugin 준비는 [Root의 Windows Build](../../readme.md#windows--visual-studio)를 따른다. GUI만 실행하려면 Startup Project를 `FingerprintGUI`로 바꾼다.
+## Verification / Limits
+
+이 절은 이전에 수행한 검증 기록이며, 문서 수정 때마다 재학습했다는 뜻은 아니다. 수업 개념에 맞춘 소유권 정리 후 `models/validation/oop_refactor`에서 네 모델을 각각 20 Epoch 새로 학습했다. 각 모델의 파라미터 텐서 586개와 버퍼 573개가 기존 운영 모델과 정확히 같았고, 2,400개 입력의 30차원 출력·512차원 특징의 최대 차이는 모두 0이었다. 학습 로그·검증 점수·60개 임계값 설정도 유지됐다. 소유권·헤더 독립성, 잘못된 입력·템플릿 거절, GUI 세 흐름 107쌍, 지표·그래프 100개 조건을 임시 검사로 확인했다. 검사 소스는 프로젝트에 추가하지 않고 결과만 해당 로컬 폴더에 보존한다. 이 검사는 리팩터링 회귀 확인이며 새로운 독립 Test 성능 측정은 아니다.
+
+학습에 필요한 검사는 `train.cpp`에서 함께 수행한다. 저장 전후와 재로딩 후의 출력 일치, Batch 1·2·4에서의 30차원 확률, Engine의 등록·자기 자신 비교를 확인한다. 학습 후 `EvaluateTrainingRun`은 성능과 임계값을 계산하고, Backbone 고정 여부와 특징 캐시·실제 이미지 추론의 일치 여부를 기록한다. 독립 디버깅용 `tests/`와 `FingerprintBackendCheck`·`FingerprintGuiCheck` 대상은 제거했으며, 이들의 이전 실행 결과는 로컬에 보존했다.
+
+이미 학습한 모델의 성능과 추천 임계값만 다시 계산하려면 다음 명령을 사용한다. `models/run_01`은 학습을 완료한 폴더로 바꾸고, 최초 학습에서 사용한 특징 캐시가 다른 위치에 있다면 `--feature-cache` 경로도 맞춘다.
+
+```sh
+cmake --build build --target FingerprintTrain FingerprintGUI --parallel 2
+./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01 --verify-only --feature-cache models/run_01/feature_cache
+```
+
+이 명령은 Weight를 바꾸지 않고 검증 결과와 `calibration.json` 등 평가 파일을 다시 기록한다. 이전 512차원 모델과 비교하려면 `--baseline <이전 모델 폴더>`를 추가한다. 학습 명령 자체의 저장·재로딩 검사를 모두 다시 수행하려면 새 출력 폴더에서 학습한다.
+
+최종 학습에서는 네 모델 모두 Backbone의 파라미터 텐서 581개와 BatchNorm/Gabor 버퍼 573개가 사전학습 파일과 정확히 같았다. 기록은 `frozen_backbone_verification.json`에 남겼다. 특징 캐시로 계산한 점수와 실제 이미지→템플릿→비교 경로의 24개 모델별 결과도 오차 1e-5 이내로 일치했다. 파일 통합 후에도 평가를 다시 실행해 24개 비교와 60개 DB·모델 조합의 임계값을 확인했다.
+
+운영 전환 당시에는 별도 검사 코드로 구형·손상·다른 가중치의 템플릿 거절과 보정 파일 호환성을 확인했다. GUI에서는 제공 DB별 개별·통합 모델과 네 모델의 최고 점수를 사용하는 7개 흐름, 총 140쌍을 검증했다. 외부 파일명 ID의 등록→비교→저장 1개 흐름, 2쌍도 추가로 확인했다. 판정 기준을 독립적으로 바꿔도 추론 점수가 유지되고, `.fpt`·CSV·HTML 저장과 Metrics 탭의 저장 버튼이 동작했다. 이 기록은 검증 전용 소스를 정리하기 전에 수행한 결과다. 외부 검사는 파일 처리 기능 확인이며 새로운 손가락의 정확도를 측정한 실험은 아니다.
+
+GUI 검증은 Qt 오프스크린 모드에서 실행했다. 현재 환경에서는 화면 서버 연결이 실패해 실제 데스크톱 창 조작은 확인하지 못했다. Windows/Linux 실행과 GPU, 외부 미학습 ID의 정확도 역시 미검증이다. GUI는 동기 실행하므로 실행 중 강제 취소와 별도 작업 프로세스를 통한 오류 격리 기능은 제공하지 않는다.
 
 ## License / Status
 
-Source License는 [LGPL-3.0](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/LICENSE), Inception Source는 [BSD-3-Clause](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/flx/models/InceptionV4.py)다. 공개 Checkpoint의 별도 License는 확인되지 않았다. 외부 Library는 [Root License](../../readme.md#license--submodule)를 참고한다.
-
-기본 Projection Fine-tuning·네 모델 Reload·Inference는 확인했다. 다른 Trainable layer 범위·SGD 학습·Windows 배포·새 GPU 실행은 미확인이다. Checkpoint 작성자의 정확한 Data manifest·학습 장비별 사용량은 제공 근거가 없어 미확인으로 남긴다.
-
-새 실행의 Verification은 `self_score`, `genuine_score`, `impostor_score`와 `score_type`을 기록한다. 기존 Verification의 `*_cosine` 값은 과거 기록으로 보존한다. 이전 Root Weight 대신 새 Run 폴더에 재학습 결과를 보관한다. Fine-tuned Weight는 Git에서 제외하며, 초기 사전학습 Weight만 Git LFS로 관리한다.
+공개 재구현 Source는 [LGPL-3.0](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors/blob/7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13/LICENSE), Inception Source는 BSD-3-Clause다. 변경 내용은 [NOTICE](../../third_party/deepprint.NOTICE.txt)를 따른다. 공개 Checkpoint의 별도 License는 확인되지 않았다. 외부 Library는 [Root License](../../readme.md#license--submodule)를 참고한다. Weight/실험 산출물은 로컬 보존·Git 제외이고 사전학습 Archive만 기존 Git LFS 배포 정책을 유지한다.

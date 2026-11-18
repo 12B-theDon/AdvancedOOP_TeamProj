@@ -79,7 +79,7 @@ def main():
     if args.output.exists():
         raise FileExistsError(args.output)
     torch.set_num_threads(setting("encoderConfig.h", "Threads"))
-    torch.manual_seed(setting("trainConfig.h", "Seed"))
+    torch.manual_seed(setting("trainConfig.h", "TrainSeed"))
     checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
     state = checkpoint["model_state_dict"]
     classes, texture_dims = state["texture_logits.0.weight"].shape

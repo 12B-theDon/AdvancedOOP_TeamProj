@@ -1,11 +1,11 @@
 #pragma once
 
 // Offline image generation; inference never uses these settings.
-namespace AugmentConfig {
+namespace algorithm {
 inline constexpr const char* FolderPattern = "crop_first_%1_per_image_seed%2"; // Copies and seed; numbered on setting changes.
 inline constexpr int Version = 2; // Cache format revision.
 inline constexpr const char* SourceGeometry = "fvc2004-center-square-before-augmentation";
-inline constexpr unsigned int Seed = 42; // Reproducible augmentation seed.
+inline constexpr unsigned int AugmentSeed = 42; // Reproducible augmentation seed.
 inline constexpr int CopiesPerOriginal = 12; // [images/original]
 // Independent probabilities; enabled changes are composed in the listed order.
 inline constexpr double RotationProbability = 0.9; // [probability]
@@ -24,4 +24,4 @@ inline constexpr double BrightnessMax = 1.10; // [ratio] Maximum pixel gain.
 inline constexpr int ForegroundThreshold = 235; // [gray8] Dark foreground cutoff.
 inline constexpr double MaxClippedForeground = 0.05; // [ratio] Maximum lost foreground.
 inline constexpr int GeometryAttempts = 32; // Retries before identity geometry.
-}
+} // namespace algorithm

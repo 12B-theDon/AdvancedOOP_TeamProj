@@ -1,10 +1,11 @@
 #pragma once
 
+#include "../Engine/engineConfig.h"
 #include <QStringList>
 #include <vector>
 
 // UI text, default selections and display sizes.
-namespace GuiConfig {
+namespace gui {
 inline constexpr int WindowWidth = 900; // [px]
 inline constexpr int WindowHeight = 720; // [px]
 inline constexpr int PreviewSize = 340; // [px] Square image preview.
@@ -18,7 +19,7 @@ inline constexpr int MetricColumns = 3;
 inline constexpr int MaxRandomCount = 1000000; // [pairs/enrollment]
 inline constexpr int ScorePrecision = 4; // [decimal places] GUI only; raw CSV keeps full precision.
 inline constexpr int TimePrecision = 3; // [decimal places]
-inline constexpr int ThresholdPrecision = 4; // [decimal places]
+inline constexpr int ThresholdPrecision = engine::ThresholdPrecision; // [decimal places]
 inline constexpr double ThresholdMinimum = 0.0; // [normalized score]
 inline constexpr double ThresholdMaximum = 1.0; // [normalized score]
 inline constexpr double ThresholdStep = 0.01; // [normalized score]
@@ -68,7 +69,7 @@ inline constexpr const char* EnrollmentHint = "Each selected image will produce 
 inline constexpr const char* BrowseWeights = "Select weights folder...";
 inline constexpr const char* WeightsFolderDialog = "Select model weights folder";
 inline constexpr const char* CreateTemplates = "Create enrollment templates";
-inline constexpr const char* ModelHint = "Select models. Normalized similarity ranges from 0 to 1; higher means more similar. This is not a probability.";
+inline constexpr const char* ModelHint = "Choose trained models and create templates for the selected images.";
 inline constexpr const char* GenuineHint = "Compare each enrollment with other images of the same finger.";
 inline constexpr const char* ImpostorHint = "Compare each enrollment with images of other fingers.";
 inline constexpr const char* RuleLabel = "Comparison selection:";
@@ -92,7 +93,7 @@ inline constexpr const char* ResultsHint = "Select a tab to view comparison resu
 inline constexpr const char* ThresholdLabel = "Similarity threshold (0-1):";
 inline constexpr const char* GenuineThresholdHint = "Same finger: score >= threshold = PASS; below = MISS (false rejection).";
 inline constexpr const char* ImpostorThresholdHint = "Different fingers: score < threshold = REJ (correct rejection); otherwise = FA (false acceptance).";
-inline constexpr const char* ScoreHint = "Normalized similarity: 0 to 1. Best/Worst = highest/lowest successful score. All model scores are saved.";
+inline constexpr const char* ScoreHint = "Higher scores mean more similar fingerprints. Best/Worst show the highest/lowest model scores. Adjust the thresholds to change the decisions.";
 inline constexpr const char* SingleModelHeader = "Model";
 inline constexpr const char* SingleScoreHeader = "Score";
 inline constexpr const char* NoWorstScore = "At least two successful models are needed for a worst score. See Result for model errors.";
@@ -116,8 +117,8 @@ inline const QStringList Resolutions = {"448 × 478 px", "300 × 300 px", "640 �
 inline const QStringList EnrollmentModes = {"Single enrollment", "Multiple enrollment (Ctrl / Shift to select)"};
 inline const QStringList ComparisonRules = {"All eligible images", "One image per finger (first capture)", "Selected capture numbers",
     "Random images per enrollment", "Comparison pairs from CSV"};
-inline const QStringList ModelHeaders = {"Model ID", "Weight file", "Load status"};
-inline const QStringList TemplateHeaders = {"Enrollment image", "Model ID", "Status", "Bytes", "Error"};
+inline const QStringList ModelHeaders = {"Model ID", "Weight file", "Vector size", "Load status"};
+inline const QStringList TemplateHeaders = {"Enrollment image", "Model ID", "Status", "Vector size", "Size (bytes)", "Error"};
 inline const QStringList ComparisonHeaders = {"#", "Enrollment", "Comparison", "Result", "Best model", "Best score", "Worst model", "Worst score", "Time (ms)"};
 inline const QStringList MetricHeaders = {"Metric", "Value"};
 inline const QStringList MetricNames = {"FTE (%)", "REJ genuine (%)", "REJ impostor (%)", "FMR (%)", "FNMR (%)",
@@ -125,4 +126,4 @@ inline const QStringList MetricNames = {"FTE (%)", "REJ genuine (%)", "REJ impos
     "Enrollment time (ms)", "Matching time (ms)", "Genuine time (ms)", "Impostor time (ms)",
     "Mean template size (bytes)", "Max template size (bytes)"};
 inline const std::vector<int> DefaultMetrics = {0, 5, 12}; // FTE, EER, matching time.
-}
+} // namespace gui

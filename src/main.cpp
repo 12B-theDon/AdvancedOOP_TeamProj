@@ -5,8 +5,8 @@
 int main(int argc, char* argv[]) {
     QApplication::setAttribute(Qt::AA_DontUseNativeDialogs);
     QApplication app(argc, argv);
-    FingerprintEncoder encoder;
-    Window window;
+    algorithm::FingerprintEncoder encoder;
+    gui::Window window;
     window.SetAlgorithm(&encoder);
     window.show();
     return app.exec();

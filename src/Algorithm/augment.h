@@ -3,6 +3,8 @@
 #include <QString>
 #include <QVector>
 
+namespace algorithm {
+
 // One original or augmentation; identity includes DB + finger ID.
 struct TrainingImage {
     QString path;
@@ -16,3 +18,5 @@ struct TrainingImage {
 // Originals plus cached augmentations; FVC2004 is center-cropped before augmentation.
 QVector<TrainingImage> PrepareAugmentations(const QString& imagesFolder, const QString& outputFolder,
                                            QString* manifestFile = nullptr);
+
+} // namespace algorithm

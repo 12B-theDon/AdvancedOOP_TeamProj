@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+namespace algorithm {
+
 // Tightly packed grayscale image before preprocessing.
 struct AlgorithmImage {
     int width = 0; // [px]
@@ -18,18 +20,32 @@ struct PreparedImage {
     std::vector<float> values; // Row-major normalized pixels.
 };
 
+// Metadata of the actually loaded archive, independent of its filename.
+struct AlgorithmModelInfo {
+    std::string format;
+    std::string weight_sha256;
+    std::string label_order_sha256;
+    std::string preprocessing;
+    int output_size = 0;
+    std::vector<std::string> labels;
+};
+
 // Engine-facing contract; false returns an error message.
 class Algorithm {
 public:
     virtual ~Algorithm() = default;
     virtual bool LoadModel(const std::string& model_id, const std::string& weight_file,
                            std::string& error) = 0;
+    virtual bool GetModelInfo(const std::string& model_id, AlgorithmModelInfo& info,
+                              std::string& error) const = 0;
     virtual bool Preprocess(const std::string& model_id, const AlgorithmImage& image,
                             PreparedImage& prepared, std::string& error) = 0;
     virtual bool CreateTemplate(const std::string& model_id, const PreparedImage& prepared,
                                 std::vector<unsigned char>& data, std::string& error) = 0;
-    // [0,1] Normalized similarity; higher is closer. Not a calibrated probability.
+    // [0.5,1] Cosine of nonnegative probability templates, mapped by (cos+1)/2.
     virtual bool Compare(const std::string& model_id, const std::vector<unsigned char>& enrollment,
                          const std::vector<unsigned char>& attempt, double& score,
                          std::string& error) = 0;
 };
+
+} // namespace algorithm

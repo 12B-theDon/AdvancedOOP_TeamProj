@@ -2,140 +2,128 @@
 
 [Root](../../readme.md) · [Algorithm](../Algorithm/readme.md) · [GUI](../GUI/readme.md)
 
-Source diagram: [SVG](../../docs/diagrams/engine.svg) · [PNG](../../docs/diagrams/engine.png). 비교 계획, 모델 로드, Template 생성, 비교와 원시 결과 저장의 연결을 보여준다.
+Engine은 비교할 이미지쌍을 구성하고 Algorithm을 실행한다. 모델별 템플릿, 점수, 시간과 오류를 모아 원시 파일로 저장한다. 화면은 GUI가, 지표와 HTML은 Report가 담당한다. GUI와 Engine은 `ImageInfo`와 실행 기록을 공유한다.
 
 ![Engine structure](../../docs/diagrams/engine.png)
 
+[구조도 SVG](../../docs/diagrams/engine.svg)
+
+현재 Encoder는 30차원 확률 벡터를 담은 `.fpt` 템플릿을 사용한다. Engine은 모델·DB 조합별 추천 판정 기준을 제공하고, GUI는 Genuine과 Impostor 기준을 각각 조절한다.
+
 ## Responsibility / Files
 
-비교할 이미지쌍을 구성하고 Algorithm을 호출하는 실행부다. 모델별 Template과 점수·시간·오류를 모아 원시 파일로 저장한다. 화면은 GUI가, 지표와 HTML은 Report가 담당한다.
+Engine의 자료형·함수·설정값은 `engine` namespace에 둔다. Engine은 모델 선택과 등록 버전을 가진 실행 객체이므로 복사 생성자·복사 대입을 금지한다. `backend_`는 빌린 포인터이며 해제 책임은 호출자에게 있다. 구현 내부에서는 직접 이름을 사용하고, 알고리즘 인터페이스를 참조할 때는 `algorithm::Algorithm`처럼 다른 모듈의 범위를 명시한다.
 
 | 파일 | 역할 |
 |---|---|
-| [Engine.h](Engine.h) | Public API, Image·Pair·Model·Template·Result·Run type을 선언한다. |
-| [Engine.cpp](Engine.cpp) | Plan, Model routing, Enrollment, Comparison, Synchronous execution, Raw export를 구현한다. |
-| [engineConfig.h](engineConfig.h) | DB/Model ID·경로·Seed·Threshold·지원 Execution 기본값을 둔다. |
+| [Engine.h](Engine.h) | 공개 API와 이미지·비교 쌍·모델·템플릿·실행 결과 자료형 |
+| [Engine.cpp](Engine.cpp) | 비교 계획, 모델 선택과 로딩, 등록·비교 실행, 원시 결과 저장 |
+| [engineConfig.h](engineConfig.h) | DB·모델 ID, 경로, Seed, 판정 기준과 실행 기본값 |
 
-## Includes
-
-| Include | 사용 이유 |
-|---|---|
-| [Algorithm.h](../Algorithm/Algorithm.h) | Abstract API와 Pixel/Preprocessing buffer를 공유한다. |
-| `string`, `vector` | GUI widget과 독립적인 입력·계획·결과를 저장한다. |
-| `random` | `mt19937`, Uniform distribution으로 Fisher–Yates shuffle을 수행한다. |
-| `chrono` | `steady_clock`으로 경과 시간 [ms]를 측정한다. |
-| `QImage` | Image file을 Gray8 buffer로 읽는다. Qt TIFF plugin이 필요하다. |
-| `QDir`, `QFile` | CSV·Template·Settings 파일을 저장한다. |
-
-필요한 Qt Core/Gui는 [CMakeLists.txt](../../CMakeLists.txt)에서 연결한다. 추가 Image/CSV Library는 사용하지 않는다.
+[Algorithm.h](../Algorithm/Algorithm.h)의 추상 인터페이스를 사용한다. 이미지 읽기에는 Qt Gui와 TIFF 플러그인이 필요하며, 파일 저장은 Qt Core를 사용한다. 별도의 이미지·CSV 라이브러리는 연결하지 않는다. 경과 시간은 `steady_clock`으로 측정한다.
 
 ## Types / Data Exchange
 
-| Type | 담는 정보·계약 |
+| 자료형 | 내용 |
 |---|---|
-| `ImageInfo` | 파일명·경로·Finger/Capture ID·`source_id`. ID 0은 Unknown이다. 같은 `source_id`는 동일 Pixel을 뜻하며 −1은 Unknown이다. |
-| `ComparisonPair` | DB Image list의 0-based Enrollment/Attempt index다. |
-| `ComparisonOptions` | Rule, Capture 번호, Count, Seed 또는 CSV pair 순서다. |
-| `ModelState` | Model ID, Weight file, Load 성공 여부와 Error다. |
-| `ModelTemplate` | 한 Image·한 Model의 Template [bytes], 처리 시간 [ms], 실패 Stage·Error다. |
-| `EnrollmentTemplates` | 한 Enrollment의 모든 ModelTemplate과 전체 성공 여부·실행 여부·Model revision이다. 하나 이상의 Model이 성공하면 Enrollment 성공이다. |
-| `ModelScore`, `SimilarityResult` | Model별 Score·Time·Error와 가장 높은 성공 Score·Model ID·전체 시간이다. |
-| `EnrollmentRecord`, `ComparisonRecord` | 실제 실행 여부와 원본 이름·실행 결과를 묶는다. Plan만 있는 상태도 표현한다. |
-| `EvaluationRun` | DB/Weight 경로·Settings·Models·Enrollment/Comparison 기록을 담는 Export snapshot이다. |
+| `ImageInfo` | 파일명과 경로, 손가락·촬영 번호, 입력 DB, 동일 픽셀을 묶는 `source_id` |
+| `ComparisonPair` | 이미지 목록에서 등록·비교 이미지의 0부터 시작하는 인덱스 |
+| `ComparisonOptions` | 선택 규칙, 촬영 번호, 개수, Seed 또는 CSV 순서 |
+| `ModelState` | 모델 ID와 파일 경로, 로딩 결과, 출력 차원과 실제 모델 식별 정보 |
+| `ModelTemplate` | 한 이미지·한 모델의 직렬화된 템플릿, 처리 시간, 실패 단계와 오류 |
+| `EnrollmentTemplates` | 한 등록 이미지의 모델별 템플릿과 모델 변경 버전 번호 |
+| `ModelScore`, `SimilarityResult` | 모델별 결과와 가장 높은 성공 점수, 선택된 모델, 전체 시간 |
+| `EnrollmentRecord`, `ComparisonRecord` | 계획과 실제 실행 여부, 이미지 이름과 결과 |
+| `EvaluationRun` | 저장 시점의 DB·모델·설정·등록·비교 기록 |
+| `ThresholdRecommendation` | 추천 임계값, 목표 충족 여부, 외부 입력용 여부와 근거. 상세 검증 비율은 보정 파일에 보관한다. |
 
-GUI → Engine: Image list, 선택한 Enrollment, Model ID, ComparisonOptions, File path를 보낸다. Engine → Algorithm: Gray8 image와 Model ID를 보낸다. Algorithm → Engine: Model별 Feature buffer·Normalized score·Error를 돌려준다. GUI의 `Snapshot()`은 `EvaluationRun`으로 Raw export와 Report에 같은 결과를 전달한다.
+GUI는 이미지 목록·등록 선택·모델 ID·비교 규칙을 전달한다. Engine은 Gray8 이미지와 모델 ID로 Algorithm을 호출하고 템플릿·점수·오류를 받는다. GUI의 `Snapshot()`은 같은 `EvaluationRun`을 원시 결과 저장과 Report에 전달한다. Algorithm 객체의 수명은 호출자가 관리하며, [main.cpp](../main.cpp)의 Encoder는 Window보다 오래 유지된다.
 
 ## API / Execution Path
 
-| 함수 | 입력 | 출력·목적 |
-|---|---|---|
-| `PlanComparisons` | Images, Enrollment indices, Genuine 여부, Options | `bool`, Pair vector, Error. Self/동일 Pixel·Label 위반을 제외하고 순서를 만든다. |
-| `SelectModels` | Built-in DB ID 또는 External flag, Weight folder | 기본 `ModelState` 목록. Built-in은 대응 Model 하나, External은 네 Model을 선택한다. |
-| `LoadModels` | 위 선택 정보, 빌린 Algorithm pointer | Default 선택 후 Load한다. 하나 이상 Loaded이면 `true`다. |
-| `LoadSelectedModels` | 선택 Model ID 목록, Weight folder, Algorithm pointer | Config에 있는 ID만 허용하고 중복 ID를 제거한다. Revision을 갱신하고 모든 Load 결과를 보관한다. |
-| `Models` | 없음 | 현재 ModelState list의 Const reference다. |
-| `ReadImage` | Image path | Tightly packed Gray8 `AlgorithmImage`. Decode 실패 시 빈 Image가 된다. |
-| `Enroll` | 한 `AlgorithmImage` | 각 Model로 Preprocess → CreateTemplate을 수행한 `EnrollmentTemplates`다. |
-| `Compare` | EnrollmentTemplates, Attempt image | 같은 Model끼리 Template을 비교한 `SimilarityResult`다. Model revision이 다르면 재등록을 요구한다. |
-| `Execute` | Ordered pairs, Images, Enrollment cache | Pair 순서와 같은 Result vector. 이미지 파일을 읽고 `Compare`를 순차 호출한다. |
-| `ClassifyComparison` | Genuine 여부, SimilarityResult, Threshold | Genuine은 PASS/MISS, Impostor는 REJ/FA, 추론 실패는 ERR를 반환한다. GUI·CSV가 같은 함수를 사용한다. |
-| `SaveRawResults` | EvaluationRun, 이미 생성된 Run folder | 파일 저장 성공 여부다. 새 폴더 선택과 실패 Rollback은 GUI가 담당한다. |
-| `MakeTemplate` / Private | 한 ModelState, Image | Input 검사·Preprocess·Encoding·Stage/Error·Time을 묶는다. |
+| 함수 | 동작 |
+|---|---|
+| `PlanComparisons` | 이미지와 규칙으로 비교 쌍을 만들고 잘못된 쌍을 검사한다. |
+| `SelectModels` | 제공 DB에는 대응 개별 모델, 외부 DB에는 네 모델을 기본 선택한다. |
+| `LoadSelectedModels` | 설정에 있는 모델 ID만 허용하고 중복을 제거해 로딩한다. 모델 변경 버전을 갱신하며 실패 결과도 보관한다. |
+| `Models` | 실제 로딩 정보가 포함된 모델 목록을 반환한다. |
+| `RecommendedThreshold` | 보정 파일과 현재 모델이 일치하는지 검사하고 DB·모델 조합별 추천값을 반환한다. |
+| `ReadImage` | 파일을 연속된 Gray8 픽셀과 입력 DB 정보로 읽는다. 실패하면 빈 이미지를 반환한다. |
+| `Enroll` | 모델별 전처리와 템플릿 생성을 실행한다. 하나 이상 성공하면 이미지 등록은 성공이다. |
+| `Compare` | 등록 때와 같은 모델로 비교 이미지의 템플릿을 만들고 모델별 점수를 모은다. |
+| `Execute` | 계획한 순서대로 이미지를 읽고 비교한다. |
+| `ClassifyComparison` | 원본 정답 종류와 점수, 임계값으로 PASS/MISS/REJ/FA/ERR를 반환한다. |
+| `SaveRawResults` | 이미 생성된 실행 폴더에 원시 결과를 저장한다. 폴더 생성과 실패 시 정리는 GUI가 담당한다. |
 
-Algorithm pointer는 Engine이 소유하지 않는다. [main.cpp](../main.cpp)의 Encoder가 Window보다 오래 살아 있도록 구성한다.
+`Compare`는 성공한 모델 중 가장 높은 점수를 최종 점수로 선택한다. 동점이면 먼저 선택된 모델을 사용한다. 실패, [0, 1] 범위 밖의 점수, NaN과 무한대는 제외한다. 모든 모델이 실패하면 유효한 점수를 반환하지 않는다. 모델별 점수를 별도로 변환하거나 평균내는 방식은 사용하지 않는다.
 
-`Compare`는 성공한 Model 중 가장 높은 Normalized score `[0,1]`를 선택한다. 동점이면 먼저 선택된 Model이다. 실패한 모델과 0~1 범위를 벗어난 점수는 제외한다. 범위 비교를 통과하지 못하는 NaN·Infinity도 실패로 처리한다. 모두 실패하면 Score를 성공값으로 표시하지 않는다. Enrollment와 Attempt는 같은 Model의 같은 Preprocessing을 사용한다. Model 간 Score calibration은 없다.
+현재 Encoder는 같은 모델의 30차원 확률 템플릿을 비교한다. 모델이 바뀐 뒤의 이전 등록 기록은 재등록을 요구한다. Backend도 템플릿 내부의 버전·모델 ID·실제 가중치 해시·ID 순서·전처리를 확인하므로 다른 모델이나 구형 512차원 템플릿을 섞어 비교할 수 없다.
 
-Time은 Algorithm 호출 경로의 경과 시간이다. Enrollment는 Preprocessing+Encoding, Comparison은 Attempt Encoding+Cosine+Model 순회를 포함한다. `ReadImage`의 File decoding은 이 시간 밖에서 실행한다. Model Load 시간도 별도 Metric으로 수집하지 않는다.
+입력 DB가 명시되면 그 정보를 우선하고, 생략되면 알려진 부모 폴더 이름으로 식별한다. FVC2004는 중앙을 정사각형으로 자르고, 다른 DB나 출처 불명 이미지는 여백을 채운다. 이 규칙은 선택한 모델이 아니라 이미지 출처에 따라 정하며 등록과 비교에 동일하게 적용한다.
 
-`ReadImage(path, database_id)`는 Gray8 pixel과 입력 DB ID를 함께 반환한다. 명시된 DB ID가 우선하며, 생략하면 알려진 부모 폴더 이름으로 식별한다. GUI의 Enrollment와 `Execute`의 Attempt 모두 이 정보를 Algorithm에 전달한다. FVC2004는 중앙 정사각형 Crop하고 다른 DB·알 수 없는 출처는 Padding한다. 선택한 Model ID나 Archive 버전과 관계없이 같은 입력 DB 규칙을 사용한다.
+등록 시간은 전처리와 인코딩을 포함한다. 비교 시간은 비교 이미지 인코딩, 템플릿 유사도와 모델 순회를 포함한다. 파일 읽기와 모델 로딩 시간은 이 지표에 포함하지 않는다.
 
 ## Comparison Rules
 
-| Rule | 동작 |
+| 규칙 | 동작 |
 |---|---|
-| `All` | Known finger ID에서 조건에 맞는 모든 Pair를 만든다. |
-| `FirstCapture` | Self를 제외한 후보에서 Finger별 가장 낮은 Capture 번호를 선택한다. 항상 Capture 1을 뜻하지는 않는다. |
-| `CaptureNumbers` | 지정한 Capture 번호만 후보로 사용한다. |
-| `RandomCount` | Enrollment별 최대 Count개를 뽑는다. 후보보다 많으면 가능한 수까지만 사용한다. |
-| `FromCsv` | GUI가 읽은 Pair index를 그대로 사용한다. CSV 순서를 다시 Shuffle하지 않는다. |
+| `All` | ID를 아는 이미지 중 종류에 맞는 모든 후보를 사용한다. |
+| `FirstCapture` | 자기 자신을 제외한 후보에서 손가락마다 촬영 번호가 가장 낮은 한 장을 선택한다. 반드시 1번 촬영본은 아니다. |
+| `CaptureNumbers` | 지정한 촬영 번호만 사용한다. |
+| `RandomCount` | 등록 이미지당 최대 지정 개수를 뽑는다. 후보가 적으면 가능한 수만 사용한다. |
+| `FromCsv` | CSV의 비교 쌍과 순서를 그대로 사용한다. |
 
-자동 Rule은 Genuine에서 같은 Finger, Impostor에서 다른 Finger를 선택한다. Unknown ID는 자동 후보에서 제외한다. 자동 실행 순서는 Seed로 Shuffle한다. CSV는 선택되지 않은 Enrollment, 범위를 벗어난 Index, 중복 Pair, Self/동일 Pixel, Known label 모순을 거절한다. Genuine/Impostor 양쪽에 같은 Unordered pair가 들어가는 검사는 GUI가 추가 수행한다.
+자동 규칙은 Genuine에서 같은 손가락, Impostor에서 다른 손가락을 선택한다. ID 0은 알 수 없는 ID로 취급해 자동 후보에서 제외한다. 같은 이미지와 동일 픽셀의 복제본도 제외한다. `source_id=-1`은 동일 픽셀 여부를 알 수 없다는 뜻이다.
+
+자동 비교 순서는 Seed에 따라 섞는다. 무작위 후보 선택에는 `mt19937`과 Fisher–Yates 방식의 섞기를 사용한다. CSV는 다시 섞지 않으며, 미선택 등록 이미지·범위 밖 인덱스·중복 쌍·동일 이미지·알려진 ID와 모순된 종류를 거절한다. Genuine과 Impostor에 같은 순서 없는 쌍이 들어가는지는 GUI에서 추가 검사한다.
 
 ## Hyperparameters / Paths
 
-값은 [engineConfig.h](engineConfig.h)에서 읽는다. Source 변경 후 다시 Build해야 한다.
+값은 [engineConfig.h](engineConfig.h)에 둔다. 소스를 수정하면 다시 빌드해야 하며, 판정 기준은 GUI 실행 중에도 조절할 수 있다.
 
-| 설정 | 현재 값 | 의미·지원 범위 |
-|---|---|---|
-| `Seed` | 42 | 자동 Pair 선택·순서의 기본 Seed다. GUI는 RandomCount일 때만 Seed를 표시·Export한다. 실제 순서 재현은 저장 CSV가 기준이다. |
-| `RandomCount` | 10 [pairs/enrollment] | RandomCount 초기값이다. GUI에서 바꿀 수 있다. |
-| `DecisionThreshold` | 0.75 [normalized score] | Genuine/Impostor Threshold의 초기값이다. GUI가 Run별 실제 입력값을 Snapshot에 보관한다. |
-| `MetricTolerance` | `1e-12` [ratio] | Report의 Rate 비교 허용 오차다. |
-| `CsvPrecision` | 17 significant digits | 원시 Score·Time 저장 정밀도다. |
-| `TimeoutMs`, `Concurrency` | 0 [ms], 1 [worker] | 현재 지원하는 값이다. 0은 Timeout 비활성화다. 다른 값이면 `Execute`가 Execution failure를 반환한다. |
-| `ImagesFolder`, `WeightsFolder` | `data/original`, `models` | GUI/CLI가 공유하는 기본 경로다. |
-| `WeightExtension` | `.bin` | Model weight와 Template 파일의 확장자다. 실제 Format은 서로 다르다. |
-| `DatabaseIds` | FVC2000_DB3_B, FVC2002_DB3_B, FVC2004_DB1_B | Built-in 세 DB다. |
-| `ModelIds` | fvc2000_db3, fvc2002_db3, fvc2004_db1, combined | 앞의 세 Model이 DB 순서에 대응한다. |
+| 설정 | 기본값과 의미 |
+|---|---|
+| `Seed` | 42. 자동 선택·순서에 사용하며 실제 순서는 저장한 CSV로 재현한다. |
+| `RandomCount` | 등록 이미지당 최대 10쌍. GUI에서 변경할 수 있다. |
+| `GenuineThreshold`, `ImpostorThreshold` | 초기값 0.5954. 정상 모델 로딩 후에는 DB·선택 모델별 추천값을 우선한다. |
+| `TargetFar`, `ThresholdPrecision` | 검증 목표 FAR 0.01, 소수점 네 자리 올림 |
+| `MetricTolerance`, `CsvPrecision` | 비율 비교 허용 오차 1e-12, 원시 숫자 유효숫자 17자리 |
+| `TimeoutMs`, `Concurrency` | 0ms, 1. 시간 제한 없이 순차 실행하며 다른 값은 실행 오류로 처리한다. |
+| `ImagesFolder`, `WeightsFolder` | `data/original`, `models/current` |
+| `WeightExtension`, `TemplateExtension` | 전체 모델 `.bin`, 템플릿 `.fpt` |
+| `DatabaseIds` | FVC2000_DB3_B, FVC2002_DB3_B, FVC2004_DB1_B |
+| `ModelIds` | fvc2000_db3, fvc2002_db3, fvc2004_db1, combined |
+
+`calibration.json`은 실제 가중치와 ID 순서의 해시, 파일 형식, FAR 정책과 정밀도를 확인한 뒤 사용한다. 가능한 15개 모델 조합마다 세 DB의 최고 점수 분포를 평가하고, 외부 입력용 값까지 총 60개 항목을 제공한다. 외부 입력에는 알려진 세 DB의 임계값 중 최댓값을 사용한다. 추천값은 학습에 등장한 ID의 다른 촬영본에서 선정한 결과로, 외부 DB나 임의의 GUI 비교 쌍에서 같은 FAR을 보장하지 않는다. [평가와 보정 근거](../Algorithm/readme.md#final-production-run--calibration)
+
+Genuine은 기준 이상일 때 PASS, 미만일 때 MISS다. Impostor는 기준 미만일 때 REJ, 이상일 때 FA다. 두 조절기는 같은 추천값에서 시작해 독립적으로 수정되며, 실제 값은 실행 기록에 남긴다.
 
 ## Raw Export
 
 | 파일 | 내용 |
 |---|---|
-| `models.csv` | 선택 Model·Weight path·Load status·Error |
-| `enrollments.csv` | Image/Model별 Status·Template size/path·Stage/Error·Time |
-| `comparisons.csv` | Type·Enrollment·Attempt·실행 Status·최고 Score·Time·선택 Model·Model별 요약·Group별 Index·Threshold·PASS/MISS/REJ/FA/ERR |
-| `model_scores.csv` | Pair/Model별 Status·Score·Stage/Error·Time |
-| `templates/<index>_<model>.bin` | 성공한 Enrollment Feature vector. Weight archive가 아니다. |
-| `settings.txt` | Run의 Genuine/Impostor Threshold와 판정 규칙, Snapshot의 실제 Rule·선택 Metric·Random 설정 |
+| `models.csv` | 모델·파일 경로·로딩 결과·형식·차원·가중치 및 ID 순서 해시·전처리 |
+| `enrollments.csv` | 이미지·모델별 상태, 템플릿 크기와 경로, 시간과 오류 |
+| `comparisons.csv` | 정답 종류, 등록·비교 이미지, 최고 점수·모델·시간, 임계값과 판정 |
+| `model_scores.csv` | 이미지쌍·모델별 점수, 시간과 오류 |
+| `templates/<index>_<model>.fpt` | 성공한 등록 이미지의 확률 벡터와 식별 정보 |
+| `settings.txt` | 두 판정 기준과 규칙, 선택 지표와 무작위 설정, 모델별 실행 정보 |
 
-Metric CSV·HTML·SVG는 [Report](../GUI/report.cpp)가 저장한다. `Not run`과 실행 후 `Failed`는 구분한다. CSV의 문자열은 Quote escaping을 수행한다.
+아직 실행하지 않은 상태와 실행 실패는 구분한다. CSV 문자열은 따옴표를 이스케이프한다. 지표 CSV와 HTML·SVG는 [Report](../GUI/report.cpp)에서 저장한다.
 
 ## DLL Backend / Extension
 
-### 현재 지원 범위
+현재 Algorithm과 Engine은 실행 파일에 정적으로 연결한다. GUI의 `.bin` 선택은 내장 Encoder가 읽는 가중치를 바꾸는 기능이며 외부 DLL을 불러오는 기능은 아니다. 호환되는 Cosine30 v2 파일만 사용할 수 있고, 다른 구조는 입력·출력·메타데이터 검사에서 거절한다.
 
-현재 실행 파일은 외부 알고리즘 DLL을 동적으로 로드하지 않는다. [CMakeLists.txt](../../CMakeLists.txt)는 Algorithm·Engine을 STATIC으로 연결하고, [main.cpp](../main.cpp)는 `FingerprintEncoder`를 생성해 GUI에 전달한다. GUI의 `.bin` 선택은 이 내장 Encoder가 읽는 Weight를 바꾸는 기능이다.
+외부 알고리즘 DLL을 연결하려면 다음 구현이 필요하다.
 
-| 교체 대상 | 현재 동작 |
-|---|---|
-| 호환되는 DeepPrint `.bin` | GUI에서 폴더와 모델을 선택하면 새 Weight를 로드한다. 기존 Template은 초기화한다. |
-| 다른 구조의 모델 Weight | Metadata·입력 크기·출력 차원 등이 맞지 않으면 로드를 거절한다. |
-| KISA 규격 알고리즘 DLL | 로딩·호출 Adapter와 GUI 선택 경로가 없어 현재 실행할 수 없다. |
-| Qt·LibTorch DLL | 프로그램의 실행 의존성이다. 이를 교체한다고 지문 알고리즘이 바뀌지는 않는다. |
+1. `Algorithm` 인터페이스를 구현하고 `LoadLibrary` 또는 `QLibrary`로 DLL을 로드한다.
+2. DLL 함수 규약에 맞춰 이미지·템플릿 형식과 메모리 소유권을 정하고, 결과를 Engine의 상태·점수 규칙으로 변환한다.
+3. 모델 선택 화면에 DLL 경로와 초기화 설정을 연결한다.
+4. 같은 이미지쌍으로 등록·비교·저장을 검증한다. 충돌과 강제 시간 제한을 격리하려면 별도 작업 프로세스가 필요하다.
 
-### DLL 연동 시 필요한 구현
-
-아래는 확장 지점이며 아직 구현된 사용 절차가 아니다.
-
-1. [Algorithm.h](../Algorithm/Algorithm.h)의 인터페이스를 구현하는 DLL Backend를 추가한다. Windows의 `LoadLibrary` 또는 Qt의 `QLibrary` 같은 로더와 KISA 함수 규격을 연결해야 한다.
-2. 이미지 버퍼·전처리·Template 형식과 메모리 소유권을 DLL 규약에 맞춘다. 반환 상태·점수 범위는 현재 Engine이 사용하는 성공/실패와 0~1 유사도로 변환한다.
-3. `.bin` 파일을 전제로 하는 현재 모델 선택 경로에 DLL 경로와 초기화 설정을 추가하고, GUI에서 Backend를 고를 수 있게 연결한다. 현재 `LoadModel` 호출을 DLL 함수에 그대로 전달할 수 있다고 가정하지 않는다.
-4. 같은 이미지쌍으로 현재 Backend와 DLL Backend의 등록·비교·저장을 검증한다. 알고리즘 Crash·Hard timeout을 격리하려면 별도 Worker process도 필요하다.
-
-DLL의 Export 함수·호출 규약·버퍼 규격이 없으면 파일만 바꿔 연결할 수 없다. Windows DLL을 macOS/Linux에서 그대로 로드하는 경로도 지원하지 않는다.
+DLL 파일만 교체해 연결할 수 없으며 함수와 버퍼 규약이 필요하다. Windows DLL을 macOS/Linux에서 그대로 실행하는 경로도 지원하지 않는다. Qt·LibTorch DLL은 실행 의존성이므로 지문 알고리즘 선택과는 별개다.
 
 ## Status
 
-기본 Model routing·실제 Inference·Raw export는 macOS에서 확인했다. 현재는 Synchronous runner로 GUI thread를 사용한다. Hard timeout, Worker process, 동시 실행, 실행 중 강제 중단, Crash isolation은 미구현이다. GUI의 Exit 확인창은 이 기능들을 대신하지 않는다. Windows/KISA DLL 경로도 아직 미확인·미구현이다. License는 [Root](../../readme.md#license--submodule)를 따른다.
+운영 전환과 파일 통합 과정에서 모델 선택, 버전 있는 템플릿, 실제 추론과 원시 결과 저장, 보정값 호환성을 확인했다. GUI 연동은 Qt 오프스크린으로 검증했다. 별도 검증 전용 소스와 실행 대상은 정리했으며, 모델 학습·평가에 포함된 검사는 `FingerprintTrain`에서 계속 수행한다. [평가 명령과 한계](../Algorithm/readme.md#verification--limits)를 참고한다. 실행은 GUI 스레드에서 동기 처리하며 강제 시간 제한·동시 실행·실행 중 강제 취소·프로세스 오류 격리는 미구현이다. 실제 데스크톱 화면과 Windows/KISA DLL 경로도 미검증 또는 미구현이다. 라이선스는 [Root](../../readme.md#license--submodule)를 따른다.

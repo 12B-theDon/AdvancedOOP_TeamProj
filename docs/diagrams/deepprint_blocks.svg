@@ -1,0 +1,698 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="841.89pt" height="595.276pt" viewBox="0 0 841.89 595.276">
+<title>DeepPrint Inception and Reduction block anatomy</title>
+<desc>Five source-checked block diagrams and a serial-repeat example. Faint parallel cells sit behind module labels; the darker cell identifies the Pool path.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<text x="420.945" y="14" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#173452">DeepPrint Inception and Reduction block anatomy</text>
+<rect x="12.0" y="24" width="267.2966666666667" height="268" rx="7" fill="#f9fbfd" stroke="#cbd6e1" stroke-width="0.8"/>
+<g data-module="Inception-A" data-repeats="4" data-panel-x="12.0" data-panel-y="24" data-panel-width="267.2966666666667" data-panel-height="268">
+<rect x="92.24833333333333" y="25.35" width="114" height="26" rx="5" fill="#fdf2f6" stroke="#d088a0" stroke-width="0.8"/>
+<rect x="91.04833333333335" y="25.9" width="114" height="26" rx="5" fill="#fdf2f6" stroke="#d088a0" stroke-width="0.8"/>
+<rect x="89.84833333333334" y="26.45" width="114" height="26" rx="5" fill="#fdf2f6" stroke="#d088a0" stroke-width="0.8"/>
+<rect x="88.64833333333334" y="27" width="114" height="26" rx="5" fill="#fae3ea" stroke="#ad3e64" stroke-width="0.8"/>
+<rect x="105.14833333333334" y="31.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="126.14833333333334" y="31.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="147.14833333333334" y="31.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="168.14833333333334" y="31.0" width="18" height="18" rx="3" fill="#dedae6" stroke="#c7c9d9" stroke-width="0.8"/>
+<text x="145.64833333333334" y="42.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#ad3e64">Inception-A</text>
+<g data-input="true">
+<text x="145.64833333333334" y="63" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Input</text>
+<text x="122.36833333333334" y="72" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(384×</text>
+<text x="143.60833333333335" y="72" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#ad3e64">35×35</text>
+<text x="165.92833333333334" y="72" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+<polyline points="145.64833333333334,75 145.64833333333334,77" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polyline points="145.64833333333334,77 47.0,77 47.0,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="44.6,79.5 47.0,83 49.4,79.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="24.804" y="83" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="38.0" y="87.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="47.0" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="47.0" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(384→96)</text>
+</g>
+<polyline points="145.64833333333334,77 112.76555555555557,77 112.76555555555557,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="110.36555555555556,79.5 112.76555555555557,83 115.16555555555557,79.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="90.56955555555557" y="83" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="103.76555555555557" y="87.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="112.76555555555557" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="112.76555555555557" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(384→64)</text>
+</g>
+<polyline points="112.76555555555557,109 112.76555555555557,115" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="110.36555555555556,111.5 112.76555555555557,115 115.16555555555557,111.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×3" data-stride="1" data-padding="1">
+<rect x="90.56955555555557" y="115" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="103.76555555555557" y="119.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="112.76555555555557" y="126.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 3×3</text>
+<text x="112.76555555555557" y="133.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(64→96)</text>
+</g>
+<polyline points="145.64833333333334,77 178.53111111111113,77 178.53111111111113,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="176.13111111111112,79.5 178.53111111111113,83 180.93111111111114,79.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="156.33511111111113" y="83" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="169.53111111111113" y="87.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="178.53111111111113" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="178.53111111111113" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(384→64)</text>
+</g>
+<polyline points="178.53111111111113,109 178.53111111111113,115" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="176.13111111111112,111.5 178.53111111111113,115 180.93111111111114,111.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×3" data-stride="1" data-padding="1">
+<rect x="156.33511111111113" y="115" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="169.53111111111113" y="119.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="178.53111111111113" y="126.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 3×3</text>
+<text x="178.53111111111113" y="133.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(64→96)</text>
+</g>
+<polyline points="178.53111111111113,141 178.53111111111113,147" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="176.13111111111112,143.5 178.53111111111113,147 180.93111111111114,143.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×3" data-stride="1" data-padding="1">
+<rect x="156.33511111111113" y="147" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="169.53111111111113" y="151.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="178.53111111111113" y="158.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 3×3</text>
+<text x="178.53111111111113" y="165.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(96→96)</text>
+</g>
+<polyline points="145.64833333333334,77 244.2966666666667,77 244.2966666666667,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="241.8966666666667,79.5 244.2966666666667,83 246.69666666666672,79.5" fill="#718395"/>
+<g data-operation="Avg Pool" data-kernel="3×3" data-stride="1" data-padding="1">
+<rect x="217.79266666666672" y="83" width="53.008" height="26" rx="5" fill="#c8d3e2" stroke="#9db3cb" stroke-width="0.8"/>
+<text x="244.2966666666667" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">AvgPool3×3</text>
+<text x="244.2966666666667" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(384→384)</text>
+</g>
+<polyline points="244.2966666666667,109 244.2966666666667,115" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="241.8966666666667,111.5 244.2966666666667,115 246.69666666666672,111.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="222.1006666666667" y="115" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="235.2966666666667" y="119.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="244.2966666666667" y="126.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="244.2966666666667" y="133.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(384→96)</text>
+</g>
+<g data-merge="channel-concatenate" data-incoming-count="4">
+<polyline points="47.0,109 47.0,245 138.72013010305784,254.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="135.00248576418946,256.0467341228601 138.72013010305784,254.0 135.471232544851,251.2696768220085" fill="#718395"/>
+<g data-edge-channels="96" data-incoming-index="0">
+<text x="55.0" y="177.0" transform="rotate(-90 55.0 177.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">96</text>
+</g>
+<polyline points="112.76555555555557,141 112.76555555555557,245 142.912172186728,250.48245903371273" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="139.03923247293991,252.21749159057242 142.912172186728,250.48245903371273 139.89807303638221,247.49495065516635" fill="#718395"/>
+<g data-edge-channels="96" data-incoming-index="1">
+<text x="120.76555555555557" y="193.0" transform="rotate(-90 120.76555555555557 193.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">96</text>
+</g>
+<polyline points="178.53111111111113,173 178.53111111111113,245 148.3844944799387,250.48245903371273" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="151.39859363028447,247.49495065516635 148.3844944799387,250.48245903371273 152.25743419372677,252.21749159057242" fill="#718395"/>
+<g data-edge-channels="96" data-incoming-index="2">
+<text x="186.53111111111113" y="209.0" transform="rotate(-90 186.53111111111113 209.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">96</text>
+</g>
+<polyline points="244.2966666666667,141 244.2966666666667,245 152.57653656360884,254.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="155.82543412181568,251.2696768220085 152.57653656360884,254.0 156.29418090247722,256.0467341228601" fill="#718395"/>
+<g data-edge-channels="96" data-incoming-index="3">
+<text x="252.2966666666667" y="193.0" transform="rotate(-90 252.2966666666667 193.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">96</text>
+</g>
+<g data-symbol="concatenate" stroke="#173452" stroke-width="1.1">
+<circle cx="145.64833333333334" cy="258" r="8" fill="white"/>
+<path d="M 141.48833333333334,258 H 149.80833333333334 M 145.64833333333334,253.84 V 262.16" fill="none"/>
+</g>
+<g data-channel-sum="384" data-channel-addends="96,96,96,96">
+<text x="159.64833333333334" y="262" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">96+96+96+96=384</text>
+</g>
+</g>
+<polyline points="145.64833333333334,266 145.64833333333334,272" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="143.24833333333333,268.5 145.64833333333334,272 148.04833333333335,268.5" fill="#718395"/>
+<g data-output="true">
+<text x="145.64833333333334" y="280" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Output</text>
+<text x="122.36833333333334" y="289" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(384×</text>
+<text x="143.60833333333335" y="289" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#ad3e64">35×35</text>
+<text x="165.92833333333334" y="289" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+</g>
+<rect x="287.2966666666667" y="24" width="267.2966666666667" height="268" rx="7" fill="#f9fbfd" stroke="#cbd6e1" stroke-width="0.8"/>
+<g data-module="Inception-B" data-repeats="7" data-panel-x="287.2966666666667" data-panel-y="24" data-panel-width="267.2966666666667" data-panel-height="268">
+<rect x="371.14500000000004" y="23.7" width="114" height="26" rx="5" fill="#faf7fc" stroke="#b296c5" stroke-width="0.8"/>
+<rect x="369.94500000000005" y="24.25" width="114" height="26" rx="5" fill="#faf7fc" stroke="#b296c5" stroke-width="0.8"/>
+<rect x="368.74500000000006" y="24.8" width="114" height="26" rx="5" fill="#faf7fc" stroke="#b296c5" stroke-width="0.8"/>
+<rect x="367.5450000000001" y="25.35" width="114" height="26" rx="5" fill="#faf7fc" stroke="#b296c5" stroke-width="0.8"/>
+<rect x="366.345" y="25.9" width="114" height="26" rx="5" fill="#faf7fc" stroke="#b296c5" stroke-width="0.8"/>
+<rect x="365.14500000000004" y="26.45" width="114" height="26" rx="5" fill="#faf7fc" stroke="#b296c5" stroke-width="0.8"/>
+<rect x="363.94500000000005" y="27" width="114" height="26" rx="5" fill="#f3eef9" stroke="#7c4e9b" stroke-width="0.8"/>
+<rect x="380.44500000000005" y="31.0" width="18" height="18" rx="3" fill="#faf7fc" stroke="#e3e6f2" stroke-width="0.8"/>
+<rect x="401.44500000000005" y="31.0" width="18" height="18" rx="3" fill="#faf7fc" stroke="#e3e6f2" stroke-width="0.8"/>
+<rect x="422.44500000000005" y="31.0" width="18" height="18" rx="3" fill="#faf7fc" stroke="#e3e6f2" stroke-width="0.8"/>
+<rect x="443.44500000000005" y="31.0" width="18" height="18" rx="3" fill="#dbdfec" stroke="#c4cee0" stroke-width="0.8"/>
+<text x="420.94500000000005" y="42.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#7c4e9b">Inception-B</text>
+<g data-input="true">
+<text x="420.94500000000005" y="63" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Input</text>
+<text x="395.62500000000006" y="72" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(1024×</text>
+<text x="420.94500000000005" y="72" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#7c4e9b">17×17</text>
+<text x="443.26500000000004" y="72" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+<polyline points="420.94500000000005,75 420.94500000000005,77" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polyline points="420.94500000000005,77 322.2966666666667,77 322.2966666666667,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="319.8966666666667,79.5 322.2966666666667,83 324.69666666666666,79.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="300.01666666666665" y="83" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="313.2966666666666" y="87.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="322.2966666666667" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="322.2966666666667" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1024→384)</text>
+</g>
+<polyline points="420.94500000000005,77 388.06222222222226,77 388.06222222222226,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="385.6622222222223,79.5 388.06222222222226,83 390.46222222222224,79.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="365.78222222222223" y="83" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="379.0622222222222" y="87.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="388.06222222222226" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="388.06222222222226" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1024→192)</text>
+</g>
+<polyline points="388.06222222222226,109 388.06222222222226,115" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="385.6622222222223,111.5 388.06222222222226,115 390.46222222222224,111.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×7" data-stride="1" data-padding="0,3">
+<rect x="365.86622222222223" y="115" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="379.06222222222226" y="119.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="388.06222222222226" y="126.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×7</text>
+<text x="388.06222222222226" y="133.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(192→224)</text>
+</g>
+<polyline points="388.06222222222226,141 388.06222222222226,147" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="385.6622222222223,143.5 388.06222222222226,147 390.46222222222224,143.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="7×1" data-stride="1" data-padding="3,0">
+<rect x="365.86622222222223" y="147" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="379.06222222222226" y="151.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="388.06222222222226" y="158.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 7×1</text>
+<text x="388.06222222222226" y="165.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(224→256)</text>
+</g>
+<polyline points="420.94500000000005,77 453.8277777777778,77 453.8277777777778,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="451.4277777777778,79.5 453.8277777777778,83 456.22777777777776,79.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="431.5477777777778" y="83" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="444.8277777777778" y="87.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="453.8277777777778" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="453.8277777777778" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1024→192)</text>
+</g>
+<polyline points="453.8277777777778,109 453.8277777777778,115" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="451.4277777777778,111.5 453.8277777777778,115 456.22777777777776,111.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="7×1" data-stride="1" data-padding="3,0">
+<rect x="431.63177777777776" y="115" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="444.8277777777778" y="119.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="453.8277777777778" y="126.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 7×1</text>
+<text x="453.8277777777778" y="133.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(192→192)</text>
+</g>
+<polyline points="453.8277777777778,141 453.8277777777778,147" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="451.4277777777778,143.5 453.8277777777778,147 456.22777777777776,143.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×7" data-stride="1" data-padding="0,3">
+<rect x="431.63177777777776" y="147" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="444.8277777777778" y="151.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="453.8277777777778" y="158.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×7</text>
+<text x="453.8277777777778" y="165.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(192→224)</text>
+</g>
+<polyline points="453.8277777777778,173 453.8277777777778,179" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="451.4277777777778,175.5 453.8277777777778,179 456.22777777777776,175.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="7×1" data-stride="1" data-padding="3,0">
+<rect x="431.63177777777776" y="179" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="444.8277777777778" y="183.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="453.8277777777778" y="190.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 7×1</text>
+<text x="453.8277777777778" y="197.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(224→224)</text>
+</g>
+<polyline points="453.8277777777778,205 453.8277777777778,211" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="451.4277777777778,207.5 453.8277777777778,211 456.22777777777776,207.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×7" data-stride="1" data-padding="0,3">
+<rect x="431.63177777777776" y="211" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="444.8277777777778" y="215.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="453.8277777777778" y="222.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×7</text>
+<text x="453.8277777777778" y="229.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(224→256)</text>
+</g>
+<polyline points="420.94500000000005,77 519.5933333333334,77 519.5933333333334,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="517.1933333333334,79.5 519.5933333333334,83 521.9933333333333,79.5" fill="#718395"/>
+<g data-operation="Avg Pool" data-kernel="3×3" data-stride="1" data-padding="1">
+<rect x="493.08933333333334" y="83" width="53.008" height="26" rx="5" fill="#c8d3e2" stroke="#9db3cb" stroke-width="0.8"/>
+<text x="519.5933333333334" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">AvgPool3×3</text>
+<text x="519.5933333333334" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1024→1024)</text>
+</g>
+<polyline points="519.5933333333334,109 519.5933333333334,115" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="517.1933333333334,111.5 519.5933333333334,115 521.9933333333333,111.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="497.3133333333334" y="115" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="510.59333333333336" y="119.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="519.5933333333334" y="126.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="519.5933333333334" y="133.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1024→128)</text>
+</g>
+<g data-merge="channel-concatenate" data-incoming-count="4">
+<polyline points="322.2966666666667,109 322.2966666666667,245 414.0167967697245,254.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="410.29915243085617,256.0467341228601 414.0167967697245,254.0 410.76789921151766,251.2696768220085" fill="#718395"/>
+<g data-edge-channels="384" data-incoming-index="0">
+<text x="330.2966666666667" y="177.0" transform="rotate(-90 330.2966666666667 177.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">384</text>
+</g>
+<polyline points="388.06222222222226,173 388.06222222222226,245 418.2088388533947,250.48245903371273" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="414.3358991396066,252.21749159057242 418.2088388533947,250.48245903371273 415.1947397030489,247.49495065516635" fill="#718395"/>
+<g data-edge-channels="256" data-incoming-index="1">
+<text x="396.06222222222226" y="209.0" transform="rotate(-90 396.06222222222226 209.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">256</text>
+</g>
+<polyline points="453.8277777777778,237 453.8277777777778,245 423.6811611466054,250.48245903371273" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="426.6952602969512,247.49495065516635 423.6811611466054,250.48245903371273 427.5541008603935,252.21749159057242" fill="#718395"/>
+<g data-edge-channels="256" data-incoming-index="2">
+<text x="461.8277777777778" y="245.12" transform="rotate(-90 461.8277777777778 245.12)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">256</text>
+</g>
+<polyline points="519.5933333333334,141 519.5933333333334,245 427.8732032302756,254.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="431.12210078848244,251.2696768220085 427.8732032302756,254.0 431.59084756914393,256.0467341228601" fill="#718395"/>
+<g data-edge-channels="128" data-incoming-index="3">
+<text x="527.5933333333334" y="193.0" transform="rotate(-90 527.5933333333334 193.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">128</text>
+</g>
+<g data-symbol="concatenate" stroke="#173452" stroke-width="1.1">
+<circle cx="420.94500000000005" cy="258" r="8" fill="white"/>
+<path d="M 416.785,258 H 425.1050000000001 M 420.94500000000005,253.84 V 262.16" fill="none"/>
+</g>
+<g data-channel-sum="1024" data-channel-addends="384,256,256,128">
+<text x="434.94500000000005" y="262" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">384+256+256+128=1024</text>
+</g>
+</g>
+<polyline points="420.94500000000005,266 420.94500000000005,272" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="418.5450000000001,268.5 420.94500000000005,272 423.345,268.5" fill="#718395"/>
+<g data-output="true">
+<text x="420.94500000000005" y="280" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Output</text>
+<text x="395.62500000000006" y="289" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(1024×</text>
+<text x="420.94500000000005" y="289" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#7c4e9b">17×17</text>
+<text x="443.26500000000004" y="289" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+</g>
+<rect x="562.5933333333334" y="24" width="267.2966666666667" height="268" rx="7" fill="#f9fbfd" stroke="#cbd6e1" stroke-width="0.8"/>
+<g data-module="Inception-C" data-repeats="3" data-panel-x="562.5933333333334" data-panel-y="24" data-panel-width="267.2966666666667" data-panel-height="268">
+<rect x="641.6416666666667" y="25.9" width="114" height="26" rx="5" fill="#f6fbf9" stroke="#77b0a9" stroke-width="0.8"/>
+<rect x="640.4416666666667" y="26.45" width="114" height="26" rx="5" fill="#f6fbf9" stroke="#77b0a9" stroke-width="0.8"/>
+<rect x="639.2416666666667" y="27" width="114" height="26" rx="5" fill="#eaf6f2" stroke="#19766d" stroke-width="0.8"/>
+<rect x="655.7416666666667" y="31.0" width="18" height="18" rx="3" fill="#f6fbf9" stroke="#dfeaef" stroke-width="0.8"/>
+<rect x="676.7416666666667" y="31.0" width="18" height="18" rx="3" fill="#f6fbf9" stroke="#dfeaef" stroke-width="0.8"/>
+<rect x="697.7416666666667" y="31.0" width="18" height="18" rx="3" fill="#f6fbf9" stroke="#dfeaef" stroke-width="0.8"/>
+<rect x="718.7416666666667" y="31.0" width="18" height="18" rx="3" fill="#d7e3e9" stroke="#c0d1dd" stroke-width="0.8"/>
+<text x="696.2416666666667" y="42.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#19766d">Inception-C</text>
+<g data-input="true">
+<text x="696.2416666666667" y="63" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Input</text>
+<text x="675.0016666666667" y="72" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(1536×</text>
+<text x="700.3216666666667" y="72" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#19766d">8×8</text>
+<text x="714.4816666666667" y="72" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+<polyline points="696.2416666666667,75 696.2416666666667,77" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polyline points="696.2416666666667,77 597.5933333333334,77 597.5933333333334,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="595.1933333333334,79.5 597.5933333333334,83 599.9933333333333,79.5" fill="#718395"/>
+<polyline points="696.2416666666667,77 663.3588888888889,77 663.3588888888889,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="660.958888888889,79.5 663.3588888888889,83 665.7588888888889,79.5" fill="#718395"/>
+<polyline points="696.2416666666667,77 729.1244444444445,77 729.1244444444445,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="726.7244444444445,79.5 729.1244444444445,83 731.5244444444445,79.5" fill="#718395"/>
+<polyline points="696.2416666666667,77 794.8900000000001,77 794.8900000000001,83" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="792.4900000000001,79.5 794.8900000000001,83 797.2900000000001,79.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="575.3133333333334" y="83" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="588.5933333333334" y="87.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="597.5933333333334" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="597.5933333333334" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1536→256)</text>
+</g>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="641.078888888889" y="83" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="654.3588888888889" y="87.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="663.3588888888889" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="663.3588888888889" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1536→384)</text>
+</g>
+<text x="619.3588888888889" y="117" font-family="AppleGothic" font-size="8" text-anchor="start" fill="#173452">Conv</text>
+<polyline points="663.3588888888889,109 663.3588888888889,113 646.3588888888889,113 646.3588888888889,119" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="643.958888888889,115.5 646.3588888888889,119 648.7588888888889,115.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×3" data-stride="1" data-padding="0,1">
+<rect x="631.3588888888889" y="119" width="30" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="637.3588888888889" y="123.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="646.3588888888889" y="130.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">1×3</text>
+<text x="646.3588888888889" y="137.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(256)</text>
+</g>
+<polyline points="663.3588888888889,109 663.3588888888889,113 680.3588888888889,113 680.3588888888889,119" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="677.958888888889,115.5 680.3588888888889,119 682.7588888888889,115.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×1" data-stride="1" data-padding="1,0">
+<rect x="665.3588888888889" y="119" width="30" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="671.3588888888889" y="123.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="680.3588888888889" y="130.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">3×1</text>
+<text x="680.3588888888889" y="137.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(256)</text>
+</g>
+<g data-merge="channel-concatenate" data-incoming-count="2">
+<polyline points="646.3588888888889,145 646.3588888888889,150 656.4306856586135,159.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="652.2216850912065,158.457492651139 656.4306856586135,159.0 655.4200088001122,154.87828527337345" fill="#718395"/>
+<polyline points="680.3588888888889,145 680.3588888888889,150 670.2870921191644,159.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="671.2977689776657,154.87828527337345 670.2870921191644,159.0 674.4960926865714,158.457492651139" fill="#718395"/>
+<g data-symbol="concatenate" stroke="#173452" stroke-width="1.1">
+<circle cx="663.3588888888889" cy="163" r="8" fill="white"/>
+<path d="M 659.198888888889,163 H 667.5188888888889 M 663.3588888888889,158.84 V 167.16" fill="none"/>
+</g>
+<g data-channel-sum="512" data-channel-addends="256,256">
+<text x="651.3588888888889" y="165" font-family="AppleGothic" font-size="6" text-anchor="end" fill="#000000">(256+256=512)</text>
+</g>
+</g>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="706.8444444444445" y="83" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="720.1244444444445" y="87.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="729.1244444444445" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="729.1244444444445" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1536→384)</text>
+</g>
+<polyline points="729.1244444444445,109 729.1244444444445,115" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="726.7244444444445,111.5 729.1244444444445,115 731.5244444444445,111.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×1" data-stride="1" data-padding="1,0">
+<rect x="706.9284444444445" y="115" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="720.1244444444445" y="119.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="729.1244444444445" y="126.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 3×1</text>
+<text x="729.1244444444445" y="133.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(384→448)</text>
+</g>
+<polyline points="729.1244444444445,141 729.1244444444445,147" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="726.7244444444445,143.5 729.1244444444445,147 731.5244444444445,143.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×3" data-stride="1" data-padding="0,1">
+<rect x="706.9284444444445" y="147" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="720.1244444444445" y="151.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="729.1244444444445" y="158.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×3</text>
+<text x="729.1244444444445" y="165.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(448→512)</text>
+</g>
+<text x="753.1244444444445" y="181" font-family="AppleGothic" font-size="8" text-anchor="start" fill="#173452">Conv</text>
+<polyline points="729.1244444444445,173 729.1244444444445,177 712.1244444444445,177 712.1244444444445,183" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="709.7244444444445,179.5 712.1244444444445,183 714.5244444444445,179.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×3" data-stride="1" data-padding="0,1">
+<rect x="697.1244444444445" y="183" width="30" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="703.1244444444445" y="187.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="712.1244444444445" y="194.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">1×3</text>
+<text x="712.1244444444445" y="201.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(256)</text>
+</g>
+<polyline points="729.1244444444445,173 729.1244444444445,177 746.1244444444445,177 746.1244444444445,183" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="743.7244444444445,179.5 746.1244444444445,183 748.5244444444445,179.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×1" data-stride="1" data-padding="1,0">
+<rect x="731.1244444444445" y="183" width="30" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="737.1244444444445" y="187.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="746.1244444444445" y="194.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">3×1</text>
+<text x="746.1244444444445" y="201.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(256)</text>
+</g>
+<g data-merge="channel-concatenate" data-incoming-count="2">
+<polyline points="712.1244444444445,209 712.1244444444445,214 722.196241214169,223.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="717.9872406467621,222.457492651139 722.196241214169,223.0 721.1855643556678,218.87828527337345" fill="#718395"/>
+<polyline points="746.1244444444445,209 746.1244444444445,214 736.05264767472,223.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="737.0633245332212,218.87828527337345 736.05264767472,223.0 740.261648242127,222.457492651139" fill="#718395"/>
+<g data-symbol="concatenate" stroke="#173452" stroke-width="1.1">
+<circle cx="729.1244444444445" cy="227" r="8" fill="white"/>
+<path d="M 724.9644444444446,227 H 733.2844444444445 M 729.1244444444445,222.84 V 231.16" fill="none"/>
+</g>
+<g data-channel-sum="512" data-channel-addends="256,256">
+<text x="717.1244444444445" y="229" font-family="AppleGothic" font-size="6" text-anchor="end" fill="#000000">(256+256=512)</text>
+</g>
+</g>
+<g data-operation="Avg Pool" data-kernel="3×3" data-stride="1" data-padding="1">
+<rect x="768.3860000000001" y="83" width="53.008" height="26" rx="5" fill="#c8d3e2" stroke="#9db3cb" stroke-width="0.8"/>
+<text x="794.8900000000001" y="94.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">AvgPool3×3</text>
+<text x="794.8900000000001" y="101.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1536→1536)</text>
+</g>
+<polyline points="794.8900000000001,109 794.8900000000001,115" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="792.4900000000001,111.5 794.8900000000001,115 797.2900000000001,111.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="772.6100000000001" y="115" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="785.8900000000001" y="119.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="794.8900000000001" y="126.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="794.8900000000001" y="133.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1536→256)</text>
+</g>
+<g data-merge="channel-concatenate" data-incoming-count="4">
+<polyline points="597.5933333333334,109 597.5933333333334,245 689.3134634363912,254.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="685.5958190975227,256.0467341228601 689.3134634363912,254.0 686.0645658781843,251.2696768220085" fill="#718395"/>
+<g data-edge-channels="256" data-incoming-index="0">
+<text x="605.5933333333334" y="177.0" transform="rotate(-90 605.5933333333334 177.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">256</text>
+</g>
+<polyline points="663.3588888888889,171 663.3588888888889,245 693.5055055200613,250.48245903371273" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="689.6325658062732,252.21749159057242 693.5055055200613,250.48245903371273 690.4914063697155,247.49495065516635" fill="#718395"/>
+<g data-edge-channels="512" data-incoming-index="1">
+<text x="671.3588888888889" y="208.0" transform="rotate(-90 671.3588888888889 208.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">512</text>
+</g>
+<polyline points="729.1244444444445,235 729.1244444444445,245 698.977827813272,250.48245903371273" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="701.9919269636179,247.49495065516635 698.977827813272,250.48245903371273 702.8507675270602,252.21749159057242" fill="#718395"/>
+<g data-edge-channels="512" data-incoming-index="2">
+<text x="737.1244444444445" y="243.12" transform="rotate(-90 737.1244444444445 243.12)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">512</text>
+</g>
+<polyline points="794.8900000000001,141 794.8900000000001,245 703.1698698969421,254.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="706.418767455149,251.2696768220085 703.1698698969421,254.0 706.8875142358106,256.0467341228601" fill="#718395"/>
+<g data-edge-channels="256" data-incoming-index="3">
+<text x="802.8900000000001" y="193.0" transform="rotate(-90 802.8900000000001 193.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">256</text>
+</g>
+<g data-symbol="concatenate" stroke="#173452" stroke-width="1.1">
+<circle cx="696.2416666666667" cy="258" r="8" fill="white"/>
+<path d="M 692.0816666666667,258 H 700.4016666666666 M 696.2416666666667,253.84 V 262.16" fill="none"/>
+</g>
+<g data-channel-sum="1536" data-channel-addends="256,512,512,256">
+<text x="710.2416666666667" y="262" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">256+512+512+256=1536</text>
+</g>
+</g>
+<polyline points="696.2416666666667,266 696.2416666666667,272" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="693.8416666666667,268.5 696.2416666666667,272 698.6416666666667,268.5" fill="#718395"/>
+<g data-output="true">
+<text x="696.2416666666667" y="280" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Output</text>
+<text x="675.0016666666667" y="289" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(1536×</text>
+<text x="700.3216666666667" y="289" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#19766d">8×8</text>
+<text x="714.4816666666667" y="289" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+</g>
+<rect x="12.0" y="300" width="267.2966666666667" height="268" rx="7" fill="#f9fbfd" stroke="#cbd6e1" stroke-width="0.8"/>
+<g data-module="Reduction-A" data-repeats="1" data-panel-x="12.0" data-panel-y="300" data-panel-width="267.2966666666667" data-panel-height="268">
+<rect x="88.64833333333334" y="303" width="114" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="115.64833333333334" y="307.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<rect x="136.64833333333334" y="307.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<rect x="157.64833333333334" y="307.0" width="18" height="18" rx="3" fill="#d9e2ee" stroke="#c1d0e2" stroke-width="0.8"/>
+<text x="145.64833333333334" y="318.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#173452">Reduction-A</text>
+<g data-input="true">
+<text x="145.64833333333334" y="339" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Input</text>
+<text x="122.36833333333334" y="348" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(384×</text>
+<text x="143.60833333333335" y="348" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#ad3e64">35×35</text>
+<text x="165.92833333333334" y="348" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+<polyline points="145.64833333333334,351 145.64833333333334,353" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polyline points="145.64833333333334,353 60.0,353 60.0,359" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="57.6,355.5 60.0,359 62.4,355.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×3" data-stride="2" data-padding="0">
+<rect x="28.595" y="359" width="62.81" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="51.0" y="363.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="30.595" y="370.4" font-family="AppleGothic" font-size="8" text-anchor="start" fill="#173452">Conv 3×3 </text>
+<text x="73.547" y="370.4" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(2,0)</text>
+<text x="60.0" y="377.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(384→384)</text>
+</g>
+<polyline points="145.64833333333334,353 145.64833333333334,353 145.64833333333334,359" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="143.24833333333333,355.5 145.64833333333334,359 148.04833333333335,355.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="123.45233333333334" y="359" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="136.64833333333334" y="363.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="145.64833333333334" y="370.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="145.64833333333334" y="377.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(384→192)</text>
+</g>
+<polyline points="145.64833333333334,385 145.64833333333334,391" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="143.24833333333333,387.5 145.64833333333334,391 148.04833333333335,387.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×3" data-stride="1" data-padding="1">
+<rect x="123.45233333333334" y="391" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="136.64833333333334" y="395.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="145.64833333333334" y="402.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 3×3</text>
+<text x="145.64833333333334" y="409.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(192→224)</text>
+</g>
+<polyline points="145.64833333333334,417 145.64833333333334,423" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="143.24833333333333,419.5 145.64833333333334,423 148.04833333333335,419.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×3" data-stride="2" data-padding="0">
+<rect x="114.24333333333334" y="423" width="62.81" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="136.64833333333334" y="427.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="116.24333333333334" y="434.4" font-family="AppleGothic" font-size="8" text-anchor="start" fill="#173452">Conv 3×3 </text>
+<text x="159.19533333333334" y="434.4" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(2,0)</text>
+<text x="145.64833333333334" y="441.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(224→256)</text>
+</g>
+<polyline points="145.64833333333334,353 231.29666666666668,353 231.29666666666668,359" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="228.89666666666668,355.5 231.29666666666668,359 233.6966666666667,355.5" fill="#718395"/>
+<g data-operation="Max Pool" data-kernel="3×3" data-stride="2" data-padding="0">
+<rect x="204.26366666666667" y="359" width="54.066" height="26" rx="5" fill="#c8d3e2" stroke="#9db3cb" stroke-width="0.8"/>
+<text x="206.26366666666667" y="370.4" font-family="AppleGothic" font-size="8" text-anchor="start" fill="#173452">MaxPool </text>
+<text x="240.47166666666666" y="370.4" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(2,0)</text>
+<text x="231.29666666666668" y="377.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(384→384)</text>
+</g>
+<g data-merge="channel-concatenate" data-incoming-count="3">
+<polyline points="60.0,385 60.0,521 138.72013010305784,530.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="134.97016887559965,531.9869048272527 138.72013010305784,530.0 135.51539665141712,527.2179713330135" fill="#718395"/>
+<g data-edge-channels="384" data-incoming-index="0">
+<text x="68.0" y="453.0" transform="rotate(-90 68.0 453.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">384</text>
+</g>
+<polyline points="145.64833333333334,449 145.64833333333334,521 145.64833333333334,526.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="143.24833333333333,522.5 145.64833333333334,526.0 148.04833333333335,522.5" fill="#718395"/>
+<g data-edge-channels="256" data-incoming-index="1">
+<text x="153.64833333333334" y="485.0" transform="rotate(-90 153.64833333333334 485.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">256</text>
+</g>
+<polyline points="231.29666666666668,385 231.29666666666668,521 152.57653656360884,530.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="155.78127001524956,527.2179713330135 152.57653656360884,530.0 156.32649779106703,531.9869048272527" fill="#718395"/>
+<g data-edge-channels="384" data-incoming-index="2">
+<text x="239.29666666666668" y="453.0" transform="rotate(-90 239.29666666666668 453.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">384</text>
+</g>
+<g data-symbol="concatenate" stroke="#173452" stroke-width="1.1">
+<circle cx="145.64833333333334" cy="534" r="8" fill="white"/>
+<path d="M 141.48833333333334,534 H 149.80833333333334 M 145.64833333333334,529.84 V 538.16" fill="none"/>
+</g>
+<g data-channel-sum="1024" data-channel-addends="384,256,384">
+<text x="159.64833333333334" y="538" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">384+256+384=1024</text>
+</g>
+</g>
+<polyline points="145.64833333333334,542 145.64833333333334,548" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="143.24833333333333,544.5 145.64833333333334,548 148.04833333333335,544.5" fill="#718395"/>
+<g data-output="true">
+<text x="145.64833333333334" y="556" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Output</text>
+<text x="120.32833333333335" y="565" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(1024×</text>
+<text x="145.64833333333334" y="565" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#7c4e9b">17×17</text>
+<text x="167.96833333333333" y="565" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+</g>
+<rect x="287.2966666666667" y="300" width="267.2966666666667" height="268" rx="7" fill="#f9fbfd" stroke="#cbd6e1" stroke-width="0.8"/>
+<g data-module="Reduction-B" data-repeats="1" data-panel-x="287.2966666666667" data-panel-y="300" data-panel-width="267.2966666666667" data-panel-height="268">
+<rect x="363.94500000000005" y="303" width="114" height="26" rx="5" fill="#f7e9bf" stroke="#96722b" stroke-width="0.8"/>
+<rect x="390.94500000000005" y="307.0" width="18" height="18" rx="3" fill="#fbf5e2" stroke="#e5e4d8" stroke-width="0.8"/>
+<rect x="411.94500000000005" y="307.0" width="18" height="18" rx="3" fill="#fbf5e2" stroke="#e5e4d8" stroke-width="0.8"/>
+<rect x="432.94500000000005" y="307.0" width="18" height="18" rx="3" fill="#ddddd2" stroke="#c6cbc6" stroke-width="0.8"/>
+<text x="420.94500000000005" y="318.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#96722b">Reduction-B</text>
+<g data-input="true">
+<text x="420.94500000000005" y="339" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Input</text>
+<text x="395.62500000000006" y="348" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(1024×</text>
+<text x="420.94500000000005" y="348" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#7c4e9b">17×17</text>
+<text x="443.26500000000004" y="348" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+<polyline points="420.94500000000005,351 420.94500000000005,353" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polyline points="420.94500000000005,353 335.2966666666667,353 335.2966666666667,359" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="332.8966666666667,355.5 335.2966666666667,359 337.69666666666666,355.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="313.01666666666665" y="359" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="326.2966666666666" y="363.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="335.2966666666667" y="370.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="335.2966666666667" y="377.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1024→192)</text>
+</g>
+<polyline points="335.2966666666667,385 335.2966666666667,391" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="332.8966666666667,387.5 335.2966666666667,391 337.69666666666666,387.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×3" data-stride="2" data-padding="0">
+<rect x="303.89166666666665" y="391" width="62.81" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="326.2966666666666" y="395.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="305.89166666666665" y="402.4" font-family="AppleGothic" font-size="8" text-anchor="start" fill="#173452">Conv 3×3 </text>
+<text x="348.84366666666665" y="402.4" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(2,0)</text>
+<text x="335.2966666666667" y="409.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(192→192)</text>
+</g>
+<polyline points="420.94500000000005,353 420.94500000000005,353 420.94500000000005,359" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="418.5450000000001,355.5 420.94500000000005,359 423.345,355.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×1" data-stride="1" data-padding="0">
+<rect x="398.6650000000001" y="359" width="44.56" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="411.94500000000005" y="363.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="420.94500000000005" y="370.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×1</text>
+<text x="420.94500000000005" y="377.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1024→256)</text>
+</g>
+<polyline points="420.94500000000005,385 420.94500000000005,391" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="418.5450000000001,387.5 420.94500000000005,391 423.345,387.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="1×7" data-stride="1" data-padding="0,3">
+<rect x="398.749" y="391" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="411.94500000000005" y="395.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="420.94500000000005" y="402.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 1×7</text>
+<text x="420.94500000000005" y="409.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(256→256)</text>
+</g>
+<polyline points="420.94500000000005,417 420.94500000000005,423" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="418.5450000000001,419.5 420.94500000000005,423 423.345,419.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="7×1" data-stride="1" data-padding="3,0">
+<rect x="398.749" y="423" width="44.392" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="411.94500000000005" y="427.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="420.94500000000005" y="434.4" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Conv 7×1</text>
+<text x="420.94500000000005" y="441.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(256→320)</text>
+</g>
+<polyline points="420.94500000000005,449 420.94500000000005,455" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="418.5450000000001,451.5 420.94500000000005,455 423.345,451.5" fill="#718395"/>
+<g data-operation="Conv" data-kernel="3×3" data-stride="2" data-padding="0">
+<rect x="389.5400000000001" y="455" width="62.81" height="26" rx="5" fill="#edf4fd" stroke="#5186be" stroke-width="0.8"/>
+<rect x="411.94500000000005" y="459.0" width="18" height="18" rx="3" fill="#f7fafe" stroke="#e0e9f4" stroke-width="0.8"/>
+<text x="391.5400000000001" y="466.4" font-family="AppleGothic" font-size="8" text-anchor="start" fill="#173452">Conv 3×3 </text>
+<text x="434.4920000000001" y="466.4" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(2,0)</text>
+<text x="420.94500000000005" y="473.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(320→320)</text>
+</g>
+<polyline points="420.94500000000005,353 506.59333333333336,353 506.59333333333336,359" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="504.1933333333334,355.5 506.59333333333336,359 508.99333333333334,355.5" fill="#718395"/>
+<g data-operation="Max Pool" data-kernel="3×3" data-stride="2" data-padding="0">
+<rect x="479.56033333333335" y="359" width="54.066" height="26" rx="5" fill="#c8d3e2" stroke="#9db3cb" stroke-width="0.8"/>
+<text x="481.56033333333335" y="370.4" font-family="AppleGothic" font-size="8" text-anchor="start" fill="#173452">MaxPool </text>
+<text x="515.7683333333333" y="370.4" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(2,0)</text>
+<text x="506.59333333333336" y="377.8" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">(1024→1024)</text>
+</g>
+<g data-merge="channel-concatenate" data-incoming-count="3">
+<polyline points="335.2966666666667,417 335.2966666666667,521 414.0167967697245,530.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="410.26683554226634,531.9869048272527 414.0167967697245,530.0 410.8120633180838,527.2179713330135" fill="#718395"/>
+<g data-edge-channels="192" data-incoming-index="0">
+<text x="343.2966666666667" y="469.0" transform="rotate(-90 343.2966666666667 469.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">192</text>
+</g>
+<polyline points="420.94500000000005,481 420.94500000000005,521 420.94500000000005,526.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="418.5450000000001,522.5 420.94500000000005,526.0 423.345,522.5" fill="#718395"/>
+<g data-edge-channels="320" data-incoming-index="1">
+<text x="428.94500000000005" y="501.0" transform="rotate(-90 428.94500000000005 501.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">320</text>
+</g>
+<polyline points="506.59333333333336,385 506.59333333333336,521 427.8732032302756,530.0" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="431.0779366819163,527.2179713330135 427.8732032302756,530.0 431.62316445773376,531.9869048272527" fill="#718395"/>
+<g data-edge-channels="1024" data-incoming-index="2">
+<text x="514.5933333333334" y="453.0" transform="rotate(-90 514.5933333333334 453.0)" font-family="AppleGothic" font-size="6" text-anchor="middle" fill="#000000">1024</text>
+</g>
+<g data-symbol="concatenate" stroke="#173452" stroke-width="1.1">
+<circle cx="420.94500000000005" cy="534" r="8" fill="white"/>
+<path d="M 416.785,534 H 425.1050000000001 M 420.94500000000005,529.84 V 538.16" fill="none"/>
+</g>
+<g data-channel-sum="1536" data-channel-addends="192,320,1024">
+<text x="434.94500000000005" y="538" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">192+320+1024=1536</text>
+</g>
+</g>
+<polyline points="420.94500000000005,542 420.94500000000005,548" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="418.5450000000001,544.5 420.94500000000005,548 423.345,544.5" fill="#718395"/>
+<g data-output="true">
+<text x="420.94500000000005" y="556" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Output</text>
+<text x="399.70500000000004" y="565" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(1536×</text>
+<text x="425.02500000000003" y="565" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#19766d">8×8</text>
+<text x="439.18500000000006" y="565" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+</g>
+<rect x="562.5933333333334" y="300" width="267.2966666666667" height="268" rx="7" fill="#f9fbfd" stroke="#cbd6e1" stroke-width="0.8"/>
+<text x="696.2416666666667" y="312" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#173452">Serial repetition</text>
+<g data-module="Inception-A" data-repeats="4">
+<rect x="642.8416666666667" y="318.35" width="114" height="26" rx="5" fill="#fdf2f6" stroke="#d088a0" stroke-width="0.8"/>
+<rect x="641.6416666666667" y="318.9" width="114" height="26" rx="5" fill="#fdf2f6" stroke="#d088a0" stroke-width="0.8"/>
+<rect x="640.4416666666667" y="319.45" width="114" height="26" rx="5" fill="#fdf2f6" stroke="#d088a0" stroke-width="0.8"/>
+<rect x="639.2416666666667" y="320" width="114" height="26" rx="5" fill="#fae3ea" stroke="#ad3e64" stroke-width="0.8"/>
+<rect x="655.7416666666667" y="324.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="676.7416666666667" y="324.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="697.7416666666667" y="324.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="718.7416666666667" y="324.0" width="18" height="18" rx="3" fill="#dedae6" stroke="#c7c9d9" stroke-width="0.8"/>
+<text x="696.2416666666667" y="335.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#ad3e64">Inception-A ×4</text>
+</g>
+<g data-input="true">
+<text x="696.2416666666667" y="357" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Input</text>
+<text x="672.9616666666667" y="366" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(384×</text>
+<text x="694.2016666666667" y="366" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#ad3e64">35×35</text>
+<text x="716.5216666666668" y="366" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+<polyline points="696.2416666666667,369 696.2416666666667,377" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="693.8416666666667,373.5 696.2416666666667,377 698.6416666666667,373.5" fill="#718395"/>
+<rect x="639.2416666666667" y="377" width="114" height="26" rx="5" fill="#fae3ea" stroke="#ad3e64" stroke-width="0.8"/>
+<rect x="655.7416666666667" y="381.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="676.7416666666667" y="381.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="697.7416666666667" y="381.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="718.7416666666667" y="381.0" width="18" height="18" rx="3" fill="#dedae6" stroke="#c7c9d9" stroke-width="0.8"/>
+<text x="696.2416666666667" y="392.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#ad3e64">Inception-A #1</text>
+<rect x="639.2416666666667" y="411" width="114" height="26" rx="5" fill="#fae3ea" stroke="#ad3e64" stroke-width="0.8"/>
+<rect x="655.7416666666667" y="415.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="676.7416666666667" y="415.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="697.7416666666667" y="415.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="718.7416666666667" y="415.0" width="18" height="18" rx="3" fill="#dedae6" stroke="#c7c9d9" stroke-width="0.8"/>
+<text x="696.2416666666667" y="426.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#ad3e64">Inception-A #2</text>
+<rect x="639.2416666666667" y="445" width="114" height="26" rx="5" fill="#fae3ea" stroke="#ad3e64" stroke-width="0.8"/>
+<rect x="655.7416666666667" y="449.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="676.7416666666667" y="449.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="697.7416666666667" y="449.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="718.7416666666667" y="449.0" width="18" height="18" rx="3" fill="#dedae6" stroke="#c7c9d9" stroke-width="0.8"/>
+<text x="696.2416666666667" y="460.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#ad3e64">Inception-A #3</text>
+<rect x="639.2416666666667" y="479" width="114" height="26" rx="5" fill="#fae3ea" stroke="#ad3e64" stroke-width="0.8"/>
+<rect x="655.7416666666667" y="483.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="676.7416666666667" y="483.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="697.7416666666667" y="483.0" width="18" height="18" rx="3" fill="#fdf2f6" stroke="#e6e1eb" stroke-width="0.8"/>
+<rect x="718.7416666666667" y="483.0" width="18" height="18" rx="3" fill="#dedae6" stroke="#c7c9d9" stroke-width="0.8"/>
+<text x="696.2416666666667" y="494.5" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#ad3e64">Inception-A #4</text>
+<polyline points="696.2416666666667,403 696.2416666666667,411" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="693.8416666666667,407.5 696.2416666666667,411 698.6416666666667,407.5" fill="#718395"/>
+<polyline points="696.2416666666667,437 696.2416666666667,445" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="693.8416666666667,441.5 696.2416666666667,445 698.6416666666667,441.5" fill="#718395"/>
+<polyline points="696.2416666666667,471 696.2416666666667,479" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="693.8416666666667,475.5 696.2416666666667,479 698.6416666666667,475.5" fill="#718395"/>
+<polyline points="696.2416666666667,505 696.2416666666667,513" fill="none" stroke="#718395" stroke-width="1.25"/>
+<polygon class="arrow-head" points="693.8416666666667,509.5 696.2416666666667,513 698.6416666666667,509.5" fill="#718395"/>
+<g data-output="true">
+<text x="696.2416666666667" y="521" font-family="AppleGothic" font-size="8" text-anchor="middle" fill="#173452">Output</text>
+<text x="672.9616666666667" y="530" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">(384×</text>
+<text x="694.2016666666667" y="530" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#ad3e64">35×35</text>
+<text x="716.5216666666668" y="530" font-family="AppleGothic" font-size="6" text-anchor="start" fill="#000000">)</text>
+</g>
+<text x="696.2416666666667" y="546" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#000000">Four successive blocks  Different weights</text>
+<text x="696.2416666666667" y="560" font-family="AppleGothic" font-size="10" text-anchor="middle" fill="#000000">Output of one block → input of the next</text>
+<text x="12" y="579" font-family="AppleGothic" font-size="10" text-anchor="start" fill="#000000">Conv: Conv2d → BatchNorm → ReLU. Unmarked ops: stride 1 with size-preserving padding. Tuples: (stride, padding). Pooling: 3×3.</text>
+<text x="12" y="591" font-family="AppleGothic" font-size="10" text-anchor="start" fill="#000000">Ops: input → output channels. Edges: output channels. N: batch size (1 for one image). Stacks: repetitions. ⊕: channel-wise concatenation.</text>
+</svg>
