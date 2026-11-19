@@ -19,6 +19,7 @@ Engine의 자료형·함수·설정값은 `engine` namespace에 둔다. Engine�
 | [Engine.h](Engine.h) | 공개 API와 이미지·비교 쌍·모델·템플릿·실행 결과 자료형 |
 | [Engine.cpp](Engine.cpp) | 비교 계획, 모델 선택과 로딩, 등록·비교 실행, 원시 결과 저장 |
 | [engineConfig.h](engineConfig.h) | DB·모델 ID, 경로, Seed, 판정 기준과 실행 기본값 |
+| [kisaBackend.h](kisaBackend.h) / [.cpp](kisaBackend.cpp) | KISA 규격 DLL을 Algorithm 인터페이스로 감싸는 Adapter |
 
 [Algorithm.h](../Algorithm/Algorithm.h)의 추상 인터페이스를 사용한다. 이미지 읽기에는 Qt Gui와 TIFF 플러그인이 필요하며, 파일 저장은 Qt Core를 사용한다. 별도의 이미지·CSV 라이브러리는 연결하지 않는다. 경과 시간은 `steady_clock`으로 측정한다.
 
@@ -117,17 +118,25 @@ Genuine은 기준 이상일 때 PASS, 미만일 때 MISS다. Impostor는 기준 
 
 ## DLL Backend / Extension
 
-현재 Algorithm과 Engine은 실행 파일에 정적으로 연결한다. GUI의 `.bin` 선택은 내장 Encoder가 읽는 가중치를 바꾸는 기능이며 외부 DLL을 불러오는 기능은 아니다. 호환되는 Cosine30 v2 파일만 사용할 수 있고, 다른 구조는 입력·출력·메타데이터 검사에서 거절한다.
+[kisaBackend.h](kisaBackend.h)의 `KisaDllAlgorithm`은 KISA 규격 DLL(`KISA_Enroll`·`KISA_Attempt`·`KISA_Compare`)을 `algorithm::Algorithm` 인터페이스로 감싸는 Adapter다. GUI Step 3에서 `Algorithm DLL (KISA spec)`을 고르면 `Engine::LoadDll`이 DLL 하나를 모델 `kisa_dll`로 등록한다. 이 모델은 항상 판정 모델이므로 이후 비교 계획·실행·원시 결과·리포트는 내장 Encoder와 같은 경로를 쓴다. DLL에는 보정 파일이 없으므로 임계값은 수동으로 조절한다.
 
-외부 알고리즘 DLL을 연결하려면 다음 구현이 필요하다.
+| Algorithm 함수 | DLL 호출 |
+|---|---|
+| `LoadModel` / `GetModelInfo` | `QLibrary`로 DLL을 열고 세 함수를 찾는다. 하나라도 없으면 거절한다. 기록용으로 DLL 파일의 SHA-256을 남긴다. |
+| `Preprocess` | 이미지 크기로 iType을 정하고 RAW gray8을 그대로 넘긴다. DB와 크기가 맞지 않으면 거절한다. |
+| `CreateTemplate` / `CreateAttemptTemplate` | `KISA_Enroll` / `KISA_Attempt`. 1,000,000 bytes 버퍼를 제공한다. |
+| `Compare` | `KISA_Compare` |
 
-1. `Algorithm` 인터페이스를 구현하고 `LoadLibrary` 또는 `QLibrary`로 DLL을 로드한다.
-2. DLL 함수 규약에 맞춰 이미지·템플릿 형식과 메모리 소유권을 정하고, 결과를 Engine의 상태·점수 규칙으로 변환한다.
-3. 모델 선택 화면에 DLL 경로와 초기화 설정을 연결한다.
-4. 같은 이미지쌍으로 등록·비교·저장을 검증한다. 충돌과 강제 시간 제한을 격리하려면 별도 작업 프로세스가 필요하다.
+`Algorithm::CreateAttemptTemplate`의 기본 구현은 `CreateTemplate`를 호출하므로 내장 Encoder의 동작은 바뀌지 않는다.
 
-DLL 파일만 교체해 연결할 수 없으며 함수와 버퍼 규약이 필요하다. Windows DLL을 macOS/Linux에서 그대로 실행하는 경로도 지원하지 않는다. Qt·LibTorch DLL은 실행 의존성이므로 지문 알고리즘 선택과는 별개다.
+알고리즘 오류는 모델 단위 실패로 기록한다.
+
+- 반환값이 1이 아니면 DLL의 오류 코드와 메시지를 남긴다.
+- 성공을 반환했지만 템플릿 크기가 0 이하·1,000,000 이상이거나 점수가 0~1 밖이면 출력과 동작 불일치로 실패 처리한다.
+- MSVC 빌드에서는 DLL 안의 접근 위반과 밖으로 빠져나온 예외를 `__try/__except`로 잡아 `crashed`로 기록한다.
+
+같은 프로세스에서 호출하므로 무한 대기(강제 시간 제한), 힙 손상, 32-bit DLL 실행은 처리하지 못한다. 이를 위해서는 별도 작업 프로세스가 필요하다. Windows DLL을 macOS/Linux에서 그대로 실행하는 경로는 지원하지 않는다. Qt·LibTorch DLL은 실행 의존성이므로 지문 알고리즘 선택과는 별개다.
 
 ## Status
 
-운영 전환과 파일 통합 과정에서 모델 선택, 버전 있는 템플릿, 실제 추론과 원시 결과 저장, 보정값 호환성을 확인했다. GUI 연동은 Qt 오프스크린으로 검증했다. 별도 검증 전용 소스와 실행 대상은 정리했으며, 모델 학습·평가에 포함된 검사는 `FingerprintTrain`에서 계속 수행한다. [평가 명령과 한계](../Algorithm/readme.md#verification--limits)를 참고한다. 실행은 GUI 스레드에서 동기 처리하며 강제 시간 제한·동시 실행·실행 중 강제 취소·프로세스 오류 격리는 미구현이다. 실제 데스크톱 화면과 Windows/KISA DLL 경로도 미검증 또는 미구현이다. 라이선스는 [Root](../../readme.md#4-license--submodule)를 따른다.
+운영 전환과 파일 통합 과정에서 모델 선택, 버전 있는 템플릿, 실제 추론과 원시 결과 저장, 보정값 호환성을 확인했다. GUI 연동은 Qt 오프스크린으로 검증했다. 별도 검증 전용 소스와 실행 대상은 정리했으며, 모델 학습·평가에 포함된 검사는 `FingerprintTrain`에서 계속 수행한다. [평가 명령과 한계](../Algorithm/readme.md#verification--limits)를 참고한다. 실행은 GUI 스레드에서 동기 처리하며 강제 시간 제한·동시 실행·실행 중 강제 취소·프로세스 오류 격리는 미구현이다. KISA DLL 경로는 Windows x64에서 우리 `FingerprintKISA.dll`로 확인했다. 실제 데스크톱 화면 조작은 미검증이다. 라이선스는 [Root](../../readme.md#4-license--submodule)를 따른다.

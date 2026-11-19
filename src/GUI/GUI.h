@@ -4,6 +4,7 @@
 #include <QString>
 #include <vector>
 #include "Engine.h"
+#include "kisaBackend.h"
 #include "guiConfig.h"
 
 class QLabel;
@@ -66,7 +67,14 @@ private:
     QString databasePath_;
     QString databaseId_;
     QPushButton* selectedDatabase_ = nullptr;
+    // Algorithm source: built-in encoder with .bin weights, or an external KISA DLL.
+    engine::KisaDllAlgorithm dllAlgorithm_;
+    bool UsingDll() const;
     // Qt parents own widgets; these pointers only refer to them.
+    QComboBox* algorithmSource_ = nullptr;
+    QWidget* weightControls_ = nullptr;
+    QWidget* dllControls_ = nullptr;
+    QLineEdit* dllPath_ = nullptr;
     QLineEdit* weightPath_ = nullptr;
     std::vector<QCheckBox*> modelChoices_;
     bool changingModels_ = false;

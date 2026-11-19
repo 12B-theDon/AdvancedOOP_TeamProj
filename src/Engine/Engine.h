@@ -133,6 +133,8 @@ public:
     // The caller owns the backend and keeps it alive while Engine uses it.
     bool LoadSelectedModels(const std::vector<std::string>& model_ids, const std::string& weights_folder,
                             algorithm::Algorithm* backend);
+    // Single external KISA algorithm DLL as the only (decision) model, DllModelId. No calibration.
+    bool LoadDll(const std::string& dll_path, algorithm::Algorithm* backend);
     const std::vector<ModelState>& Models() const { return models_; }
     static bool IsDecisionModel(const std::string& model_id, const std::string& database_id);
     static void SelectDecisionScore(SimilarityResult& result, const std::string& database_id);
@@ -153,7 +155,7 @@ private:
     std::vector<ModelState> models_;
     int revision_ = 0;
     std::string weights_folder_;
-    ModelTemplate MakeTemplate(const ModelState& model, const algorithm::AlgorithmImage& image);
+    ModelTemplate MakeTemplate(const ModelState& model, const algorithm::AlgorithmImage& image, bool attempt);
 };
 
 } // namespace engine

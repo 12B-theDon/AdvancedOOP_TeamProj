@@ -193,8 +193,26 @@ bool Engine::LoadSelectedModels(const std::vector<std::string>& ids, const std::
     return anyLoaded;
 }
 
+bool Engine::LoadDll(const std::string& dll_path, algorithm::Algorithm* backend) {
+    backend_ = backend;
+    weights_folder_.clear(); // A DLL has no calibration file.
+    ++revision_;
+    models_.clear();
+    ModelState model{DllModelId, dll_path, false, ""};
+    if (!backend_)
+        model.error = "Algorithm backend is not configured.";
+    else {
+        model.loaded = backend_->LoadModel(model.model_id, model.weight_file, model.error)
+            && backend_->GetModelInfo(model.model_id, model.info, model.error);
+        if (!model.loaded && model.error.empty()) model.error = "DLL loading failed.";
+        if (model.loaded) model.error.clear();
+    }
+    models_.push_back(model);
+    return model.loaded;
+}
+
 bool Engine::IsDecisionModel(const std::string& model_id, const std::string& database_id) {
-    if (model_id == "combined") return true;
+    if (model_id == "combined" || model_id == DllModelId) return true;
     for (int db = 0; db < int(DatabaseIds.size()); ++db)
         if (database_id == DatabaseIds[db] || database_id + "_B" == DatabaseIds[db])
             return model_id == ModelIds[db];
@@ -217,6 +235,8 @@ void Engine::SelectDecisionScore(SimilarityResult& result, const std::string& da
 
 ThresholdRecommendation Engine::RecommendedThreshold(const std::string& database_id) const {
     ThresholdRecommendation result;
+    for (const ModelState& model : models_)
+        if (model.model_id == DllModelId) { result.note = "External DLL has no calibration; adjust thresholds manually."; return result; }
     QFile file(QDir(QString::fromStdString(weights_folder_)).filePath(CalibrationFile));
     if (!file.open(QIODevice::ReadOnly)) { result.note = "No matching calibration; adjust thresholds manually."; return result; }
     const QJsonObject calibration = QJsonDocument::fromJson(file.readAll()).object();
@@ -258,7 +278,7 @@ ThresholdRecommendation Engine::RecommendedThreshold(const std::string& database
     return result;
 }
 
-ModelTemplate Engine::MakeTemplate(const ModelState& model, const algorithm::AlgorithmImage& image) {
+ModelTemplate Engine::MakeTemplate(const ModelState& model, const algorithm::AlgorithmImage& image, bool attempt) {
     ModelTemplate result;
     const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     result.model_id = model.model_id;
@@ -278,7 +298,9 @@ ModelTemplate Engine::MakeTemplate(const ModelState& model, const algorithm::Alg
             if (result.error.empty()) result.error = "Preprocessing failed.";
         } else {
             result.stage = "template";
-            if (!backend_->CreateTemplate(model.model_id, prepared, result.data, result.error) || result.data.empty()) {
+            const bool created = attempt ? backend_->CreateAttemptTemplate(model.model_id, prepared, result.data, result.error)
+                                         : backend_->CreateTemplate(model.model_id, prepared, result.data, result.error);
+            if (!created || result.data.empty()) {
                 result.data.clear();
                 if (result.error.empty()) result.error = "Template generation failed.";
             } else {
@@ -298,7 +320,7 @@ EnrollmentTemplates Engine::Enroll(const algorithm::AlgorithmImage& image) {
     result.executed = true;
     result.revision = revision_;
     for (const ModelState& model : models_) {
-        result.models.push_back(MakeTemplate(model, image));
+        result.models.push_back(MakeTemplate(model, image, false));
         if (result.models.back().success)
             result.success = true;
     }
@@ -326,7 +348,7 @@ SimilarityResult Engine::Compare(const EnrollmentTemplates& enrollment, const al
             score.error = enrolled ? enrolled->error : "Enrollment template is missing.";
         } else {
             // Enrollment and attempt both use this exact model-specific path.
-            const ModelTemplate attempted = MakeTemplate(model, attempt);
+            const ModelTemplate attempted = MakeTemplate(model, attempt, true);
             if (!attempted.success) {
                 score.stage = attempted.stage;
                 score.error = attempted.error;

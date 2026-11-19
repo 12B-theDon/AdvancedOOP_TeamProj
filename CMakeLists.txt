@@ -15,7 +15,20 @@ target_include_directories(Algorithm PUBLIC src/Algorithm)
 target_link_libraries(Algorithm PUBLIC "${TORCH_LIBRARIES}" Qt${QT_VERSION_MAJOR}::Core)
 target_compile_options(Algorithm PUBLIC ${TORCH_FLAGS})
 
-add_library(Engine STATIC src/Engine/Engine.cpp)
+set_target_properties(Algorithm PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+# K-NBTC fingerprint DLL: KISA_Enroll / KISA_Attempt / KISA_Compare around the same encoder.
+add_library(FingerprintKISA SHARED src/KISA/kisa.cpp)
+target_include_directories(FingerprintKISA PUBLIC src/KISA)
+target_link_libraries(FingerprintKISA PRIVATE Algorithm)
+set_target_properties(FingerprintKISA PROPERTIES PREFIX "" CXX_VISIBILITY_PRESET hidden)
+
+add_executable(FingerprintKISATest src/KISA/kisaTest.cpp)
+target_include_directories(FingerprintKISATest PRIVATE src/KISA)
+target_link_libraries(FingerprintKISATest PRIVATE Qt${QT_VERSION_MAJOR}::Gui)
+add_dependencies(FingerprintKISATest FingerprintKISA)
+
+add_library(Engine STATIC src/Engine/Engine.cpp src/Engine/kisaBackend.cpp)
 target_include_directories(Engine PUBLIC src/Engine)
 target_link_libraries(Engine PUBLIC Algorithm Qt${QT_VERSION_MAJOR}::Gui)
 
@@ -36,4 +49,6 @@ if(MSVC)
     target_compile_options(Algorithm PRIVATE /utf-8)
     target_compile_options(FingerprintTrain PRIVATE /utf-8)
     target_compile_options(FingerprintGUI PRIVATE /utf-8)
+    target_compile_options(FingerprintKISA PRIVATE /utf-8)
+    target_compile_options(FingerprintKISATest PRIVATE /utf-8)
 endif()

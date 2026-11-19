@@ -307,8 +307,32 @@ QWizardPage* Window::TemplatePage() {
     calibrationInfo_ = new QLabel("Select trained models to obtain a minimum-score threshold.");
     calibrationInfo_->setObjectName("calibrationInfo");
     calibrationInfo_->setWordWrap(true);
-    layout->addWidget(weightPath_);
-    layout->addWidget(browse);
+    algorithmSource_ = new QComboBox;
+    algorithmSource_->setObjectName("algorithmSource");
+    algorithmSource_->addItems(AlgorithmSources);
+    dllPath_ = new QLineEdit;
+    dllPath_->setObjectName("algorithmDll");
+    dllPath_->setReadOnly(true);
+    dllPath_->setPlaceholderText("Select a DLL that follows the KISA fingerprint spec...");
+    QPushButton* browseDll = new QPushButton(BrowseDll);
+    browseDll->setObjectName("browseDll");
+    QLabel* dllHint = new QLabel(DllHint);
+    dllHint->setWordWrap(true);
+    dllControls_ = new QWidget;
+    QVBoxLayout* dllLayout = new QVBoxLayout(dllControls_);
+    dllLayout->setContentsMargins(0, 0, 0, 0);
+    dllLayout->addWidget(dllPath_);
+    dllLayout->addWidget(browseDll);
+    dllLayout->addWidget(dllHint);
+    dllControls_->hide();
+    weightControls_ = new QWidget;
+    QVBoxLayout* weightLayout = new QVBoxLayout(weightControls_);
+    weightLayout->setContentsMargins(0, 0, 0, 0);
+    weightLayout->addWidget(weightPath_);
+    weightLayout->addWidget(browse);
+    layout->addWidget(algorithmSource_);
+    layout->addWidget(weightControls_);
+    layout->addWidget(dllControls_);
     QHBoxLayout* modelOptions = new QHBoxLayout;
     modelChoices_.resize(ModelIds.size());
     for (int index = 0; index < ModelIds.size(); ++index) {
@@ -319,8 +343,24 @@ QWizardPage* Window::TemplatePage() {
             if (!changingModels_) ReloadModels();
         });
     }
-    layout->addLayout(modelOptions);
+    QWidget* modelChoicesWidget = new QWidget;
+    modelOptions->setContentsMargins(0, 0, 0, 0);
+    modelChoicesWidget->setLayout(modelOptions);
+    layout->addWidget(modelChoicesWidget);
     layout->addWidget(modelTable_);
+    connect(algorithmSource_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this, modelChoicesWidget] {
+        weightControls_->setVisible(!UsingDll());
+        modelChoicesWidget->setVisible(!UsingDll());
+        dllControls_->setVisible(UsingDll());
+        ReloadModels();
+    });
+    connect(browseDll, &QPushButton::clicked, this, [this] {
+        const QString path = QFileDialog::getOpenFileName(this, DllDialog, {}, DllFilter);
+        if (!path.isEmpty()) {
+            dllPath_->setText(QDir::toNativeSeparators(path));
+            ReloadModels();
+        }
+    });
     layout->addWidget(createTemplates_);
     layout->addWidget(templateTable_);
     layout->addWidget(inferenceInfo_);
@@ -643,11 +683,22 @@ void Window::ClearTemplates() {
     comparisonsExecuted_ = false;
 }
 
+bool Window::UsingDll() const {
+    return algorithmSource_ && algorithmSource_->currentIndex() == 1;
+}
+
 void Window::ReloadModels() {
-    std::vector<std::string> ids;
-    for (int index = 0; index < ModelIds.size(); ++index)
-        if (!weightPath_->text().isEmpty() && modelChoices_[index]->isChecked()) ids.push_back(ModelIds[index].toStdString());
-    engine_.LoadSelectedModels(ids, weightPath_->text().toStdString(), algorithm_);
+    if (UsingDll()) {
+        if (dllPath_->text().isEmpty())
+            engine_.LoadSelectedModels({}, "", &dllAlgorithm_); // Clears models until a DLL is chosen.
+        else
+            engine_.LoadDll(QDir::fromNativeSeparators(dllPath_->text()).toStdString(), &dllAlgorithm_);
+    } else {
+        std::vector<std::string> ids;
+        for (int index = 0; index < ModelIds.size(); ++index)
+            if (!weightPath_->text().isEmpty() && modelChoices_[index]->isChecked()) ids.push_back(ModelIds[index].toStdString());
+        engine_.LoadSelectedModels(ids, weightPath_->text().toStdString(), algorithm_);
+    }
     modelTable_->setRowCount(0);
     int loaded = 0;
     for (const engine::ModelState& model : engine_.Models()) {
@@ -985,23 +1036,29 @@ std::vector<bool> Window::SelectedMetrics() const {
 engine::EvaluationRun Window::Snapshot() const {
     engine::EvaluationRun run;
     run.database = databasePath_.toStdString();
-    run.weights_folder = weightPath_->text().toStdString();
+    run.weights_folder = (UsingDll() ? dllPath_->text() : weightPath_->text()).toStdString();
     run.models = engine_.Models();
     run.genuine_threshold = genuine_.threshold->value();
     run.impostor_threshold = impostor_.threshold->value();
-    QString settings = "database=" + databasePath_ + "\nweights_folder=" + weightPath_->text() + "\n";
+    QString settings = "database=" + databasePath_ + "\n";
+    settings += UsingDll() ? "algorithm_dll=" + dllPath_->text() + "\n" : "weights_folder=" + weightPath_->text() + "\n";
     settings += "timeout_ms=" + QString::number(engine::TimeoutMs) + "\n"
         + "concurrency=" + QString::number(engine::Concurrency) + "\n";
     QStringList selected;
     for (int row = 0; row < metrics_->rowCount(); ++row)
         if (!metrics_->isRowHidden(row)) selected.append(MetricNames[row]);
     settings += "comparison_type=" + comparisonType_->currentText() + "\n";
-    settings += "template_format=fingerprint-probability-template-v2\nencoder_embedding_dim=512\ntemplate_output_dim=30\n"
-        "template_values=softmax ID probabilities; serialized bytes include model identity and labels\n"
-        "decision_models=selected matching-DB model and combined; unknown DB uses combined only\n"
-        "genuine_aggregation=minimum successful decision-model score\n"
-        "impostor_aggregation=minimum successful decision-model score\n"
-        "other_db_models=reference scores only; cell colors use the current comparison-type threshold\n";
+    if (UsingDll())
+        settings += "template_format=defined by the DLL (KISA_Enroll/KISA_Attempt output)\n"
+            "decision_models=kisa_dll; iType from image size (448x478=1, 300x300=2, 640x480=3)\n"
+            "score=KISA_Compare pdScore [0,1]\n";
+    else
+        settings += "template_format=fingerprint-probability-template-v2\nencoder_embedding_dim=512\ntemplate_output_dim=30\n"
+            "template_values=softmax ID probabilities; serialized bytes include model identity and labels\n"
+            "decision_models=selected matching-DB model and combined; unknown DB uses combined only\n"
+            "genuine_aggregation=minimum successful decision-model score\n"
+            "impostor_aggregation=minimum successful decision-model score\n"
+            "other_db_models=reference scores only; cell colors use the current comparison-type threshold\n";
     const engine::ThresholdRecommendation recommendation = engine_.RecommendedThreshold(databaseId_.toStdString());
     settings += "calibration_note=" + QString::fromStdString(recommendation.note) + "\n";
     if (recommendation.available) settings += "validation_recommended_threshold=" + QString::number(recommendation.threshold, 'g', 17) + "\n";

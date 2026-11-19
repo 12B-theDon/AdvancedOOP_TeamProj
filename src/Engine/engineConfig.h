@@ -25,4 +25,5 @@ inline constexpr const char* CalibrationFormat = "fingerprint-calibration-v3";
 inline constexpr const char* ScoreAggregation = "minimum-successful-matching-db-or-combined";
 inline const std::vector<std::string> DatabaseIds = {"FVC2000_DB3_B", "FVC2002_DB3_B", "FVC2004_DB1_B"};
 inline const std::vector<std::string> ModelIds = {"fvc2000_db3", "fvc2002_db3", "fvc2004_db1", "combined"};
+inline constexpr const char* DllModelId = "kisa_dll"; // Model ID shown for an external KISA DLL.
 } // namespace engine

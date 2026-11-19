@@ -12,6 +12,8 @@
 #include <QJsonObject>
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
 #include <stdexcept>
 
 namespace algorithm {
@@ -137,7 +139,16 @@ bool FingerprintEncoder::LoadModel(const std::string& id, const std::string& fil
         if (it->id == id) it = state_->models.erase(it); else ++it;
     try {
         torch::jit::ExtraFilesMap extras{{"metadata.json", ""}};
-        torch::jit::Module module = torch::jit::load(file, torch::kCPU, extras);
+        // Open through std::filesystem so non-ASCII (e.g. Korean) Windows paths work; LibTorch's
+        // own fopen path fails on them. `file` is UTF-8 from every caller.
+#if defined(__cpp_char8_t)
+        const std::filesystem::path path(std::u8string(file.begin(), file.end()));
+#else
+        const std::filesystem::path path = std::filesystem::u8path(file);
+#endif
+        std::ifstream stream(path, std::ios::binary);
+        if (!stream) return Fail(error, "Cannot open model file: " + file);
+        torch::jit::Module module = torch::jit::load(stream, torch::kCPU, extras);
         const QJsonObject metadata = QJsonDocument::fromJson(QByteArray::fromStdString(extras["metadata.json"])).object();
         const QString preprocessing = metadata.value("preprocessing").toString();
         const bool pretrained = id == "pretrained";

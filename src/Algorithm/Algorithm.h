@@ -40,8 +40,14 @@ public:
                               std::string& error) const = 0;
     virtual bool Preprocess(const std::string& model_id, const AlgorithmImage& image,
                             PreparedImage& prepared, std::string& error) = 0;
+    // Enrollment template.
     virtual bool CreateTemplate(const std::string& model_id, const PreparedImage& prepared,
                                 std::vector<unsigned char>& data, std::string& error) = 0;
+    // Attempt (probe) template; backends whose enrollment and attempt paths match keep the default.
+    virtual bool CreateAttemptTemplate(const std::string& model_id, const PreparedImage& prepared,
+                                       std::vector<unsigned char>& data, std::string& error) {
+        return CreateTemplate(model_id, prepared, data, error);
+    }
     // [0.5,1] Cosine of nonnegative probability templates, mapped by (cos+1)/2.
     virtual bool Compare(const std::string& model_id, const std::vector<unsigned char>& enrollment,
                          const std::vector<unsigned char>& attempt, double& score,

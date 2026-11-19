@@ -18,8 +18,34 @@
 #include <cmath>
 #include <limits>
 #include <exception>
+#include <filesystem>
+#include <fstream>
 
 namespace algorithm {
+
+// LibTorch's path-based load/save fails on non-ASCII Windows paths; use streams instead.
+static std::filesystem::path NativePath(const QString& path) {
+#ifdef _WIN32
+    return std::filesystem::path(path.toStdWString());
+#else
+    return std::filesystem::path(path.toStdString());
+#endif
+}
+
+static torch::jit::Module LoadModule(const QString& path, torch::jit::ExtraFilesMap* extras = nullptr) {
+    std::ifstream stream(NativePath(path), std::ios::binary);
+    Require(bool(stream), "Cannot open " + path);
+    if (extras) return torch::jit::load(stream, torch::kCPU, *extras);
+    return torch::jit::load(stream, torch::kCPU);
+}
+
+static void SaveModule(torch::jit::Module& module, const QString& path, const torch::jit::ExtraFilesMap& extras) {
+    std::ofstream stream(NativePath(path), std::ios::binary);
+    Require(bool(stream), "Cannot write " + path);
+    module.save(stream, extras);
+    stream.close();
+    Require(bool(stream), "Cannot write " + path);
+}
 
 static bool Trainable(const std::string& name) {
     for (const std::string& prefix : TrainablePrefixes)
@@ -90,7 +116,7 @@ TrainingData PrepareTrainingData(const QString& dataFolder, const QString& check
         Require(QDir().mkpath(cache.absolutePath()), "Cannot create feature cache.");
         FingerprintEncoder preprocessor; std::string error;
         Require(preprocessor.LoadModel("pretrained", checkpoint.toStdString(), error), QString::fromStdString(error));
-        torch::jit::Module base = torch::jit::load(checkpoint.toStdString(), torch::kCPU); base.eval();
+        torch::jit::Module base = LoadModule(checkpoint); base.eval();
         std::vector<torch::Tensor> chunks;
         torch::NoGradGuard guard;
         for (int start = 0; start < result.samples.size(); start += FeatureBatchSize) {
@@ -196,7 +222,7 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
     QByteArray raw("representation,model,database,enrollment,probe,genuine,score\n");
     QByteArray metricsCsv("representation,model,database,eer_pct,auc,threshold_at_far1,genuine_accept_pct,false_accept_pct,genuine_pairs,impostor_pairs\n");
     QJsonArray summaries;
-    torch::jit::Module reference = torch::jit::load(data.checkpoint.toStdString(), torch::kCPU); reference.eval();
+    torch::jit::Module reference = LoadModule(data.checkpoint); reference.eval();
     std::vector<torch::jit::Named<torch::Tensor>> referenceParameters, referenceBuffers;
     for (const torch::jit::Named<torch::Tensor>& parameter : reference.named_parameters()) referenceParameters.push_back(parameter);
     for (const torch::jit::Named<torch::Tensor>& buffer : reference.named_buffers()) referenceBuffers.push_back(buffer);
@@ -227,7 +253,7 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
     for (int modelIndex = 0; modelIndex < 4; ++modelIndex) {
         const QString id = QString::fromStdString(engine::ModelIds[modelIndex]), path = QDir(folder).filePath(id + ".bin");
         torch::jit::ExtraFilesMap extras{{"metadata.json", ""}};
-        torch::jit::Module model = torch::jit::load(path.toStdString(), torch::kCPU, extras); model.eval();
+        torch::jit::Module model = LoadModule(path, &extras); model.eval();
         const QJsonObject metadata = QJsonDocument::fromJson(QByteArray::fromStdString(extras["metadata.json"])).object();
         Require(metadata.value("format").toString() == ProbabilityFormat, "Not a v2 probability model.");
         Require(metadata.value("base_encoder_sha256").toString() == data.cache_info.value("base_sha256").toString(),
@@ -265,7 +291,7 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
             const QString oldPath = QDir(baselineFolder).filePath(id + ".bin");
             const QString oldHash = Hash(oldPath);
             torch::jit::ExtraFilesMap oldExtras{{"metadata.json", ""}};
-            torch::jit::Module old = torch::jit::load(oldPath.toStdString(), torch::kCPU, oldExtras); old.eval();
+            torch::jit::Module old = LoadModule(oldPath, &oldExtras); old.eval();
             const QJsonObject oldMeta = QJsonDocument::fromJson(QByteArray::fromStdString(oldExtras["metadata.json"])).object();
             Require(oldMeta.value("format").toString() == "deepprint-torchscript-v1"
                 && oldMeta.value("model_id").toString() == id
@@ -427,7 +453,7 @@ int RunTraining(int argc, char** argv) {
         for (int modelIndex = 0; modelIndex < 4; ++modelIndex) {
             const QString id = QString::fromStdString(engine::ModelIds[modelIndex]);
             // Reload the original encoder independently. Never use a preceding model's weights.
-            torch::jit::Module encoder = torch::jit::load(checkpoint.toStdString(), torch::kCPU); encoder.eval();
+            torch::jit::Module encoder = LoadModule(checkpoint); encoder.eval();
             std::vector<torch::Tensor> parameters;
             std::vector<torch::Tensor> initialProjections;
             QJsonArray trainedNames;
@@ -517,7 +543,7 @@ int RunTraining(int argc, char** argv) {
                     {"orders_sha256", QString::fromLatin1(orderHash.result().toHex())}}}};
             const QByteArray json = QJsonDocument(metadata).toJson();
             const QString path = QDir(folder).filePath(id + ".bin");
-            production.save((path + ".partial").toStdString(), {{"metadata.json", json.toStdString()}});
+            SaveModule(production, path + ".partial", {{"metadata.json", json.toStdString()}});
             Require(QFile::rename(path + ".partial", path), "Cannot commit new model archive.");
             QJsonObject sidecar = metadata;
             sidecar.insert("weight_sha256", Hash(path)); // Outside the archive: no recursive self-hash.
@@ -525,7 +551,7 @@ int RunTraining(int argc, char** argv) {
             Write(QDir(folder).filePath(id + "_training.csv"), history);
             {
                 torch::NoGradGuard guard;
-                torch::jit::Module reloaded = torch::jit::load(path.toStdString(), torch::kCPU); reloaded.eval();
+                torch::jit::Module reloaded = LoadModule(path); reloaded.eval();
                 const torch::Tensor featureProbe = data.features.index_select(0, val.slice(0, 0, 4));
                 for (int batch : {1, 2, 4}) {
                     const torch::Tensor f = featureProbe.slice(0, 0, batch);
