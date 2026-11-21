@@ -6,6 +6,7 @@
 #include <atomic>
 #include <functional>
 #include "engineConfig.h"
+#include "ExportControl.h"
 
 namespace engine {
 
@@ -48,7 +49,7 @@ struct ModelTemplate {
     std::string model_id;
     bool success = false;
     std::vector<unsigned char> data; // [bytes] Opaque DLL output; preserve actual length.
-    double time_ms = 0; // [ms] Preprocessing + encoding.
+    double time_ms = 0; // [ms] Extract wall time, including first-call worker/model initialization.
     std::string stage;
     std::string error;
 };
@@ -142,7 +143,9 @@ public:
     // Ground-truth group + best score -> PASS, MISS, REJ, FA or ERR.
     static const char* ClassifyComparison(bool genuine, const SimilarityResult& result, double threshold);
     // Write into the caller's newly created run folder.
-    static bool SaveRawResults(const EvaluationRun& run, const std::string& folder);
+    static int RawExportSteps(const EvaluationRun& run);
+    static bool SaveRawResults(const EvaluationRun& run, const std::string& folder,
+                               const ExportControl& control = {});
 
 private:
     Algorithm* backend_ = nullptr; // Borrowed; caller keeps it alive through execution.

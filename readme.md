@@ -35,7 +35,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 소스 저장소 안에서 GUI를 실행했는데 이 프로젝트의 DLL·학습 모델이 빠져 있으면 자동으로 준비 프로그램을 실행합니다. **LFS 다운로드 → 없는 경우에만 학습 → 패키징 → GUI 재실행** 순서로 복구합니다. 완성된 배포본은 학습 없이 바로 열립니다. 다른 PC로 옮길 때는 [dist/FingerprintAlgorithm/](docs/build.md#package)과 [dist/FingerprintEvaluator/](docs/build.md#package)를 함께 복사합니다.
 
-GUI에서 **DB → 등록 이미지 → DLL·옵션·템플릿 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 [dist/FingerprintAlgorithm/FingerprintAlgorithm.dll](src/Kisa/readme.md)을 선택하고, Algorithm 표에 등록되면 **Create enrollment templates**를 누릅니다. Results에서는 임계값(초기 0.5)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장할 수 있습니다.
+GUI에서 **DB → 등록 이미지 → DLL·옵션·템플릿 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3의 선택창은 [FingerprintAlgorithm.dll](src/Kisa/readme.md)만 기본으로 보여줍니다. 등록 후 **Create enrollment templates**를 누르면 상태·크기·오류·생성 시간(ms)이 표시됩니다. Results에서는 임계값(초기 0.5)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장합니다. Template 생성·비교·보고서 저장은 진행률과 **Stop**을 제공합니다.
 
 [학습 옵션](src/Training/readme.md) · [GUI·지표](src/GUI/readme.md) · [검증 상태](docs/verification.md)
 

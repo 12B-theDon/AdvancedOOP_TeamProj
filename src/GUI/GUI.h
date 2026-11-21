@@ -7,6 +7,7 @@
 #include "kisaDll.h"
 #include <functional>
 #include <memory>
+#include <utility>
 #include "guiConfig.h"
 
 class QLabel;
@@ -69,7 +70,8 @@ private:
     bool closeRequested_ = false;
     bool exitQuestionOpen_ = false;
     int closeResult_ = QDialog::Rejected;
-    bool RunWithProgress(const QString& title, const std::function<void()>& work);
+    bool RunWithProgress(const QString& title, const std::function<void()>& work,
+                         const std::function<std::pair<int, int>()>& progressCounts = {});
     bool AlgorithmUnchanged();
     std::vector<engine::EnrollmentTemplates> enrollmentTemplates_;
     bool templatesReady_ = false;

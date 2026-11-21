@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="224.3298mm" viewBox="0 0 940 710" role="img"><title>Engine · generic evaluation and DLL adapter</title><desc>Current project implementation; editable vector source. Generated from verified source paths and selected direct includes.</desc><rect width="940" height="710" fill="white"/>
 <line x1="250" y1="64" x2="690" y2="64" stroke="#73818d"/>
 <g data-node="config" data-source="src/Engine/engineConfig.h"><rect x="20" y="110" width="260" height="92" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="20" y="110" width="260" height="32.5" fill="#21834d"/></g>
-<g data-node="engineh" data-source="src/Engine/Engine.h"><rect x="340" y="110" width="260" height="92" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="340" y="110" width="260" height="32.5" fill="#21834d"/></g>
+<g data-node="engineh" data-source="src/Engine/Engine.h;src/Engine/ExportControl.h"><rect x="340" y="110" width="260" height="92" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="340" y="110" width="260" height="32.5" fill="#21834d"/></g>
 <g data-node="contract" data-source="src/Engine/Algorithm.h"><rect x="660" y="110" width="260" height="110" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="660" y="110" width="260" height="32.5" fill="#21834d"/></g>
 <g data-node="gui" data-source="src/GUI/GUI.cpp"><rect x="20" y="300" width="260" height="110" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/><rect x="20" y="300" width="260" height="32.5" fill="#7c4db5"/></g>
 <g data-node="engine" data-source="src/Engine/Engine.cpp"><rect x="340" y="300" width="260" height="110" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="340" y="300" width="260" height="32.5" fill="#21834d"/></g>
@@ -23,8 +23,8 @@
 <text x="150.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">startup 30 s / threshold 0.5</text>
 <text x="470.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Engine.h</text>
 <text x="470.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">ImageInfo / ComparisonPair</text>
-<text x="470.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">EnrollmentTemplates</text>
-<text x="470.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">SimilarityResult / EvaluationRun</text>
+<text x="470.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">EnrollmentTemplates / EvaluationRun</text>
+<text x="470.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">ExportControl: check / step</text>
 <text x="790.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Algorithm.h</text>
 <text x="790.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">engine::Algorithm interface</text>
 <text x="790.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">raw image / opaque templates</text>
@@ -50,7 +50,7 @@
 <text x="150.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">version 2 / fixed-width layout</text>
 <text x="150.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">24-byte request / 296-byte reply</text>
 <text x="470.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Raw evaluation files</text>
-<text x="470.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">SaveRawResults()</text>
+<text x="470.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">SaveRawResults() / progress / Stop</text>
 <text x="470.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">actual template byte lengths</text>
 <text x="470.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">separate attempt / Compare time</text>
 <text x="790.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">kisaDll.h</text>

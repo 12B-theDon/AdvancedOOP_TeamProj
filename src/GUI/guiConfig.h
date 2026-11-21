@@ -117,7 +117,7 @@ inline const QStringList EnrollmentModes = {"Single enrollment", "Multiple enrol
 inline const QStringList ComparisonRules = {"All eligible images", "One image per finger (first capture)", "Selected capture numbers",
     "Random images per enrollment", "Comparison pairs from CSV"};
 inline const QStringList ModelHeaders = {"Algorithm", "DLL file", "Initialization"};
-inline const QStringList TemplateHeaders = {"Enrollment image", "Algorithm", "Status", "Size (bytes)", "Error"};
+inline const QStringList TemplateHeaders = {"Enrollment image", "Algorithm", "Status", "Size (bytes)", "Error", "Load time (ms)"};
 inline const QStringList ComparisonHeaders = {"#", "Enrollment", "Comparison", "Result", "Time (ms)"};
 inline const QStringList MetricHeaders = {"Metric", "Value"};
 inline const QStringList MetricNames = {"FTE (%)", "REJ genuine (%)", "REJ impostor (%)", "FMR (%)", "FNMR (%)",

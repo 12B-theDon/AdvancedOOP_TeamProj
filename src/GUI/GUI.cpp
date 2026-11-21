@@ -34,6 +34,7 @@
 #include <QEventLoop>
 #include <QProgressDialog>
 #include <QTimer>
+#include <QTemporaryDir>
 #include <exception>
 #include <future>
 #include <chrono>
@@ -74,6 +75,18 @@ static void AddRow(QTableWidget* table, const QStringList& values) {
         item->setTextAlignment(Qt::AlignCenter);
         table->setItem(row, column, item);
     }
+}
+
+static QString InitialAlgorithmDll(const QString& executableFolder) {
+    QDir folder(executableFolder);
+    const QString sibling = folder.filePath("../FingerprintAlgorithm/FingerprintAlgorithm.dll");
+    if (QFileInfo(sibling).isFile()) return QDir::cleanPath(sibling);
+    do {
+        if (QFileInfo::exists(folder.filePath("CMakeLists.txt"))
+            && QFileInfo::exists(folder.filePath("src/main.cpp")))
+            return folder.filePath("dist/FingerprintAlgorithm/FingerprintAlgorithm.dll");
+    } while (folder.cdUp());
+    return executableFolder;
 }
 
 static const char* DecisionColor(const QString& decision) {
@@ -325,6 +338,8 @@ QWizardPage* Window::TemplatePage() {
     modelTable_->setMaximumHeight(ModelTableHeight);
     templateTable_ = MakeTable(TemplateHeaders);
     templateTable_->setObjectName("enrollmentTemplates");
+    templateTable_->horizontalHeaderItem(5)->setToolTip(
+        "Template generation elapsed time, including worker startup and model loading on the first call.");
     inferenceInfo_ = new QLabel(ModelHint);
     inferenceInfo_->setObjectName("inferenceInfo");
     inferenceInfo_->setTextFormat(Qt::PlainText);
@@ -335,6 +350,10 @@ QWizardPage* Window::TemplatePage() {
     calibrationInfo_->setWordWrap(true);
     layout->addWidget(dllPath_);
     layout->addWidget(browse);
+    QLabel* dllHelp = new QLabel("Project DLL: FingerprintAlgorithm.dll (dist/FingerprintAlgorithm). "
+                                "For another implementation, select the External K-NBTC DLL filter.");
+    dllHelp->setWordWrap(true);
+    layout->addWidget(dllHelp);
     workerCount_ = new QSpinBox;
     workerCount_->setObjectName("workerCount"); workerCount_->setRange(1, engine::MaxConcurrency);
     workerCount_->setValue(engine::DefaultConcurrency);
@@ -353,9 +372,21 @@ QWizardPage* Window::TemplatePage() {
     layout->addWidget(inferenceInfo_);
     layout->addWidget(calibrationInfo_);
     connect(browse, &QPushButton::clicked, this, [this] {
-        const QString path = QFileDialog::getOpenFileName(this, WeightsFolderDialog, QString(), "Windows DLL (*.dll)");
-        if (!path.isEmpty()) {
-            dllPath_->setText(path);
+        const QString initial = dllPath_->text().isEmpty()
+            ? InitialAlgorithmDll(QCoreApplication::applicationDirPath()) : dllPath_->text();
+        const QFileInfo location(initial);
+        QFileDialog dialog(this, WeightsFolderDialog, location.isDir() ? initial : location.absolutePath());
+        dialog.setObjectName("algorithmDllDialog");
+        dialog.setFileMode(QFileDialog::ExistingFile);
+        dialog.setAcceptMode(QFileDialog::AcceptOpen);
+        const QString projectFilter = "Project algorithm (FingerprintAlgorithm.dll)";
+        const QString externalFilter = "External K-NBTC DLL (*.dll)";
+        dialog.setNameFilters({projectFilter, externalFilter});
+        dialog.selectNameFilter(!dllPath_->text().isEmpty() && location.fileName() != "FingerprintAlgorithm.dll"
+            ? externalFilter : projectFilter);
+        if (!location.isDir()) dialog.selectFile(location.fileName());
+        if (dialog.exec() == QDialog::Accepted && !dialog.selectedFiles().isEmpty()) {
+            dllPath_->setText(dialog.selectedFiles().front());
             ReloadModels();
         }
     });
@@ -564,8 +595,12 @@ QWizardPage* Window::ResultsPage() {
         const QString folder = QFileDialog::getExistingDirectory(this, OutputFolderDialog);
         if (folder.isEmpty())
             return;
-        if (SaveResults(folder))
+        const bool saved = SaveResults(folder);
+        if (closeRequested_) return;
+        if (saved)
             QMessageBox::information(this, SavedTitle, SavedMessage);
+        else if (engine_.Cancelled())
+            QMessageBox::information(this, "Report stopped", "Unfinished report files were discarded. Previous results are preserved.");
         else
             QMessageBox::warning(this, SaveFailureTitle, SaveFailureMessage);
     });
@@ -753,7 +788,8 @@ void Window::ReloadModels() {
     }
     ClearTemplates(); UpdateEnrollment();
 }
-bool Window::RunWithProgress(const QString& title, const std::function<void()>& work) {
+bool Window::RunWithProgress(const QString& title, const std::function<void()>& work,
+                             const std::function<std::pair<int, int>()>& progressCounts) {
     engine_.ResetCancel();
     busy_ = true;
     std::vector<std::pair<QWidget*, bool>> disabled;
@@ -762,6 +798,7 @@ bool Window::RunWithProgress(const QString& title, const std::function<void()>& 
         disabled.push_back({button(which), button(which)->isEnabled()});
     for (const std::pair<QWidget*, bool>& item : disabled) item.first->setEnabled(false);
     QProgressDialog progress(title, "Stop", 0, 0, this);
+    progress.setObjectName("workProgress");
     // Pages and navigation are disabled; keep the main window's close action usable.
     progress.setWindowModality(Qt::NonModal); progress.setMinimumDuration(0);
     progress.setAutoClose(false); progress.setAutoReset(false);
@@ -777,15 +814,18 @@ bool Window::RunWithProgress(const QString& title, const std::function<void()>& 
     } catch (...) { launchError = std::current_exception(); engine_.Cancel(); }
     bool stopping = false;
     const QMetaObject::Connection stopConnection = connect(&progress, &QProgressDialog::canceled, this, [this] { engine_.Cancel(); });
-    connect(&timer, &QTimer::timeout, &loop, [this, title, &progress, &task, &loop, &stopping] {
-        const int total = engine_.ProgressTotal();
+    connect(&timer, &QTimer::timeout, &loop, [this, title, &progress, &task, &loop, &stopping, &progressCounts] {
+        const std::pair<int, int> counts = progressCounts ? progressCounts()
+            : std::make_pair(engine_.ProgressDone(), engine_.ProgressTotal());
+        const int total = counts.second;
         if (engine_.Cancelled()) {
             if (!stopping) { stopping = true; progress.setCancelButton(nullptr); progress.setRange(0, 0); }
-            progress.setLabelText("Stopping all workers and releasing resources...");
+            progress.setLabelText("Stopping and releasing resources...");
             if (!progress.isVisible()) progress.show();
         } else if (total > 0) {
-            progress.setRange(0, total); progress.setValue(engine_.ProgressDone());
-            progress.setLabelText(title + QString("\n%1 / %2 completed").arg(engine_.ProgressDone()).arg(total));
+            progress.setRange(0, total); progress.setValue(counts.first);
+            progress.setLabelText(title + QString("\n%1 / %2 completed (%3%)")
+                .arg(counts.first).arg(total).arg(100.0 * counts.first / total, 0, 'f', 1));
         }
         if ((!task.valid() || task.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
             && engine_.CancellationFinished() && !exitQuestionOpen_) loop.quit();
@@ -824,7 +864,8 @@ void Window::CreateEnrollmentTemplates() {
     for (int index : selected) {
         for (const engine::ModelTemplate& model : enrollmentTemplates_[index].models) {
             AddRow(templateTable_, {QString::fromStdString(images_[index].name), QString::fromStdString(model.model_id),
-                model.success ? "OK" : "ERR", QString::number(model.data.size()), QString::fromStdString(model.error)});
+                model.success ? "OK" : "ERR", QString::number(model.data.size()), QString::fromStdString(model.error),
+                QString::number(model.time_ms, 'f', TimePrecision)});
             if (model.success) ++successful;
         }
         // A completed enrollment phase can proceed even if every enrollment fails:
@@ -1209,12 +1250,28 @@ bool Window::SaveResults(const QString& folder) {
     int number = 1;
     while (destination.exists(QString("run_%1").arg(number))) ++number;
     const QString name = QString("run_%1").arg(number);
-    if (!destination.mkdir(name) || !destination.cd(name)) return false;
+    QTemporaryDir staging(destination.filePath(".report-XXXXXX"));
+    if (!staging.isValid()) return false;
     const engine::EvaluationRun run = Snapshot();
-    if (engine::Engine::SaveRawResults(run, destination.absolutePath().toStdString())
-        && Save(run, SelectedMetrics(), destination.absolutePath())) return true;
-    destination.removeRecursively(); // Only this newly created run folder.
-    return false;
+    const std::vector<bool> selected = SelectedMetrics(); // Read widgets only on the GUI thread.
+    const int total = engine::Engine::RawExportSteps(run) + ReportSteps(selected);
+    std::atomic<int> completedSteps{0};
+    const engine::ExportControl control{[this] { return engine_.Cancelled(); }, [&completedSteps] { ++completedSteps; }};
+    bool saved = false;
+    const bool completed = RunWithProgress("Generating report (CSV / HTML / Word / SVG)", [&] {
+        try {
+            saved = engine::Engine::SaveRawResults(run, staging.path().toStdString(), control)
+                && Save(run, selected, staging.path(), control);
+            control.Check();
+        } catch (const engine::ExportCancelled&) { saved = false; }
+        catch (...) { QDir(staging.path()).removeRecursively(); throw; }
+        if (!saved) QDir(staging.path()).removeRecursively();
+    }, [&] { return std::make_pair(completedSteps.load(), total); });
+    if (!completed || !saved) return false;
+    // Publish only complete exports; never overwrite an existing successful run.
+    if (!destination.rename(QFileInfo(staging.path()).fileName(), name)) return false;
+    staging.setAutoRemove(false);
+    return true;
 }
 
 } // namespace gui

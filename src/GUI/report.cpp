@@ -20,9 +20,19 @@ struct ScoreGroups {
     bool complete[2] = {true, true};
 };
 
-static ScoreGroups CollectScores(const engine::EvaluationRun& run) {
+static void SortScores(std::vector<double>& values, const engine::ExportControl& control) {
+    std::size_t comparisons = 0;
+    std::sort(values.begin(), values.end(), [&control, &comparisons](double a, double b) {
+        if ((++comparisons % 4096) == 0) control.Check();
+        return a < b;
+    });
+    control.Check();
+}
+
+static ScoreGroups CollectScores(const engine::EvaluationRun& run, const engine::ExportControl& control) {
     ScoreGroups groups;
     for (const engine::ComparisonRecord& record : run.comparisons) {
+        control.Check();
         const int group = record.genuine ? 0 : 1;
         ++groups.total[group];
         if (!record.executed) groups.complete[group] = false;
@@ -30,7 +40,7 @@ static ScoreGroups CollectScores(const engine::EvaluationRun& run) {
             groups.values[group].push_back(record.result.score);
     }
     for (int group = 0; group < 2; ++group)
-        std::sort(groups.values[group].begin(), groups.values[group].end());
+        SortScores(groups.values[group], control);
     return groups;
 }
 
@@ -44,21 +54,23 @@ static void Rates(const ScoreGroups& groups, double genuineThreshold, double imp
     fnmr = genuine > 0 ? double(nonmatches) / genuine : 0;
 }
 
-static std::vector<double> Thresholds(const ScoreGroups& groups) {
+static std::vector<double> Thresholds(const ScoreGroups& groups, const engine::ExportControl& control) {
     std::vector<double> thresholds;
     for (int group = 0; group < 2; ++group)
         thresholds.insert(thresholds.end(), groups.values[group].begin(), groups.values[group].end());
-    std::sort(thresholds.begin(), thresholds.end());
+    SortScores(thresholds, control);
     thresholds.erase(std::unique(thresholds.begin(), thresholds.end()), thresholds.end());
     if (!thresholds.empty()) thresholds.push_back(std::nextafter(thresholds.back(), std::numeric_limits<double>::infinity()));
     return thresholds;
 }
 
-static QString EerBounds(const ScoreGroups& groups, bool successfulOnly, const std::vector<double>& thresholds) {
+static QString EerBounds(const ScoreGroups& groups, bool successfulOnly, const std::vector<double>& thresholds,
+                         const engine::ExportControl& control) {
     if (thresholds.empty() || (successfulOnly && (groups.values[0].empty() || groups.values[1].empty()))) return "N/A";
     double previousFmr = 0, previousFnmr = 0;
     bool previous = false;
     for (double threshold : thresholds) {
+        control.Check();
         double fmr, fnmr;
         Rates(groups, threshold, threshold, successfulOnly, fmr, fnmr);
         if (std::abs(fmr - fnmr) <= engine::MetricTolerance) return Value(100 * fmr);
@@ -85,13 +97,15 @@ static QString FailureCounts(const std::array<int, 5>& counts) {
         .arg(counts[0]).arg(counts[1]).arg(counts[2]).arg(counts[3]).arg(counts[4]);
 }
 
-QStringList CalculateMetrics(const engine::EvaluationRun& run) {
+QStringList CalculateMetrics(const engine::EvaluationRun& run, const engine::ExportControl& control) {
+    control.Check();
     QStringList values;
     for (int index = 0; index < MetricNames.size(); ++index) values.append("N/A (not run)");
     int enrolled = 0, failed = 0, templates = 0;
     std::array<int, 5> enrollmentFailures = {};
     double enrollmentTime = 0, templateSize = 0, maximumSize = 0;
     for (const engine::EnrollmentRecord& record : run.enrollments) {
+        control.Check();
         if (!record.result.executed) continue;
         ++enrolled;
         if (!record.result.success) {
@@ -110,11 +124,12 @@ QStringList CalculateMetrics(const engine::EvaluationRun& run) {
     if (enrolled > 0) values[11] = Value(enrollmentTime / enrolled);
     if (enrolled > 0 && enrolled == int(run.enrollments.size())) values[0] = Value(100.0 * failed / enrolled) + FailureCounts(enrollmentFailures);
     if (templates > 0) { values[15] = Value(templateSize / templates); values[16] = Value(maximumSize); }
-    const ScoreGroups groups = CollectScores(run);
+    const ScoreGroups groups = CollectScores(run, control);
     double times[2] = {};
     int compared[2] = {}, attempted[2] = {}, rejected[2] = {};
     std::array<int, 5> matchingFailures[2] = {};
     for (const engine::ComparisonRecord& record : run.comparisons) {
+        control.Check();
         if (!record.executed) continue;
         const int group = record.genuine ? 0 : 1;
         if (record.result.enrollment_failed) continue;
@@ -139,11 +154,12 @@ QStringList CalculateMetrics(const engine::EvaluationRun& run) {
     if (groups.complete[1] && groups.total[1] > 0) values[3] = Value(100 * fmr);
     if (groups.complete[0] && groups.total[0] > 0) values[4] = Value(100 * fnmr);
     if (groups.complete[0] && groups.complete[1] && groups.total[0] > 0 && groups.total[1] > 0) {
-        const std::vector<double> thresholds = Thresholds(groups);
-        values[5] = EerBounds(groups, false, thresholds);
-        values[6] = EerBounds(groups, true, thresholds);
+        const std::vector<double> thresholds = Thresholds(groups, control);
+        values[5] = EerBounds(groups, false, thresholds, control);
+        values[6] = EerBounds(groups, true, thresholds, control);
         double best[4] = {2, 2, 2, 2};
         for (double threshold : thresholds) {
+            control.Check();
             Rates(groups, threshold, threshold, false, fmr, fnmr);
             if (fmr <= engine::MetricTolerance && fnmr < best[0]) best[0] = fnmr;
             if (fnmr <= engine::MetricTolerance && fmr < best[1]) best[1] = fmr;
@@ -214,26 +230,37 @@ QString GraphTitle(const QString& file, const std::vector<bool>& selected) {
     return (selected.size() > 3 && selected[3]) ? "FMR by threshold" : "FNMR by threshold";
 }
 
-static bool WriteReportFile(const QString& path, const QString& text) {
+static bool WriteReportFile(const QString& path, const QString& text, const engine::ExportControl& control) {
+    control.Check();
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly)) return false;
     const QByteArray bytes = text.toUtf8();
-    if (file.write(bytes) != bytes.size()) return false;
+    for (qint64 offset = 0; offset < bytes.size();) {
+        control.Check();
+        const qint64 size = std::min<qint64>(256 * 1024, bytes.size() - offset);
+        if (file.write(bytes.constData() + offset, size) != size) return false;
+        offset += size;
+    }
     file.close();
-    return file.error() == QFileDevice::NoError;
+    if (file.error() != QFileDevice::NoError) return false;
+    control.Step();
+    return true;
 }
 
 
-bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& selected, const QString& folder) {
+bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& selected, const QString& folder,
+                 const engine::ExportControl& control) {
+    control.Check();
     const QStringList files = GraphFiles(selected);
     if (files.isEmpty()) return true;
     const bool derived = DerivedMetricSelected(selected);
     const bool showFmr = derived || (selected.size() > 3 && selected[3]);
     const bool showFnmr = derived || (selected.size() > 4 && selected[4]);
-    ScoreGroups groups = CollectScores(run);
+    ScoreGroups groups = CollectScores(run, control);
     double low = EmptyScoreLow, high = EmptyScoreHigh;
     bool first = true;
     for (const engine::ComparisonRecord& record : run.comparisons) {
+        control.Check();
         if (!record.executed || !record.result.success) continue;
         const double score = record.result.score;
         if (!std::isfinite(score)) {
@@ -256,6 +283,7 @@ bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& sele
         int maximum = 1;
         for (int group = 0; group < 2; ++group) {
             for (double score : groups.values[group]) {
+                control.Check();
                 int bin = int((score - low) / (high - low) * HistogramBins);
                 if (bin >= HistogramBins) bin = HistogramBins - 1;
                 ++bins[group][bin];
@@ -282,6 +310,7 @@ bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& sele
         const double start = std::fmax(0.0, low - (high - low) * CurvePadding);
         const double end = std::fmin(1.0, high + (high - low) * CurvePadding);
         for (int step = 0; step <= CurveSteps; ++step) {
+            control.Check();
             const double threshold = start + (end - start) * step / CurveSteps;
             double fmr, fnmr;
             Rates(groups, threshold, threshold, false, fmr, fnmr);
@@ -305,7 +334,7 @@ bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& sele
             svg = Plot(GraphTitle(file, selected), "Normalized threshold (0-1)", "Error rate (%)", errors);
         else
             svg = Plot(GraphTitle(file, selected), "FMR (%)", "FNMR (%)", tradeoff);
-        if (!WriteReportFile(folder + "/" + file, svg)) return false;
+        if (!WriteReportFile(folder + "/" + file, svg, control)) return false;
     }
     return true;
 }
@@ -322,8 +351,14 @@ static QString RtfText(const QString& text) {
     return result;
 }
 
-bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, const QString& folder) {
-    const QStringList values = CalculateMetrics(run);
+int ReportSteps(const std::vector<bool>& selected) {
+    return 4 + GraphFiles(selected).size(); // Metrics, three report files, selected SVGs.
+}
+
+bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, const QString& folder,
+          const engine::ExportControl& control) {
+    const QStringList values = CalculateMetrics(run, control);
+    control.Step();
     QString csv = "metric,value\n";
     QString html = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
         "<title>Fingerprint performance report</title><style>"
@@ -332,7 +367,10 @@ bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, c
         "pre{white-space:pre-wrap;overflow-wrap:anywhere}img{max-width:100%}"
         "</style></head><body><h1>Fingerprint performance report</h1>";
     bool executed = false;
-    for (const engine::ComparisonRecord& item : run.comparisons) if (item.executed) executed = true;
+    for (const engine::ComparisonRecord& item : run.comparisons) {
+        control.Check();
+        if (item.executed) { executed = true; break; }
+    }
     html += executed ? "<p>Status: Results available.</p>" : "<p>Status: Not run. No comparisons were executed.</p>";
     html += "<h2>Evaluation setup</h2>"
         "<p>Each enrolled image is saved as a template. Higher scores mean more similar fingerprints. The selected DLL supplies the similarity; its templates are opaque. Scores are not match probabilities.</p>"
@@ -349,6 +387,7 @@ bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, c
     html += "</table><h2>Performance metrics</h2><table><tr><th>Metric</th><th>Value</th></tr>";
     int count = 0;
     for (int row = 0; row < MetricNames.size(); ++row) {
+        control.Check();
         csv += '"' + MetricNames[row] + "\",\"" + values[row] + "\"\n";
         if (row < int(selected.size()) && selected[row]) {
             ++count;
@@ -384,9 +423,9 @@ bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, c
     for (const QString& file : files) word += RtfText("Vector graph: " + file) + "\\par ";
     word += "}";
     const QDir destination(folder);
-    return WriteReportFile(destination.filePath("metrics.csv"), csv)
-        && WriteReportFile(destination.filePath("report.html"), html)
-        && WriteReportFile(destination.filePath("report.rtf"), word) && WriteGraphs(run, selected, folder);
+    return WriteReportFile(destination.filePath("metrics.csv"), csv, control)
+        && WriteReportFile(destination.filePath("report.html"), html, control)
+        && WriteReportFile(destination.filePath("report.rtf"), word, control) && WriteGraphs(run, selected, folder, control);
 }
 
 } // namespace gui

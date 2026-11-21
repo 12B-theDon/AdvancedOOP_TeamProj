@@ -46,7 +46,7 @@
 <text x="150.0" y="293.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">report.cpp</text>
 <text x="150.0" y="318.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CalculateMetrics()</text>
 <text x="150.0" y="336.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">WriteGraphs() / Save()</text>
-<text x="150.0" y="354.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">selected report items</text>
+<text x="150.0" y="354.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">report progress / Stop</text>
 <text x="780.0" y="293.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">worker.cpp</text>
 <text x="780.0" y="318.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FingerprintWorker.exe</text>
 <text x="780.0" y="336.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">LoadLibraryExW()</text>

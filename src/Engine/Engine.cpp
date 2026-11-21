@@ -296,24 +296,42 @@ static QString Csv(QString value) {
     return '"' + value + '"';
 }
 
-static bool WriteText(const QString& path, const QString& text) {
+static bool WriteText(const QString& path, const QString& text, const ExportControl& control) {
+    control.Check();
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly)) return false;
     const QByteArray bytes = text.toUtf8();
-    if (file.write(bytes) != bytes.size()) return false;
+    for (qint64 offset = 0; offset < bytes.size();) {
+        control.Check();
+        const qint64 size = std::min<qint64>(256 * 1024, bytes.size() - offset);
+        if (file.write(bytes.constData() + offset, size) != size) return false;
+        offset += size;
+    }
     file.close();
-    return file.error() == QFileDevice::NoError;
+    if (file.error() != QFileDevice::NoError) return false;
+    control.Step();
+    return true;
 }
 
-bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder) {
+int Engine::RawExportSteps(const EvaluationRun& run) {
+    return 6 + int(run.enrollments.size()) + int(run.comparisons.size());
+}
+
+bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder, const ExportControl& control) {
+    control.Check();
     const QDir destination(QString::fromStdString(folder));
     QString models = "algorithm_id,dll_file,status,error\n";
-    for (const ModelState& model : run.models)
+    for (const ModelState& model : run.models) {
+        control.Check();
         models += Csv(QString::fromStdString(model.model_id)) + ',' + Csv(QString::fromStdString(model.dll_file))
             + ',' + Csv(model.loaded ? "Ready" : "Failed") + ',' + Csv(QString::fromStdString(model.error)) + '\n';
+    }
+    control.Step();
     QString enrollments = "image,model_id,status,template_bytes,template_file,stage,error,time_ms\n";
     for (const EnrollmentRecord& record : run.enrollments) {
+        control.Check();
         for (const ModelState& model : run.models) {
+            control.Check();
             const ModelTemplate* value = nullptr;
             for (const ModelTemplate& item : record.result.models) if (item.model_id == model.model_id) value = &item;
             QString path;
@@ -333,11 +351,13 @@ bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder)
                 + Csv(value ? QString::fromStdString(value->error) : QString()) + ','
                 + (record.result.executed && value ? QString::number(value->time_ms, 'g', CsvPrecision) : QString()) + '\n';
         }
+        control.Step();
     }
     QString comparisons = "type,enrollment,attempt,status,score,time_ms,model_id,model_scores,index,threshold,result\n";
     QString scores = "type,enrollment,attempt,model_id,status,score,stage,error,time_ms,attempt_time_ms\n";
     int indices[2] = {};
     for (const ComparisonRecord& record : run.comparisons) {
+        control.Check();
         const int index = ++indices[record.genuine ? 0 : 1];
         const double threshold = record.genuine ? run.genuine_threshold : run.impostor_threshold;
         const QString decision = !record.executed ? "Not run"
@@ -346,6 +366,7 @@ bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder)
         const QString common = type + ',' + Csv(QString::fromStdString(record.enrollment)) + ',' + Csv(QString::fromStdString(record.attempt));
         QStringList summary;
         for (const ModelState& model : run.models) {
+            control.Check();
             const ModelScore* value = nullptr;
             for (const ModelScore& item : record.result.model_scores) if (item.model_id == model.model_id) value = &item;
             const QString status = !record.executed ? "Not run" : value && value->success ? "OK" : "Failed";
@@ -363,11 +384,12 @@ bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder)
             + Csv(record.executed ? QString::fromStdString(record.result.model_id) : QString()) + ','
             + Csv(record.executed ? summary.join("; ") : QString()) + ',' + QString::number(index) + ','
             + QString::number(threshold, 'g', CsvPrecision) + ',' + Csv(decision) + '\n';
+        control.Step();
     }
-    return WriteText(destination.filePath("models.csv"), models)
-        && WriteText(destination.filePath("enrollments.csv"), enrollments)
-        && WriteText(destination.filePath("comparisons.csv"), comparisons)
-        && WriteText(destination.filePath("model_scores.csv"), scores)
+    return WriteText(destination.filePath("models.csv"), models, control)
+        && WriteText(destination.filePath("enrollments.csv"), enrollments, control)
+        && WriteText(destination.filePath("comparisons.csv"), comparisons, control)
+        && WriteText(destination.filePath("model_scores.csv"), scores, control)
         && WriteText(destination.filePath("settings.txt"),
                      "score_type=selected DLL similarity\nscore_range=[0,1]\ntemplate_format=opaque bytes\n"
                      "template_length=actual bytes returned by selected DLL\n"
@@ -375,7 +397,7 @@ bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder)
                      + "impostor_threshold=" + QString::number(run.impostor_threshold, 'g', CsvPrecision) + "\n"
                      + "decision_rule=Genuine: score >= threshold -> PASS, below -> MISS; "
                        "Impostor: score >= threshold -> FA, below -> REJ; inference failure -> ERR\n"
-                     + QString::fromStdString(run.settings));
+                     + QString::fromStdString(run.settings), control);
 }
 
 } // namespace engine
