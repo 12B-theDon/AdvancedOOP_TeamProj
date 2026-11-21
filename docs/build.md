@@ -78,3 +78,5 @@ python tools/verify_manifest.py dist/FingerprintAlgorithm
 - `dist/FingerprintEvaluator`: GUI·Worker와 windeployqt로 수집한 Qt·TIFF·runtime·라이선스·SHA-256 목록을 포함합니다.
 
 DLL과 모델은 같은 배포 폴더에 둡니다. 필수 파일이 빠지면 기존 배포 폴더를 교체하지 않습니다. [검증 상태](verification.md) · [출처·라이선스](THIRD_PARTY.md)
+
+`LibTorch license files missing`으로 중단된 경우 수정본을 `git pull --ff-only`로 받고 설치 스크립트를 다시 실행합니다. 기존 도구·라이브러리·정상 모델은 재사용합니다. 공식 Windows CPU LibTorch ZIP에 고지가 없으면 저장소에 보관한 동일 버전·build의 고지를 포함하므로 별도 다운로드는 필요하지 않습니다. 버전·build·SHA-256이 맞지 않으면 패키징을 중단하며 기존 배포 폴더를 보존합니다. CMake 4.3+에서는 [CMP0207](https://cmake.org/cmake/help/latest/policy/CMP0207.html)의 경로 정규화 동작을 명시해 반복 정책 경고를 방지합니다.

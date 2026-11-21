@@ -13,3 +13,5 @@ demo.gif filter=lfs diff=lfs merge=lfs -text
 CMakeLists.txt text eol=lf
 # Original dataset bytes must never undergo newline conversion.
 data/original/** -text
+# Preserve upstream notice bytes and their recorded SHA-256 across checkouts.
+third_party/libtorch-notices/** -text -whitespace
