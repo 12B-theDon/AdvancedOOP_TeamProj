@@ -41,7 +41,7 @@ GUI에서 **DB → 등록 이미지 → DLL·옵션·Load·Template 생성 → �
 
 ## 3. Project structure
 
-Git으로 배포하는 항목만 표시합니다. 빌드·증강·패키징 생성물과 로컬 개발 도구는 제외했습니다.
+주요 소스와 배포 구조입니다. `dist/` 외의 빌드·증강 생성물과 로컬 개발 도구는 제외했습니다.
 
 ```text
 FinalProject/
@@ -59,8 +59,11 @@ FinalProject/
 ├─ models/
 │  ├─ pretrained/     # 학습 초기화용 DeepPrint 가중치
 │  └─ trained_result/ # Git LFS로 배포하는 학습 모델 4개·검증 manifest
+├─ dist/             # 배포 결과 (패키징 시 생성, Git 제외)
+│  ├─ FingerprintAlgorithm/ # 알고리즘 DLL·모델·runtime
+│  └─ FingerprintEvaluator/ # GUI·Worker·Qt runtime·plugins
 ├─ docs/             # 빌드·검증·출처 문서, 구조도, 보존 기준
-├─ cmake/            # 알고리즘·평가 프로그램 배포 폴더 생성
+├─ cmake/            # 알고리즘·평가 프로그램 배포 폴더 생성 (dist/)
 ├─ tools/            # Windows 설치·빌드·패키징·배포 파일 검사
 │  ├─ setup_windows.ps1  # 도구 설치·모델 다운로드·필요 시 학습·패키징
 │  └─ verify_manifest.py # 배포 파일 누락·SHA-256 검사
@@ -68,7 +71,7 @@ FinalProject/
 └─ CMakeLists.txt    # 빌드 대상·의존성·패키징 명령 정의
 ```
 
-외부 DLL은 GUI Step 3에서 선택합니다. 이 프로젝트의 알고리즘을 배포할 때는 `FingerprintAlgorithm/` 전체를 함께 배포합니다. DLL·모델을 교체한 뒤에는 GUI를 다시 실행하고 템플릿을 재생성합니다.
+패키징을 마치면 `dist/` 아래에 두 배포 폴더가 생성됩니다. 외부 DLL은 GUI Step 3에서 선택합니다. 이 프로젝트의 알고리즘을 배포할 때는 `dist/FingerprintAlgorithm/` 전체를 함께 배포합니다. DLL·모델을 교체한 뒤에는 GUI를 다시 실행하고 템플릿을 재생성합니다.
 
 주요 설정은 각 모듈의 `*Config.h`에 있습니다. `encoderConfig.h`는 전처리·모델 차원, `trainConfig.h`·`augmentConfig.h`는 학습·증강, `evaluationConfig.h`는 학습 검증, `engineConfig.h`·`guiConfig.h`는 평가·화면 기본값을 정의합니다. 파일별 설명은 [소스 안내](src/readme.md)에서 확인할 수 있습니다.
 
