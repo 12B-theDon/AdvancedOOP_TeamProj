@@ -106,7 +106,7 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
     QByteArray raw("representation,model,database,enrollment,probe,genuine,score\n");
     QByteArray metricsCsv("representation,model,database,eer_pct,auc,threshold_at_far1,genuine_accept_pct,false_accept_pct,genuine_pairs,impostor_pairs\n");
     QJsonArray summaries;
-    torch::jit::Module reference = torch::jit::load(data.checkpoint.toStdString(), torch::kCPU); reference.eval();
+    torch::jit::Module reference = LoadArchive(data.checkpoint); reference.eval();
     std::vector<torch::jit::Named<torch::Tensor>> referenceParameters, referenceBuffers;
     for (const torch::jit::Named<torch::Tensor>& parameter : reference.named_parameters()) referenceParameters.push_back(parameter);
     for (const torch::jit::Named<torch::Tensor>& buffer : reference.named_buffers()) referenceBuffers.push_back(buffer);
@@ -137,7 +137,7 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
     for (int modelIndex = 0; modelIndex < 4; ++modelIndex) {
         const QString id = QString::fromStdString(training::ModelIds[modelIndex]), path = QDir(folder).filePath(id + ".bin");
         torch::jit::ExtraFilesMap extras{{"metadata.json", ""}};
-        torch::jit::Module model = torch::jit::load(path.toStdString(), torch::kCPU, extras); model.eval();
+        torch::jit::Module model = LoadArchive(path, extras); model.eval();
         const QJsonObject metadata = QJsonDocument::fromJson(QByteArray::fromStdString(extras["metadata.json"])).object();
         Require(metadata.value("format").toString() == ProbabilityFormat, "Not a v2 probability model.");
         Require(metadata.value("base_encoder_sha256").toString() == data.cache_info.value("base_sha256").toString(),
@@ -175,7 +175,7 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
             const QString oldPath = QDir(baselineFolder).filePath(id + ".bin");
             const QString oldHash = Hash(oldPath);
             torch::jit::ExtraFilesMap oldExtras{{"metadata.json", ""}};
-            torch::jit::Module old = torch::jit::load(oldPath.toStdString(), torch::kCPU, oldExtras); old.eval();
+            torch::jit::Module old = LoadArchive(oldPath, oldExtras); old.eval();
             const QJsonObject oldMeta = QJsonDocument::fromJson(QByteArray::fromStdString(oldExtras["metadata.json"])).object();
             Require(oldMeta.value("format").toString() == "deepprint-torchscript-v1"
                 && oldMeta.value("model_id").toString() == id

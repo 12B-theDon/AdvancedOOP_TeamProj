@@ -1,6 +1,6 @@
 # 검증 결과 — 2026-11-21
 
-Windows·MSVC 전용 프로젝트입니다. Windows PowerShell 5.1 로그에서 Qt·LibTorch 설치, MSVC Release 빌드, 모델 4개 재사용을 확인했습니다. 패키징 고지 오류 수정 후 사용자 화면에서 GUI 실행과 Step 3의 DLL 선택까지 확인했으며, DLL 등록 실패는 CRLF manifest로 로컬 재현했습니다. 아래 수정 후 검사는 macOS 검증 환경에서 수행했습니다. 실제 Windows에서 최종 패키징 완료·DLL 평가·Stop 동작은 아직 재검증하지 않았습니다.
+Windows·MSVC 전용 프로젝트입니다. Windows 로그·화면에서 Qt·LibTorch 설치, MSVC Release 빌드, DLL 등록과 Worker/Core의 모델 로딩 오류 응답까지 확인했습니다. CRLF manifest 등록 오류와 한글 경로의 모델 열기 문제를 수정했으며, 아래 수정 후 검사는 macOS 검증 환경에서 수행했습니다. 실제 Windows에서 수정 후 모델 추론·점수·Stop 동작은 아직 재검증하지 않았습니다.
 
 | 현재 검사 | 결과 |
 |---|---|
@@ -8,7 +8,10 @@ Windows·MSVC 전용 프로젝트입니다. Windows PowerShell 5.1 로그에서 
 | Windows 빌드 로그 | Windows PowerShell 5.1·MSVC 19.44·Qt 6.8.3·LibTorch 2.15.0 CPU에서 GUI·Train·Worker·공개 DLL·Core DLL 생성 완료. 모델 4개 확인 후 학습 생략. 사용자가 제공한 로그 기준 |
 | Windows 전용 전환 | 전환 당시 전처리 결과 9개 조합이 기존 Windows/MSVC 코드·include 선택과 일치. 이번 Stop 수정 이전의 검사 |
 | 공개 KISA ABI | Clang의 Windows x64·x86 target에서 함수 포인터 자료형·export 선언의 구문 검사 통과. MSVC 링크·실행 검사는 아님 |
-| 원본·학습 보존 | 원본 241개·디렉터리·가중치·설정·학습/검증 함수 본문 보존 검사 통과 |
+| 원본·학습 보존 | 원본 241개·디렉터리·가중치·설정 보존 통과. Unicode 모델 입출력 호출만 이전 표현으로 환원해 encoder·학습·검증 본문 비교 통과. 계산·전처리·RNG·optimizer·점수 코드는 일치 |
+| Unicode 모델 입출력 | 실제 LibTorch에서 파일명 기반 load/save API를 사용하면 실패하도록 제한하고 Qt reader·writer로 한글·공백 경로의 모델 4종 저장·로딩, metadata·forward 일치, Template·self-score·파일 삭제 후 캐시 재사용 통과. 누락·손상 입력·잘못된 출력 경로 거부 통과. train.cpp·validation.cpp 컴파일 통과 |
+| 실제 배포 모델 출력 | 기존 production 4개를 각각 batch 1·2로 읽어 기존 reader와 새 Qt reader의 metadata·forward 결과가 정확히 일치. 최대 차이 0. Pretrained 전처리·embedding은 세 DB의 원래 baseline hash와 일치 |
+| Core 모델 통합 | 현재 Core·Algorithm 코드에 Windows 모듈 경로 API만 검증용 shim을 연결해 공유 라이브러리 빌드·실행. 한글·공백 배포 폴더, CWD 독립성, 모든 FVC 타입의 Enroll/Attempt/Compare·버퍼·점수 집계·파일 삭제 후 캐시 재사용 통과. 합성 모델 검사이며 실제 Windows DLL 실행은 아님 |
 | 설치 스크립트 | PowerShell 7.7에서 구문·helper·격리 모의 실행 통과: 한글 프로젝트 경로·ASCII 의존성 경로, Qt 설치 실패·완료 기록·경로·버전 검사, 부분 설치 보관·재설치, 다운로드 우선·학습 생략·fallback, 패키징·GUI 실행, 실패 시 중단. Windows PowerShell 5.1 실제 실행은 위 로그의 `[8/9]` 진입까지 확인 |
 | 전체 Worker 취소 | 현재 `kisaDll.cpp`를 WinAPI mock으로 컴파일·실행: 실행·대기 slot 전체 종료, job 자식 종료 대기, handle 해제, 비차단 Cancel, Reset 대기, 반복 Stop, destructor 정리, 시작 도중 취소·취소 후 대기 Worker 생성 방지 통과. 실제 Windows job·pipe 검사는 아님 |
 | GUI 종료 | 현재 GUI·Engine을 Qt 5.15 offscreen·검증용 backend로 컴파일·실행: Stop 버튼, 정리 대기·결과 폐기·저장 차단·재실행, 실행 중 창 닫기의 Yes/No, 확인 중 작업 완료, 정리 후 지연 종료, 예외 시 정리 통과 |

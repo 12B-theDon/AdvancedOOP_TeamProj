@@ -90,7 +90,7 @@ TrainingData PrepareTrainingData(const QString& dataFolder, const QString& check
         Require(QDir().mkpath(cache.absolutePath()), "Cannot create feature cache.");
         FingerprintEncoder preprocessor; std::string error;
         Require(preprocessor.LoadModel("pretrained", checkpoint.toStdString(), error), QString::fromStdString(error));
-        torch::jit::Module base = torch::jit::load(checkpoint.toStdString(), torch::kCPU); base.eval();
+        torch::jit::Module base = LoadArchive(checkpoint); base.eval();
         std::vector<torch::Tensor> chunks;
         torch::NoGradGuard guard;
         for (int start = 0; start < result.samples.size(); start += FeatureBatchSize) {
@@ -165,7 +165,7 @@ int RunTraining(int argc, char** argv) {
         for (int modelIndex = 0; modelIndex < 4; ++modelIndex) {
             const QString id = QString::fromStdString(training::ModelIds[modelIndex]);
             // Reload the original encoder independently. Never use a preceding model's weights.
-            torch::jit::Module encoder = torch::jit::load(checkpoint.toStdString(), torch::kCPU); encoder.eval();
+            torch::jit::Module encoder = LoadArchive(checkpoint); encoder.eval();
             std::vector<torch::Tensor> parameters;
             std::vector<torch::Tensor> initialProjections;
             QJsonArray trainedNames;
@@ -255,7 +255,7 @@ int RunTraining(int argc, char** argv) {
                     {"orders_sha256", QString::fromLatin1(orderHash.result().toHex())}}}};
             const QByteArray json = QJsonDocument(metadata).toJson();
             const QString path = QDir(folder).filePath(id + ".bin");
-            production.save((path + ".partial").toStdString(), {{"metadata.json", json.toStdString()}});
+            SaveArchive(production, path + ".partial", {{"metadata.json", json.toStdString()}});
             Require(QFile::rename(path + ".partial", path), "Cannot commit new model archive.");
             QJsonObject sidecar = metadata;
             sidecar.insert("weight_sha256", Hash(path)); // Outside the archive: no recursive self-hash.
@@ -263,7 +263,7 @@ int RunTraining(int argc, char** argv) {
             Write(QDir(folder).filePath(id + "_training.csv"), history);
             {
                 torch::NoGradGuard guard;
-                torch::jit::Module reloaded = torch::jit::load(path.toStdString(), torch::kCPU); reloaded.eval();
+                torch::jit::Module reloaded = LoadArchive(path); reloaded.eval();
                 const torch::Tensor featureProbe = data.features.index_select(0, val.slice(0, 0, 4));
                 for (int batch : {1, 2, 4}) {
                     const torch::Tensor f = featureProbe.slice(0, 0, batch);

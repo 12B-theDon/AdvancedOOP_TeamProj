@@ -2,6 +2,8 @@
 
 2026-11-21에 commit `ccfe7b5`에서 확인한 설정입니다. `implementation.json`은 소스와 당시 존재한 가중치의 SHA-256을, `original_data.json`은 원본 파일·디렉터리 전체를 기록합니다. 리팩터링 전 상태를 비교하는 baseline이며 새 학습 절차를 정의하는 문서는 아닙니다.
 
+Windows 한글 경로 대응으로 모델 입출력 호출을 `LoadArchive()`·`SaveArchive()`로 교체했습니다. 보존 검사는 이 호출 표현만 이전 형태로 환원한 뒤 encoder·학습·검증 코드와 비교합니다. 아래 계산 설정과 원본 snapshot은 그대로 비교 기준으로 사용합니다.
+
 - **Architecture**: pretrained `DeepPrint_TexMinu_512`을 사용합니다. upstream commit은 `7accfca1f33b9b42bfd220e43cd5bc13b4a7fa13`입니다. 공통 Inception stem에서 texture 1536·minutia 1024 features를 추출합니다. Linear projection은 각각 1536→256·1024→256이며, 각 branch의 L2 normalization 후 concatenate하고 다시 L2 normalization하여 512차원 embedding을 만듭니다.
 - **Initialization**: 모델 4개가 각각 `models/pretrained/deepprint.bin`을 독립적으로 다시 로딩합니다. 앞에서 fine-tuning한 모델을 다음 모델의 초기값으로 사용하지 않습니다. CPU에서 Torch thread 4개로 실행합니다.
 - **Frozen·Trainable**: stem, texture·minutia Backbone, Gabor와 모든 BatchNorm buffer는 고정합니다. dropout·BatchNorm을 포함한 encoder는 `eval` 상태를 유지합니다. `texture_projection.*`, `minutia_projection.*`, bias가 없는 512→30 cosine classifier만 학습합니다. classifier에는 hidden layer가 없습니다.

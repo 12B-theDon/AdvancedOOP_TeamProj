@@ -137,7 +137,7 @@ bool FingerprintEncoder::LoadModel(const std::string& id, const std::string& fil
         if (it->id == id) it = state_->models.erase(it); else ++it;
     try {
         torch::jit::ExtraFilesMap extras{{"metadata.json", ""}};
-        torch::jit::Module module = torch::jit::load(file, torch::kCPU, extras);
+        torch::jit::Module module = LoadArchive(QString::fromStdString(file), extras);
         const QJsonObject metadata = QJsonDocument::fromJson(QByteArray::fromStdString(extras["metadata.json"])).object();
         const QString preprocessing = metadata.value("preprocessing").toString();
         const bool pretrained = id == "pretrained";

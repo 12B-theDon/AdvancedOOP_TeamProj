@@ -1,5 +1,7 @@
 # Training 모듈
 
+모델 입출력은 Algorithm의 `LoadArchive()`·`SaveArchive()`를 공유하며 Windows 한글·공백 경로를 처리합니다. 학습 계산·seed·epoch·optimizer·전처리 설정은 유지합니다.
+
 - `augment.cpp`: 원본에서 `data/augmented`를 생성합니다.
 - `train.cpp`: 검증된 feature cache로 두 projection과 cosine classifier를 학습합니다.
 - `validation.cpp`·`ValidationEngine`: 저장 모델, 고정 parameter·buffer, native 점수와 calibration을 검증합니다.

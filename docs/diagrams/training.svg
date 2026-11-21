@@ -7,7 +7,7 @@
 <g data-node="train" data-source="src/Training/train.cpp"><rect x="340" y="300" width="260" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="340" y="300" width="260" height="32.5" fill="#2864b4"/></g>
 <g data-node="validation" data-source="src/Training/validation.cpp;src/Training/ValidationEngine.cpp;src/Training/ValidationEngine.h"><rect x="660" y="300" width="260" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="300" width="260" height="32.5" fill="#2864b4"/></g>
 <g data-node="augmented" data-source=""><rect x="20" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="20" y="550" width="260" height="32.5" fill="#73818d"/></g>
-<g data-node="weights" data-source=""><rect x="340" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="340" y="550" width="260" height="32.5" fill="#73818d"/></g>
+<g data-node="weights" data-source=""><rect x="340" y="550" width="260" height="110" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="340" y="550" width="260" height="32.5" fill="#73818d"/></g>
 <g data-node="validationout" data-source=""><rect x="660" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="660" y="550" width="260" height="32.5" fill="#73818d"/></g>
 <g data-from="augment" data-to="augmentcfg" data-relation="include"><polyline points="150.0,300 150.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="150.0,202 153.3,210.0 146.7,210.0" fill="#81909b"/></g>
 <g data-from="train" data-to="traincfg" data-relation="include"><polyline points="470.0,300 470.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="470.0,202 473.3,210.0 466.7,210.0" fill="#81909b"/></g>
@@ -53,6 +53,7 @@
 <text x="470.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">per-DB models + combined</text>
 <text x="470.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">retained Softmax30 classifier</text>
 <text x="470.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">final-epoch TorchScript .bin files</text>
+<text x="470.0" y="652.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">SaveArchive(): Unicode paths</text>
 <text x="790.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Validation outputs</text>
 <text x="790.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">validation CSV / HTML / JSON</text>
 <text x="790.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">native / frozen-backbone audit</text>

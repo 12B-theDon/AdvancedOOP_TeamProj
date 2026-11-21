@@ -52,6 +52,8 @@ Release 빌드는 `build/Release/FingerprintGUI.exe`·`FingerprintTrain.exe`를 
 
 GUI는 `data/original`을 작업 폴더 또는 실행파일의 상위 폴더에서 찾습니다. DB 버튼으로 경로를 지정하거나 외부 폴더를 선택할 수도 있습니다. [FVC 매핑](../src/Public/readme.md)에 맞는 원본 gray8을 사용합니다. GUI·Worker·알고리즘 DLL·학습·검증 도구는 모두 Windows에서 실행합니다.
 
+한글 사용자 경로에서 Template 생성이 `DLL error 3: No matching-DB/combined model: open file...`로 실패하던 문제는 모델 입출력을 Qt `QFile`·`QSaveFile`로 통일해 수정했습니다. 기존 GUI를 닫고 수정본을 받은 뒤 설치 스크립트로 빌드·패키징합니다. 기존 정상 가중치 4개는 재사용합니다. [LibTorch 파일명 입력 구현](https://github.com/pytorch/pytorch/blob/v2.15.0/caffe2/serialize/file_adapter.cc)은 일반 `fopen()`을 사용하며, 수정본은 reader·writer API로 파일 내용을 전달합니다.
+
 ## Evaluator 전용 빌드
 
 외부 DLL만 평가할 때는 Qt만 준비하고 아래 옵션을 사용합니다.

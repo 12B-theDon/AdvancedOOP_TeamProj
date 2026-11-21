@@ -8,7 +8,7 @@
 <g data-node="encoder" data-source="src/Algorithm/encoder.cpp"><rect x="660" y="300" width="260" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="300" width="260" height="32.5" fill="#2864b4"/></g>
 <g data-node="image" data-source="src/Public/Image.h"><rect x="20" y="530" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="20" y="530" width="260" height="32.5" fill="#73818d"/></g>
 <g data-node="api" data-source="src/Algorithm/Algorithm.h"><rect x="340" y="530" width="260" height="92" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="340" y="530" width="260" height="32.5" fill="#2864b4"/></g>
-<g data-node="encoderh" data-source="src/Algorithm/encoder.h"><rect x="660" y="530" width="260" height="92" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="530" width="260" height="32.5" fill="#2864b4"/></g>
+<g data-node="encoderh" data-source="src/Algorithm/encoder.h;src/Algorithm/archive.h;src/Algorithm/archive.cpp"><rect x="660" y="530" width="260" height="92" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="530" width="260" height="32.5" fill="#2864b4"/></g>
 <g data-from="public" data-to="abi" data-relation="include"><polyline points="150.0,300 150.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="150.0,202 153.3,210.0 146.7,210.0" fill="#81909b"/></g>
 <g data-from="core" data-to="fvc" data-relation="include"><polyline points="470.0,300 470.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="470.0,202 473.3,210.0 466.7,210.0" fill="#81909b"/></g>
 <g data-from="encoder" data-to="config" data-relation="include"><polyline points="790.0,300 790.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="790.0,202 793.3,210.0 786.7,210.0" fill="#81909b"/></g>
@@ -53,10 +53,10 @@
 <text x="470.0" y="578.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">algorithm::Algorithm</text>
 <text x="470.0" y="596.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">PreparedImage / model metadata</text>
 <text x="470.0" y="614.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">native training / encoder API</text>
-<text x="790.0" y="553.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">encoder.h</text>
-<text x="790.0" y="578.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FingerprintEncoder</text>
-<text x="790.0" y="596.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">PImpl owns loaded modules</text>
-<text x="790.0" y="614.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">copying deleted</text>
+<text x="790.0" y="553.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Encoder / archive API</text>
+<text x="790.0" y="578.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FingerprintEncoder / PImpl</text>
+<text x="790.0" y="596.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">LoadArchive() / SaveArchive()</text>
+<text x="790.0" y="614.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">archive.cpp: Qt Unicode file I/O</text>
 <text x="310" y="343" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">forward</text>
 <text x="630" y="343" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">calls</text>
 <text x="470" y="660" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">Solid: calls / data flow     Dashed: selected direct #include links</text>

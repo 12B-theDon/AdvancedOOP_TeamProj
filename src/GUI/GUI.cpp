@@ -70,6 +70,7 @@ static void AddRow(QTableWidget* table, const QStringList& values) {
     table->insertRow(row);
     for (int column = 0; column < values.size(); ++column) {
         QTableWidgetItem* item = new QTableWidgetItem(values[column]);
+        item->setToolTip(values[column]);
         item->setTextAlignment(Qt::AlignCenter);
         table->setItem(row, column, item);
     }

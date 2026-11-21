@@ -5,6 +5,7 @@
 <img src="../../docs/diagrams/algorithm.png" alt="공개 KISA 계약에서 Core DLL과 FingerprintEncoder로 이어지는 알고리즘 구조" width="100%">
 
 - `encoder.h/.cpp`: 모델을 실행하고 확률 Template을 직렬화합니다.
+- `archive.h/.cpp`: Qt `QFile`·`QSaveFile`로 한글·공백 경로를 열고 LibTorch reader·writer API에 연결합니다. 파일을 한꺼번에 메모리 복사하지 않고 읽으며 저장은 commit 후 교체합니다. Core·학습·검증이 같은 입출력을 사용합니다.
 - `encoderConfig.h`: 입력 크기, 모델 차원, 전처리·Template 형식을 정의합니다.
 - `Algorithm.h`: native encoder 인터페이스와 입력·metadata 자료형을 정의합니다.
 

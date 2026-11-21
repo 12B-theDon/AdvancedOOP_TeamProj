@@ -48,7 +48,7 @@ FinalProject/
 ├─ src/
 │  ├─ main.cpp       # GUI 실행 진입점
 │  ├─ Public/        # 공개 KISA 함수 선언, FVC 매핑, 이미지 자료형
-│  ├─ Algorithm/     # 모델 로딩·전처리·템플릿 생성·유사도 계산
+│  ├─ Algorithm/     # Unicode 모델 I/O·전처리·템플릿 생성·유사도 계산
 │  ├─ Training/      # 데이터 증강·학습·학습 결과 검증
 │  ├─ Kisa/          # 공개 DLL wrapper와 알고리즘 Core DLL
 │  ├─ Engine/        # 비교 계획·템플릿 캐시·병렬 평가·원시 결과 저장
@@ -82,7 +82,7 @@ FinalProject/
 |---|---|---|
 | Qt Widgets | `<QApplication>`, `<QWizard>` | GUI |
 | Qt Gui | `<QImage>`, `<QPainter>` | 이미지·augmentation |
-| Qt Core | `<QFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·SHA-256 |
+| Qt Core | `<QFile>`, `<QSaveFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·SHA-256 |
 | LibTorch·ATen | `<torch/torch.h>`, `<torch/script.h>`, `<ATen/core/Tensor.h>` | 학습·inference·Tensor |
 | C++ Standard Library | `<vector>`, `<thread>`, `<future>`, `<mutex>`, `<condition_variable>`, `<random>` | 자료구조·병렬·동기화·sampling |
 | Windows API | `<windows.h>` | DLL·Process·IPC |

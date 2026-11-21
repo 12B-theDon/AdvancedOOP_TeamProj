@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Algorithm.h"
+#include "archive.h"
 #include <memory>
 
 class QString;

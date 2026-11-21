@@ -64,7 +64,7 @@
 <text x="780.0" y="823.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FingerprintEncoder</text>
 <text x="780.0" y="841.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Preprocess() / CreateTemplate()</text>
 <text x="780.0" y="859.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Compare()</text>
-<text x="780.0" y="877.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">LibTorch + Qt Core</text>
+<text x="780.0" y="877.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Unicode I/O: archive.cpp</text>
 <text x="150.0" y="463.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Evaluation outputs</text>
 <text x="150.0" y="488.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CSV + opaque templates</text>
 <text x="150.0" y="506.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">HTML / Word-compatible RTF</text>
