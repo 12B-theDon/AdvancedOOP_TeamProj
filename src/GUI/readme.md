@@ -4,6 +4,8 @@
 
 `Window`는 7단계 QWizard와 DLL adapter를 소유합니다. Step 3에서 DLL·Worker·timeout을 설정하고 Template을 생성합니다. background 실행 중 진행률과 Stop을 제공하며, DLL을 교체하면 cache를 초기화합니다.
 
+DLL을 선택하면 Algorithm 표에 `K-NBTC DLL`이 등록됩니다. **Create enrollment templates**를 눌러 모델을 로드하고 Template을 생성한 뒤 Next로 진행합니다. 배포 파일·manifest 검사에 실패하면 표에 `Error`, 하단에 해당 파일명과 원인이 표시됩니다. 정상 배포 폴더의 DLL을 다시 선택해 복구할 수 있습니다.
+
 Stop은 전체 Worker를 종료하고 생성 중인 Template·비교 결과를 버립니다. GUI는 정리 상태를 표시하며 background 작업과 Worker의 handle 정리가 모두 끝난 뒤 다시 조작할 수 있습니다. 취소된 실행은 CSV·보고서로 저장하지 않습니다. 실행 중 메인 창을 닫으면 종료 여부를 확인하고, 승인 시 같은 취소·정리 절차가 끝난 뒤 창을 닫습니다. 종료 확인 중 작업이 먼저 끝나도 사용자의 선택을 기다립니다.
 
 <img src="../../docs/diagrams/gui.png" alt="GUI의 화면 구성·백그라운드 평가·결과 및 보고서 생성 관계" width="100%">

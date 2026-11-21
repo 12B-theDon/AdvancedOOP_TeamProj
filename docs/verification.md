@@ -1,6 +1,6 @@
 # 검증 결과 — 2026-11-21
 
-Windows·MSVC 전용 프로젝트입니다. Windows PowerShell 5.1 로그에서 Qt·LibTorch 설치, MSVC Release 빌드, 모델 4개 재사용을 확인했습니다. 최신 Windows 로그에서는 LibTorch 고지 검사를 통과한 뒤 SDK에서 Qt 고지를 찾지 못해 `[8/9]`에서 중단됐습니다. Qt 고지 fallback 수정 후 파일 패키징 검사는 macOS 검증 환경에서 수행했으며, 수정본의 실제 Windows 패키징·GUI/DLL 실행은 아직 재검증하지 않았습니다.
+Windows·MSVC 전용 프로젝트입니다. Windows PowerShell 5.1 로그에서 Qt·LibTorch 설치, MSVC Release 빌드, 모델 4개 재사용을 확인했습니다. 패키징 고지 오류 수정 후 사용자 화면에서 GUI 실행과 Step 3의 DLL 선택까지 확인했으며, DLL 등록 실패는 CRLF manifest로 로컬 재현했습니다. 아래 수정 후 검사는 macOS 검증 환경에서 수행했습니다. 실제 Windows에서 최종 패키징 완료·DLL 평가·Stop 동작은 아직 재검증하지 않았습니다.
 
 | 현재 검사 | 결과 |
 |---|---|
@@ -12,12 +12,15 @@ Windows·MSVC 전용 프로젝트입니다. Windows PowerShell 5.1 로그에서 
 | 설치 스크립트 | PowerShell 7.7에서 구문·helper·격리 모의 실행 통과: 한글 프로젝트 경로·ASCII 의존성 경로, Qt 설치 실패·완료 기록·경로·버전 검사, 부분 설치 보관·재설치, 다운로드 우선·학습 생략·fallback, 패키징·GUI 실행, 실패 시 중단. Windows PowerShell 5.1 실제 실행은 위 로그의 `[8/9]` 진입까지 확인 |
 | 전체 Worker 취소 | 현재 `kisaDll.cpp`를 WinAPI mock으로 컴파일·실행: 실행·대기 slot 전체 종료, job 자식 종료 대기, handle 해제, 비차단 Cancel, Reset 대기, 반복 Stop, destructor 정리, 시작 도중 취소·취소 후 대기 Worker 생성 방지 통과. 실제 Windows job·pipe 검사는 아님 |
 | GUI 종료 | 현재 GUI·Engine을 Qt 5.15 offscreen·검증용 backend로 컴파일·실행: Stop 버튼, 정리 대기·결과 폐기·저장 차단·재실행, 실행 중 창 닫기의 Yes/No, 확인 중 작업 완료, 정리 후 지연 종료, 예외 시 정리 통과 |
+| GUI DLL 선택 | 수정 전 CRLF manifest에서 빈 Algorithm 표·비활성 Create를 재현. 수정 후 Qt offscreen에서 LF/CRLF 동일 식별, 한글·공백 경로, 표 등록·Create 활성화·worker 수 변경, 누락·손상·잘못된 manifest의 오류 표시, cache 무효화·복구·manifest 없는 외부 DLL 등록 통과. WinAPI는 mock이며 실제 DLL 호출 검사는 아님 |
 | 패키징 검사 | manifest 누락·손상·경로 보호·가중치 누락 거부 통과. 실제 Algorithm·Evaluator CMake 스크립트에서 runtime 탐색·외부 windeployqt만 mock으로 대체하고 Qt/LibTorch 고지 fallback·파일 복사·manifest·폴더 교체 통과. 버전·build·SHA·고지 누락, windeployqt 실패·TIFF 누락 거부와 기존 배포본 보존 통과. SDK의 LICENSES 및 doc/global/licenses 경로도 확인 |
 | LibTorch 고지 출처 | 공식 Windows CPU ZIP 파일 목록 9,573개에 라이선스 고지가 없음을 확인. 동일 버전·build의 공식 Windows CPU wheel SHA-256 확인 후 고지 61개 전문 보존. URL·해시를 provenance에 기록 |
 | Qt 고지 출처 | 공식 Qt Base·Qt SVG·Qt Image Formats 6.8.3 source archive 3개의 SHA-256을 Qt 서버의 공개 checksum과 대조. 라이선스·third-party 고지·attribution 156개 전문과 원문별 SHA-256 보존. attribution의 LicenseFile 참조도 모두 포함 |
 | 그림 | 전체 Worker 종료·cleanup·GUI 종료 대기를 구조도에 반영. Arial·SVG/PNG의 크기·aspect ratio 유지 |
 
 이번 검증용 mock은 Windows 이외의 실행 지원 코드에 포함하지 않습니다. 배포 대상은 Windows·MSVC로 유지합니다. 실제 Windows의 수정 후 패키징·DLL/IPC·Stop·종료 범위는 추가 실행 검증이 필요합니다.
+
+DLL 선택 오류는 Windows의 `SHA256SUMS.txt` 줄끝 CRLF를 파일명 일부로 읽던 코드에서 발생했습니다. GUI에서 줄끝을 정규화하고 각 파일의 SHA-256을 검사하며, 실패 원인을 표시합니다. [CMake 4.4.4의 file(WRITE) 구현](https://github.com/Kitware/CMake/blob/v4.4.4/Source/cmFileCommand.cxx)은 text stream을 사용합니다.
 
 <details>
 <summary>Windows 전용 전환 이전 검증 기록</summary>

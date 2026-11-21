@@ -23,6 +23,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QSet>
 #include <QStackedWidget>
 #include <QTableWidget>
 #include <QTabWidget>
@@ -324,6 +325,9 @@ QWizardPage* Window::TemplatePage() {
     templateTable_ = MakeTable(TemplateHeaders);
     templateTable_->setObjectName("enrollmentTemplates");
     inferenceInfo_ = new QLabel(ModelHint);
+    inferenceInfo_->setObjectName("inferenceInfo");
+    inferenceInfo_->setTextFormat(Qt::PlainText);
+    inferenceInfo_->setTextInteractionFlags(Qt::TextSelectableByMouse);
     inferenceInfo_->setWordWrap(true);
     calibrationInfo_ = new QLabel("Threshold starts at 0.5; adjust in Results for the selected DLL.");
     calibrationInfo_->setObjectName("calibrationInfo");
@@ -657,35 +661,65 @@ void Window::ClearTemplates() {
     }
 }
 
-static QString DllHash(const QString& path) {
+static QString DllHash(const QString& path, QString* error = nullptr) {
+    if (error) error->clear();
+    if (path.isEmpty()) return QString();
+    const auto fail = [error](const QString& message) {
+        if (error) *error = message;
+        return QString();
+    };
     QFile file(path);
-    if (!file.open(QIODevice::ReadOnly)) return QString();
+    if (!file.open(QIODevice::ReadOnly))
+        return fail("Cannot read algorithm DLL: " + QDir::toNativeSeparators(path) + "\n" + file.errorString());
     QCryptographicHash hash(QCryptographicHash::Sha256);
-    if (!hash.addData(&file)) return QString();
+    if (!hash.addData(&file)) return fail("Cannot hash algorithm DLL: " + QDir::toNativeSeparators(path));
     // A deployment manifest also identifies auxiliary files/weights as a bundle.
     const QDir folder = QFileInfo(path).dir();
     QFile manifest(folder.filePath("SHA256SUMS.txt"));
-    if (manifest.open(QIODevice::ReadOnly)) {
-        const QByteArray contents = manifest.readAll(); hash.addData(contents);
+    if (manifest.exists()) {
+        if (!manifest.open(QIODevice::ReadOnly))
+            return fail("Cannot read deployment manifest: " + QDir::toNativeSeparators(manifest.fileName()));
+        QByteArray contents = manifest.readAll();
+        if (manifest.error() != QFile::NoError) return fail("Cannot read deployment manifest: " + manifest.errorString());
+        // CMake file(WRITE) uses native CRLF on Windows. Strip only line endings,
+        // preserving spaces and Unicode characters in relative file names.
+        contents.replace("\r\n", "\n");
+        hash.addData(contents);
+        QSet<QString> seen;
+        const QString prefix = folder.absolutePath().endsWith('/') ? folder.absolutePath() : folder.absolutePath() + '/';
+        int lineNumber = 0;
         for (const QByteArray& line : contents.split('\n')) {
+            ++lineNumber;
             if (line.isEmpty()) continue;
-            if (line.size() < 67 || line.mid(64, 2) != "  ") return QString();
-            const QString name = QString::fromUtf8(line.mid(66));
+            const QByteArray expected = line.left(64);
+            if (line.size() < 67 || line.mid(64, 2) != "  " || line.contains('\0')
+                || QByteArray::fromHex(expected).toHex() != expected)
+                return fail(QString("Invalid deployment manifest at line %1.").arg(lineNumber));
+            const QByteArray nameBytes = line.mid(66);
+            const QString name = QString::fromUtf8(nameBytes);
             const QString resolved = QDir::cleanPath(folder.absoluteFilePath(name));
-            if (!resolved.startsWith(folder.absolutePath() + '/')) return QString();
+            const QString key = resolved.toCaseFolded();
+            if (name.toUtf8() != nameBytes || !resolved.startsWith(prefix)
+                || key == QFileInfo(manifest).absoluteFilePath().toCaseFolded() || seen.contains(key))
+                return fail("Invalid deployment manifest path: " + name);
+            seen.insert(key);
             QFile auxiliary(resolved);
-            if (!auxiliary.open(QIODevice::ReadOnly)) return QString();
+            if (!auxiliary.open(QIODevice::ReadOnly))
+                return fail("Cannot read deployment file: " + name + "\n" + auxiliary.errorString());
             QCryptographicHash auxiliaryHash(QCryptographicHash::Sha256);
-            if (!auxiliaryHash.addData(&auxiliary)) return QString();
-            hash.addData(name.toUtf8()); hash.addData(auxiliaryHash.result());
+            if (!auxiliaryHash.addData(&auxiliary)) return fail("Cannot hash deployment file: " + name);
+            const QByteArray actual = auxiliaryHash.result();
+            if (actual.toHex() != expected) return fail("Deployment SHA-256 mismatch: " + name);
+            hash.addData(nameBytes); hash.addData(actual);
         }
+        if (seen.isEmpty()) return fail("Deployment manifest contains no files.");
     }
     return QString::fromLatin1(hash.result().toHex());
 }
 bool Window::AlgorithmUnchanged() {
     if (dllHash_.isEmpty() || dllHash_ != DllHash(dllPath_->text())) {
         ReloadModels();
-        inferenceInfo_->setText("Algorithm changed; generate new enrollment templates.");
+        if (!dllHash_.isEmpty()) inferenceInfo_->setText("Algorithm changed; generate new enrollment templates.");
         return false;
     }
     return true;
@@ -694,7 +728,8 @@ void Window::ReloadModels() {
     if (busy_) return;
     engine_.Configure(nullptr, "");
     algorithm_.reset();
-    dllHash_ = DllHash(dllPath_->text());
+    QString error;
+    dllHash_ = DllHash(dllPath_->text(), &error);
     modelTable_->setRowCount(0);
     if (!dllHash_.isEmpty()) {
         engine::DllOptions options;
@@ -709,7 +744,12 @@ void Window::ReloadModels() {
     impostor_.threshold->setValue(engine::ImpostorThreshold);
     const QString hint = "Threshold starts at 0.5; adjust it in Results for this DLL.";
     calibrationInfo_->setText(hint); resultCalibrationInfo_->setText(hint);
-    inferenceInfo_->setText(ModelHint);
+    if (!error.isEmpty()) {
+        AddRow(modelTable_, {"K-NBTC DLL", QFileInfo(dllPath_->text()).fileName(), "Error"});
+        inferenceInfo_->setText(error + "\nRestore a complete deployment folder and select the DLL again.");
+    } else {
+        inferenceInfo_->setText(dllHash_.isEmpty() ? ModelHint : "DLL registered. Click Create enrollment templates. Models load on the first call.");
+    }
     ClearTemplates(); UpdateEnrollment();
 }
 bool Window::RunWithProgress(const QString& title, const std::function<void()>& work) {
