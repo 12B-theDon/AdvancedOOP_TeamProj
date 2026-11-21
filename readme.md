@@ -33,7 +33,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 .\dist\FingerprintEvaluator\FingerprintGUI.exe
 ```
 
-소스 저장소 안에서 GUI를 실행했는데 자사 DLL·학습 모델이 빠져 있으면 자동으로 준비 프로그램을 실행합니다. **LFS 다운로드 → 없는 경우에만 학습 → 패키징 → GUI 재실행** 순서로 복구합니다. 완성된 배포본은 학습 없이 바로 열립니다. 다른 PC로 옮길 때는 [dist/FingerprintAlgorithm/](docs/build.md#package)과 [dist/FingerprintEvaluator/](docs/build.md#package)를 함께 복사합니다.
+소스 저장소 안에서 GUI를 실행했는데 이 프로젝트의 DLL·학습 모델이 빠져 있으면 자동으로 준비 프로그램을 실행합니다. **LFS 다운로드 → 없는 경우에만 학습 → 패키징 → GUI 재실행** 순서로 복구합니다. 완성된 배포본은 학습 없이 바로 열립니다. 다른 PC로 옮길 때는 [dist/FingerprintAlgorithm/](docs/build.md#package)과 [dist/FingerprintEvaluator/](docs/build.md#package)를 함께 복사합니다.
 
 GUI에서 **DB → 등록 이미지 → DLL·옵션·템플릿 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 [dist/FingerprintAlgorithm/FingerprintAlgorithm.dll](src/Kisa/readme.md)을 선택합니다. Results에서는 임계값(초기 0.5)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장할 수 있습니다.
 
@@ -72,6 +72,20 @@ FinalProject/
 
 주요 설정은 각 모듈의 `*Config.h`에 있습니다. `encoderConfig.h`는 전처리·모델 차원, `trainConfig.h`·`augmentConfig.h`는 학습·증강, `evaluationConfig.h`는 학습 검증, `engineConfig.h`·`guiConfig.h`는 평가·화면 기본값을 정의합니다. 파일별 설명은 [소스 안내](src/readme.md)에서 확인할 수 있습니다.
 
-![평가 GUI·Engine·Worker·알고리즘 DLL과 학습 모듈의 전체 연결 구조](docs/diagrams/overview.png)
+<img src="docs/diagrams/overview.png" alt="평가 GUI·Engine·Worker·알고리즘 DLL과 학습 모듈의 전체 연결 구조" width="100%">
+
+## 4. Libraries
+
+주요 라이브러리와 대표 `#include`입니다.
+
+| 라이브러리 | 대표 `#include` | 목적 |
+|---|---|---|
+| Qt Widgets | `<QApplication>`, `<QWizard>` | GUI |
+| Qt Gui | `<QImage>`, `<QPainter>` | 이미지·augmentation |
+| Qt Core | `<QFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·SHA-256 |
+| LibTorch·ATen | `<torch/torch.h>`, `<torch/script.h>`, `<ATen/core/Tensor.h>` | 학습·inference·Tensor |
+| C++ Standard Library | `<vector>`, `<thread>`, `<future>`, `<mutex>`, `<random>` | 자료구조·병렬·동기화·sampling |
+| Windows API | `<windows.h>` | DLL·Process·IPC |
+| POSIX Dynamic Linking | `<dlfcn.h>` | 모듈 경로(macOS·Linux) |
 
 [구조도·모듈 안내](docs/diagrams/readme.md) · [출처·라이선스](docs/THIRD_PARTY.md)

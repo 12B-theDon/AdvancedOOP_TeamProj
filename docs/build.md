@@ -1,4 +1,4 @@
-# Build / Deploy
+# 빌드·배포
 
 ## Windows 자동 설치·빌드·패키징
 
@@ -38,7 +38,7 @@ cmake --build build --config Release --parallel 4
 
 GUI는 `data/original`을 작업 폴더 또는 실행파일의 상위 폴더에서 찾습니다. DB 버튼으로 경로를 지정하거나 외부 폴더를 선택할 수도 있습니다. [FVC 매핑](../src/Public/readme.md)에 맞는 원본 gray8을 사용합니다. DLL 평가는 Windows에서 실행하며, 학습·검증 도구는 macOS/Linux에서도 빌드할 수 있습니다.
 
-## Evaluator only
+## Evaluator 전용 빌드
 
 외부 DLL만 평가할 때는 Qt만 준비하고 아래 옵션을 사용합니다.
 
@@ -47,7 +47,9 @@ cmake -S . -B build-evaluator -DCMAKE_PREFIX_PATH="<Qt>" -DFINGERPRINT_BUILD_ALG
 cmake --build build-evaluator --config Release --parallel 4
 ```
 
-## Package
+<a id="package"></a>
+
+## 패키징
 
 Windows에서 기존 [모델 4개](../models/readme.md)가 있는 폴더를 지정합니다. 기본값은 `models/trained_result`입니다.
 
@@ -58,7 +60,7 @@ cmake --build build --config Release --target FingerprintEvaluatorPackage
 python tools/verify_manifest.py dist/FingerprintAlgorithm
 ```
 
-- `dist/FingerprintAlgorithm`: public DLL·Core·worker·모델·런타임·라이선스·SHA-256 목록.
-- `dist/FingerprintEvaluator`: GUI·worker와 windeployqt로 수집한 Qt·TIFF·런타임·라이선스·SHA-256 목록.
+- `dist/FingerprintAlgorithm`: 공개 DLL·Core·Worker·모델·runtime·라이선스·SHA-256 목록을 포함합니다.
+- `dist/FingerprintEvaluator`: GUI·Worker와 windeployqt로 수집한 Qt·TIFF·runtime·라이선스·SHA-256 목록을 포함합니다.
 
 DLL과 모델은 같은 배포 폴더에 둡니다. 필수 파일이 빠지면 기존 배포 폴더를 교체하지 않습니다. [검증 상태](verification.md) · [출처·라이선스](THIRD_PARTY.md)

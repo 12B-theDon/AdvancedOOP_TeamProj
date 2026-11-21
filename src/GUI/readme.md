@@ -1,10 +1,10 @@
-# GUI / Report
+# GUI·보고서
 
-`startup.cpp`가 Windows 실행 시 자사 배포 DLL·모델 4개·Worker를 확인합니다. 소스 저장소에서 누락이 발견되면 준비 프로그램이 LFS 다운로드를 우선 시도하고, 필요한 경우 학습·패키징을 마친 뒤 GUI를 다시 엽니다. 완성된 배포본과 자사 알고리즘이 없는 외부 DLL 전용 평가기는 바로 실행됩니다.
+`startup.cpp`가 Windows 실행 시 이 프로젝트의 배포 DLL·모델 4개·Worker를 확인합니다. 소스 저장소에서 누락이 발견되면 준비 프로그램이 LFS 다운로드를 우선 시도하고, 필요한 경우 학습·패키징을 마친 뒤 GUI를 다시 엽니다. 완성된 배포본과 이 프로젝트의 알고리즘을 포함하지 않은 외부 DLL 전용 평가기는 바로 실행됩니다.
 
-`Window`는 7단계 QWizard와 DLL adapter를 소유합니다. Step 3에서 DLL·worker·timeout을 설정하고 템플릿을 생성합니다. 백그라운드 실행 중 진행률과 Stop을 제공하며, DLL 교체 시 캐시를 초기화합니다.
+`Window`는 7단계 QWizard와 DLL adapter를 소유합니다. Step 3에서 DLL·Worker·timeout을 설정하고 Template을 생성합니다. background 실행 중 진행률과 Stop을 제공하며, DLL을 교체하면 cache를 초기화합니다.
 
-![GUI의 화면 구성·백그라운드 평가·결과 및 보고서 생성 관계](../../docs/diagrams/gui.png)
+<img src="../../docs/diagrams/gui.png" alt="GUI의 화면 구성·백그라운드 평가·결과 및 보고서 생성 관계" width="100%">
 
 Results에서 임계값(초기 0.5)을 바꾸면 저장된 점수로 다시 판정합니다. Save는 원시 CSV, 선택 지표의 HTML·Word 호환 RTF, 별도 SVG 그래프를 저장합니다.
 

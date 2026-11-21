@@ -1,4 +1,4 @@
-# Source code
+# 소스 구성
 
 `main.cpp`는 GUI 실행 진입점이며, 나머지 코드는 역할별 모듈로 나뉩니다.
 
@@ -15,7 +15,7 @@
 
 Windows에서는 `GUI/startup.cpp`가 배포 파일을 확인하고, 필요하면 설치 스크립트로 다운로드·학습·패키징한 뒤 GUI를 다시 실행합니다. 평가 흐름은 `main.cpp → GUI → Engine → Worker → 선택한 DLL`입니다. 이 프로젝트의 DLL은 `Kisa → Algorithm`을 호출합니다. 학습은 `FingerprintTrain → Training → Algorithm` 흐름으로 실행됩니다.
 
-![소스 모듈과 평가·학습 프로세스의 연결 구조](../docs/diagrams/overview.png)
+<img src="../docs/diagrams/overview.png" alt="소스 모듈과 평가·학습 프로세스의 연결 구조" width="100%">
 
 외부 DLL 교체는 GUI Step 3에서 경로를 선택합니다. 이 프로젝트의 DLL을 배포할 때는 패키징으로 생성한 `dist/FingerprintAlgorithm/`을 사용합니다.
 

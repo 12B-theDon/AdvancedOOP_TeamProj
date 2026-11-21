@@ -1,10 +1,10 @@
-# Public contract
+# 공개 KISA 계약
 
 `BioApi.h`는 `KISA_Enroll`, `KISA_Attempt`, `KISA_Compare` 세 함수를 선언합니다. C linkage·cdecl을 사용하며 성공은 1, 실패는 0입니다.
 
-- 입력: 헤더·행 패딩 없는 원본 gray8 픽셀.
-- 출력: 템플릿 버퍼 1,000,000 bytes, 실제 길이 `0 < size < 1,000,000`, 오류 코드와 256-byte 메시지.
-- Compare: 길이 인자가 없으므로 같은 DLL이 생성한 완전한 템플릿을 전달합니다.
+- 입력: header·행 padding이 없는 원본 gray8 픽셀입니다.
+- 출력: Template buffer는 1,000,000 bytes이며 실제 길이는 `0 < size < 1,000,000`입니다. 오류 코드와 256-byte 메시지를 함께 반환합니다.
+- Compare: 길이 인자가 없으므로 같은 DLL이 생성한 완전한 Template을 전달합니다.
 
 `FvcSpec.h`의 매핑은 다음과 같습니다. 크기는 가로×세로입니다.
 

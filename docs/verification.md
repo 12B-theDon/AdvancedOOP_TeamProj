@@ -1,4 +1,4 @@
-# Verification — 2026-11-21
+# 검증 결과 — 2026-11-21
 
 macOS arm64, AppleClang 21, Qt 5.15.17, LibTorch 2.15.0 CPU에서 수행한 결과입니다.
 
@@ -12,10 +12,11 @@ macOS arm64, AppleClang 21, Qt 5.15.17, LibTorch 2.15.0 CPU에서 수행한 결�
 | Core 통합 | 합성 모델로 경로 독립성, 지연 로딩·재사용, 버퍼·점수 집계 검사 통과 |
 | GUI 시작 준비 | 배포 위치·누락 모델·LFS 포인터·Worker 감지, 독립 외부 DLL 평가기 호환 검사 통과 |
 | GUI·출력 | Qt offscreen 확인, SVG 파싱·시각 확인, RTF textutil 변환 |
+| 문서 그림 표시 | 로컬 GFM·WebKit에서 1000px·600px 화면 18개 조합, 그림 36개의 표시 폭·aspect ratio 검사 통과 |
 | 패키징·소스 | 누락 파일·SHA·경로 보호 검사, `git diff --check` 통과 |
 | Windows 설치 스크립트 | PowerShell 7.7 구문·격리 모의 실행 통과: 다운로드 우선·학습 생략, 부분 모델 보관·학습, 패키징·GUI 재실행, 공백·한글 경로, 실패 시 중단 |
 
-위 결과는 정리 전 로컬 테스트로 확인한 기록입니다. 테스트 코드는 Git 배포 대상에서 제외하며, 로컬에 `tests/CMakeLists.txt`가 있을 때만 CMake에서 등록합니다. 보존 기준은 [baseline](baseline/training_configuration.md)에 정리했습니다. 합성 모델 검사는 실제 인식 성능을 검증하지 않습니다.
+위 결과는 이 작업 폴더에서 수행한 검증 기록입니다. 테스트 코드는 Git 배포 대상에서 제외하며, 로컬에 `tests/CMakeLists.txt`가 있을 때만 CMake에서 등록합니다. 보존 기준은 [baseline](baseline/training_configuration.md)에 정리했습니다. 합성 모델 검사는 실제 인식 성능을 검증하지 않습니다.
 
 미검증 항목은 Windows 설치 스크립트의 실제 도구 설치·Windows 빌드·PE export/import·실제 worker IPC/장애/timeout/Stop/재시작·Unicode DLL 교체·1/4-process 점수 일치·배포 런타임/TIFF 구성과 Microsoft Word에서의 RTF 열기입니다.
 
