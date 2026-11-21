@@ -33,17 +33,17 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 .\dist\FingerprintEvaluator\FingerprintGUI.exe
 ```
 
-소스 저장소 안에서 GUI를 실행했는데 자사 DLL·학습 모델이 빠져 있으면 자동으로 준비 프로그램을 실행합니다. **LFS 다운로드 → 없는 경우에만 학습 → 패키징 → GUI 재실행** 순서로 복구합니다. 완성된 배포본은 학습 없이 바로 열립니다. 다른 PC로 옮길 때는 `dist/FingerprintAlgorithm/`과 `dist/FingerprintEvaluator/`를 함께 복사합니다.
+소스 저장소 안에서 GUI를 실행했는데 자사 DLL·학습 모델이 빠져 있으면 자동으로 준비 프로그램을 실행합니다. **LFS 다운로드 → 없는 경우에만 학습 → 패키징 → GUI 재실행** 순서로 복구합니다. 완성된 배포본은 학습 없이 바로 열립니다. 다른 PC로 옮길 때는 [dist/FingerprintAlgorithm/](docs/build.md#package)과 [dist/FingerprintEvaluator/](docs/build.md#package)를 함께 복사합니다.
 
-GUI에서 **DB → 등록 이미지 → DLL·옵션·템플릿 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 `dist/FingerprintAlgorithm/FingerprintAlgorithm.dll`을 선택합니다. Results에서는 임계값(초기 0.5)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장할 수 있습니다.
+GUI에서 **DB → 등록 이미지 → DLL·옵션·템플릿 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 [dist/FingerprintAlgorithm/FingerprintAlgorithm.dll](src/Kisa/readme.md)을 선택합니다. Results에서는 임계값(초기 0.5)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장할 수 있습니다.
 
 [학습 옵션](src/Training/readme.md) · [GUI·지표](src/GUI/readme.md) · [검증 상태](docs/verification.md)
 
 ## 3. Project structure
 
-파란색 링크는 **`dist/`에서 실제로 교체·배포할 파일과 폴더**입니다. 클릭하면 관련 설명을 확인할 수 있습니다.
+Git으로 배포하는 항목만 표시합니다. 빌드·증강·패키징 생성물과 로컬 개발 도구는 제외했습니다.
 
-<pre>
+```text
 FinalProject/
 ├─ src/
 │  ├─ main.cpp       # GUI 실행 진입점
@@ -55,8 +55,7 @@ FinalProject/
 │  ├─ Worker/        # Windows DLL 실행 프로세스와 IPC 규약
 │  └─ GUI/           # 단계별 화면·결과 표시·지표·보고서
 ├─ data/
-│  ├─ original/      # 보존 대상 원본 FVC 데이터
-│  └─ augmented/     # 학습용 증강 이미지(자동 생성)
+│  └─ original/      # 보존 대상 원본 FVC 데이터
 ├─ models/
 │  ├─ pretrained/     # 학습 초기화용 DeepPrint 가중치
 │  └─ trained_result/ # Git LFS로 배포하는 학습 모델 4개·검증 manifest
@@ -67,20 +66,8 @@ FinalProject/
 │  └─ verify_manifest.py # 배포 파일 누락·SHA-256 검사
 ├─ third_party/      # DeepPrint 외부 소스·라이선스·수정 patch
 ├─ 프로젝트 관련 자료-20261029/  # K-NBTC 안내서·DLL 예제·DB 압축본
-├─ build*/           # 빌드 결과(자동 생성)
-├─ dist/             # 패키징 시 생성, 의존성·라이선스를 포함해 폴더 단위로 배포
-│  ├─ <a href="docs/build.md#package">FingerprintAlgorithm/</a>
-│  │  ├─ <a href="src/Kisa/readme.md">FingerprintAlgorithm.dll</a>      # GUI에서 선택할 공개 DLL
-│  │  ├─ <a href="src/Kisa/readme.md">FingerprintAlgorithmCore.dll</a>  # 이 프로젝트 알고리즘의 구현 DLL
-│  │  ├─ <a href="models/readme.md">fvc2000_db3.bin</a>
-│  │  ├─ <a href="models/readme.md">fvc2002_db3.bin</a>
-│  │  ├─ <a href="models/readme.md">fvc2004_db1.bin</a>
-│  │  └─ <a href="models/readme.md">combined.bin</a>
-│  └─ <a href="docs/build.md#package">FingerprintEvaluator/</a>
-│     ├─ <a href="src/GUI/readme.md">FingerprintGUI.exe</a>           # 평가 GUI
-│     └─ <a href="src/Worker/readme.md">FingerprintWorker.exe</a>        # DLL 호출용 프로세스
 └─ CMakeLists.txt    # 빌드 대상·의존성·패키징 명령 정의
-</pre>
+```
 
 외부 DLL은 GUI Step 3에서 선택합니다. 이 프로젝트의 알고리즘을 배포할 때는 `FingerprintAlgorithm/` 전체를 함께 배포합니다. DLL·모델을 교체한 뒤에는 GUI를 다시 실행하고 템플릿을 재생성합니다.
 
