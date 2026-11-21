@@ -33,14 +33,14 @@
 <text x="32" y="758" font-family="Arial" font-size="16" font-weight="700" text-anchor="start" fill="#2864b4">Training process</text>
 <text x="150.0" y="163.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">GUI.cpp</text>
 <text x="150.0" y="188.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Window / seven steps</text>
-<text x="150.0" y="206.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">RunWithProgress()</text>
-<text x="150.0" y="224.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Results / threshold 0.5</text>
+<text x="150.0" y="206.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">select + settings -&gt; Load</text>
+<text x="150.0" y="224.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">RunWithProgress() / Stop</text>
 <text x="460.0" y="163.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Engine.cpp</text>
 <text x="460.0" y="188.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">PlanComparisons()</text>
 <text x="460.0" y="206.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">EnrollImages() / Execute()</text>
 <text x="460.0" y="224.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">opaque template cache</text>
 <text x="460.0" y="293.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">kisaDll.cpp</text>
-<text x="460.0" y="318.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">KisaDllAlgorithm</text>
+<text x="460.0" y="318.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Load(): DLL / KISA exports</text>
 <text x="460.0" y="336.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">process pool / deadlines</text>
 <text x="460.0" y="354.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Stop all jobs; await cleanup</text>
 <text x="150.0" y="293.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">report.cpp</text>

@@ -15,13 +15,13 @@ Windows·MSVC 전용 프로젝트입니다. Windows 로그·화면에서 Qt·Lib
 | 설치 스크립트 | PowerShell 7.7에서 구문·helper·격리 모의 실행 통과: 한글 프로젝트 경로·ASCII 의존성 경로, Qt 설치 실패·완료 기록·경로·버전 검사, 부분 설치 보관·재설치, 다운로드 우선·학습 생략·fallback, 패키징·GUI 실행, 실패 시 중단. Windows PowerShell 5.1 실제 실행은 위 로그의 `[8/9]` 진입까지 확인 |
 | 전체 Worker 취소 | 현재 `kisaDll.cpp`를 WinAPI mock으로 컴파일·실행: 실행·대기 slot 전체 종료, job 자식 종료 대기, handle 해제, 비차단 Cancel, Reset 대기, 반복 Stop, destructor 정리, 시작 도중 취소·취소 후 대기 Worker 생성 방지 통과. 실제 Windows job·pipe 검사는 아님 |
 | GUI 종료 | 현재 GUI·Engine을 Qt 5.15 offscreen·검증용 backend로 컴파일·실행: Stop 버튼, 정리 대기·결과 폐기·저장 차단·재실행, 실행 중 창 닫기의 Yes/No, 확인 중 작업 완료, 정리 후 지연 종료, 예외 시 정리 통과 |
-| GUI DLL 선택 | 수정 전 CRLF manifest에서 빈 Algorithm 표·비활성 Create를 재현. 수정 후 Qt offscreen에서 LF/CRLF 동일 식별, 한글·공백 경로, 표 등록·Create 활성화·worker 수 변경, 누락·손상·잘못된 manifest의 오류 표시, cache 무효화·복구·manifest 없는 외부 DLL 등록 통과. 기본 배포 경로·FingerprintAlgorithm.dll filter·외부 DLL filter 전환도 확인. WinAPI는 mock이며 실제 DLL 호출 검사는 아님 |
-| Template 시간 | 실제 GUI·Engine과 검증용 backend로 성공·실패 Template의 Status·Size·Error·Load time(ms) 표시 확인. 시간은 Extract 전체 경과 시간이며 첫 호출 초기화를 포함. CSV의 time_ms 보존 확인 |
+| GUI DLL 선택·수동 Load | CRLF manifest 정규화·한글 경로·파일 오류 검사를 유지. 실제 GUI·Engine·adapter와 WinAPI mock으로 임의 파일명의 *.dll 선택, 선택·설정 변경 시 Worker 미생성, Load 버튼 이후 설정한 Worker 수·timeout 적용과 Loaded 등록 확인. DLL·설정·파일 변경 시 등록·cache 무효화, DB 변경 시 로드된 DLL 유지, Error 표시·Stop·재시도·Load 중 창 닫기·manifest 실패 시 실행 차단·일부 Worker 실패 시 전체 정리 통과. 실제 Windows DLL 로딩 검사는 아님 |
+| Template 시간 | 실제 GUI·Engine과 검증용 backend로 성공·실패 Template의 Status·Size·Error·Load time(ms) 표시 확인. 시간은 Extract 전체 경과 시간이며 내부 모델 초기화와 요청 중 Worker 재시작을 포함. CSV의 time_ms 보존 확인 |
 | 보고서 진행률·취소 | 실제 GUI·Engine·report를 Qt offscreen으로 실행. 160,000개 비교 결과의 보고서 저장 중 진행 건수·비율·Stop·재저장·창 닫기, 완료된 평가와 기존 보고서 보존, 임시 폴더 정리 통과. CSV·지표·HTML·RTF·SVG의 진행 건수와 취소 경계, 지표 계산 중 취소 확인. 기존 평가·지표·출력 회귀 검사 통과 |
 | 패키징 검사 | manifest 누락·손상·경로 보호·가중치 누락 거부 통과. 실제 Algorithm·Evaluator CMake 스크립트에서 runtime 탐색·외부 windeployqt만 mock으로 대체하고 Qt/LibTorch 고지 fallback·파일 복사·manifest·폴더 교체 통과. 버전·build·SHA·고지 누락, windeployqt 실패·TIFF 누락 거부와 기존 배포본 보존 통과. SDK의 LICENSES 및 doc/global/licenses 경로도 확인 |
 | LibTorch 고지 출처 | 공식 Windows CPU ZIP 파일 목록 9,573개에 라이선스 고지가 없음을 확인. 동일 버전·build의 공식 Windows CPU wheel SHA-256 확인 후 고지 61개 전문 보존. URL·해시를 provenance에 기록 |
 | Qt 고지 출처 | 공식 Qt Base·Qt SVG·Qt Image Formats 6.8.3 source archive 3개의 SHA-256을 Qt 서버의 공개 checksum과 대조. 라이선스·third-party 고지·attribution 156개 전문과 원문별 SHA-256 보존. attribution의 LicenseFile 참조도 모두 포함 |
-| 그림 | 전체 Worker 종료·cleanup·GUI 종료 대기, Template 시간·DLL filter·보고서 진행률·Stop·완료 후 저장을 구조도에 반영. Arial·SVG/PNG의 크기·aspect ratio 유지 |
+| 그림 | 전체 Worker 종료·cleanup·GUI 종료 대기, 임의 DLL 선택·설정 후 수동 Load, Template 시간·보고서 진행률·Stop·완료 후 저장을 구조도에 반영. Arial·SVG/PNG의 크기·aspect ratio 유지 |
 
 이번 검증용 mock은 Windows 이외의 실행 지원 코드에 포함하지 않습니다. 배포 대상은 Windows·MSVC로 유지합니다. 실제 Windows의 수정 후 패키징·DLL/IPC·Stop·종료 범위는 추가 실행 검증이 필요합니다.
 

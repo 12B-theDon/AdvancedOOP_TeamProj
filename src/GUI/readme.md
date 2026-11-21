@@ -2,11 +2,15 @@
 
 `startup.cpp`가 Windows 실행 시 이 프로젝트의 배포 DLL·모델 4개·Worker를 확인합니다. 소스 저장소에서 누락이 발견되면 준비 프로그램이 LFS 다운로드를 우선 시도하고, 필요한 경우 학습·패키징을 마친 뒤 GUI를 다시 엽니다. 완성된 배포본과 이 프로젝트의 알고리즘을 포함하지 않은 외부 DLL 전용 평가기는 바로 실행됩니다.
 
-`Window`는 7단계 QWizard와 DLL adapter를 소유합니다. Step 3에서 DLL·Worker·timeout을 설정하고 Template을 생성합니다. background 실행 중 진행률과 Stop을 제공하며, DLL을 교체하면 cache를 초기화합니다.
+`Window`는 7단계 QWizard와 DLL adapter를 소유합니다. Step 3에서 DLL 선택 → Worker·timeout 설정 → **Load selected DLL with these settings** → Template 생성 순서로 진행합니다. background 실행 중 진행률과 Stop을 제공합니다.
 
-DLL 선택창은 배포 폴더의 `FingerprintAlgorithm.dll`을 기본으로 보여줍니다. 다른 구현은 `External K-NBTC DLL (*.dll)` filter로 선택합니다. 함께 배포된 Core·LibTorch·Qt·Windows runtime DLL은 실행 의존성이므로 폴더에 그대로 둡니다.
+DLL 선택창은 `*.dll`을 보여주며 파일명을 제한하지 않습니다. 다른 팀의 K-NBTC DLL도 그대로 선택합니다. 이 프로젝트의 DLL은 `dist/FingerprintAlgorithm/FingerprintAlgorithm.dll`입니다. 함께 배포된 Core·LibTorch·Qt·Windows runtime DLL은 실행 의존성이므로 폴더에 그대로 둡니다.
 
-DLL을 선택하면 Algorithm 표에 `K-NBTC DLL`이 등록됩니다. **Create enrollment templates**를 누르면 각 이미지의 `Status / Size (bytes) / Error / Load time (ms)`가 표시됩니다. 시간은 Template 생성 요청의 전체 경과 시간이며, 첫 호출의 Worker 시작·모델 로딩을 포함합니다. 실패한 요청의 시간도 표시합니다. 배포 파일·manifest 검사에 실패하면 표에 `Error`, 하단에 파일명과 원인이 표시됩니다. 정상 배포 폴더의 DLL을 다시 선택해 복구할 수 있습니다. 잘린 메시지는 셀에 마우스를 올려 확인합니다.
+DLL 선택·설정 변경만으로는 로드하지 않습니다. **Load selected DLL with these settings**를 누르면 배포 파일·manifest를 검사하고, 설정한 수의 Worker에서 DLL과 KISA exports를 로드합니다. 성공하면 Algorithm / DLL file / Initialization 표에 `Loaded`가 표시되고 **Create enrollment templates**가 활성화됩니다. 실패하면 `Error`와 원인이 표시됩니다. Load에도 진행률·Stop을 제공하며 실패·중단 시 이미 시작한 Worker도 모두 정리합니다. 파일명과 별개로 Windows bitness와 KISA ABI가 호환되어야 합니다.
+
+DLL·Worker 수·timeout을 바꾸거나 DLL 파일 변경을 감지하면 기존 등록·Template·비교 결과를 무효화합니다. 새 설정은 Load를 다시 눌러 적용합니다. DB만 바꾸면 로드된 DLL은 유지하고 Template·비교 결과를 초기화합니다.
+
+**Create enrollment templates**를 누르면 각 이미지의 `Status / Size (bytes) / Error / Load time (ms)`가 표시됩니다. 시간은 Template 생성 요청의 전체 경과 시간이며, DLL 내부의 첫 모델 초기화와 요청 중 필요한 Worker 재시작을 포함합니다. DLL 내부 모델은 구현에 따라 첫 inference에서 초기화될 수 있습니다. 실패한 요청의 시간도 표시합니다. 잘린 메시지는 셀에 마우스를 올려 확인합니다.
 
 Stop은 전체 Worker를 종료하고 생성 중인 Template·비교 결과를 버립니다. GUI는 정리 상태를 표시하며 background 작업과 Worker의 handle 정리가 모두 끝난 뒤 다시 조작할 수 있습니다. 취소된 실행은 CSV·보고서로 저장하지 않습니다. 실행 중 메인 창을 닫으면 종료 여부를 확인하고, 승인 시 같은 취소·정리 절차가 끝난 뒤 창을 닫습니다. 종료 확인 중 작업이 먼저 끝나도 사용자의 선택을 기다립니다.
 

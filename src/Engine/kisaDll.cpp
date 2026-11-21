@@ -219,10 +219,8 @@ struct KisaDllAlgorithm::State {
         if (ready.result != 1) { error = std::string("[FAIL] ") + ready.message; return false; }
         return true;
     }
-    bool Call(ipc::Request request, const std::vector<unsigned char>& first, const std::vector<unsigned char>& second,
-        std::vector<unsigned char>& bytes, double& score, double& time_ms, std::string& error) {
-        Process& process = *processes[next.fetch_add(1) % processes.size()];
-        std::lock_guard<std::mutex> lock(process.mutex);
+    // Caller holds the slot's call lock. Share launch serialization with lazy restarts.
+    bool EnsureStarted(Process& process, std::string& error) {
         if (cancelled.load()) { error = "[CANCELLED] Stopped."; return false; }
         if (!process.process) {
             static std::mutex launches;
@@ -233,6 +231,14 @@ struct KisaDllAlgorithm::State {
                 process.Stop(); return false;
             }
         }
+        if (cancelled.load()) { error = "[CANCELLED] Stopped."; process.Stop(); return false; }
+        return true;
+    }
+    bool Call(ipc::Request request, const std::vector<unsigned char>& first, const std::vector<unsigned char>& second,
+        std::vector<unsigned char>& bytes, double& score, double& time_ms, std::string& error) {
+        Process& process = *processes[next.fetch_add(1) % processes.size()];
+        std::lock_guard<std::mutex> lock(process.mutex);
+        if (!EnsureStarted(process, error)) return false;
         const int timeout = process.first ? std::max(options.timeout_ms, options.first_call_timeout_ms) : options.timeout_ms;
         const ULONGLONG deadline = GetTickCount64() + timeout;
         request.first_size = static_cast<std::uint32_t>(first.size()); request.second_size = static_cast<std::uint32_t>(second.size());
@@ -277,6 +283,21 @@ KisaDllAlgorithm::KisaDllAlgorithm(const std::string& dll, const std::string& wo
     state_->StartCleanupThread();
 }
 KisaDllAlgorithm::~KisaDllAlgorithm() = default;
+bool KisaDllAlgorithm::Load(std::string& error, const std::function<void()>& worker_ready) {
+    error.clear();
+    for (const std::unique_ptr<State::Process>& process : state_->processes) {
+        {
+            std::lock_guard<std::mutex> lock(process->mutex);
+            if (!state_->EnsureStarted(*process, error)) {
+                state_->Cancel(); // Release earlier workers too if any slot fails.
+                return false;
+            }
+        }
+        if (worker_ready) worker_ready();
+    }
+    if (state_->cancelled.load()) { error = "[CANCELLED] Stopped."; return false; }
+    return true;
+}
 void KisaDllAlgorithm::Cancel() { state_->Cancel(); }
 bool KisaDllAlgorithm::CancellationFinished() const { return state_->cancellation_finished.load(); }
 void KisaDllAlgorithm::ResetCancel() { state_->ResetCancel(); }

@@ -49,7 +49,7 @@ struct ModelTemplate {
     std::string model_id;
     bool success = false;
     std::vector<unsigned char> data; // [bytes] Opaque DLL output; preserve actual length.
-    double time_ms = 0; // [ms] Extract wall time, including first-call worker/model initialization.
+    double time_ms = 0; // [ms] Extract wall time, including model initialization or worker restart during the request.
     std::string stage;
     std::string error;
 };

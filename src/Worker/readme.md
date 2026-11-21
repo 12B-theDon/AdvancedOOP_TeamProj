@@ -2,6 +2,8 @@
 
 `FingerprintWorker.exe`가 선택 DLL을 로드하고 KISA 함수를 호출합니다. `Protocol.h`는 원본 픽셀·실제 길이의 템플릿과 응답을 전달하는 IPC 규약입니다. 전용 handle로 DLL의 표준 출력을 분리합니다.
 
+GUI의 **Load selected DLL with these settings**에서 설정한 수의 Worker를 시작합니다. 각 Worker가 DLL·KISA exports를 확인한 handshake를 반환한 뒤 `Loaded`로 등록합니다. 파일명은 제한하지 않으며, DLL 내부 모델은 첫 inference에서 초기화될 수 있습니다. 한 Worker의 Load가 실패하면 이미 시작한 Worker도 모두 종료합니다.
+
 <img src="../../docs/diagrams/worker.png" alt="Host와 Windows worker의 IPC·DLL 호출·오류 및 timeout 처리 구조" width="100%">
 
 Host는 pipe·Process·job handle을 소유합니다. 비동기 쓰기·읽기 polling으로 timeout과 Stop을 처리하고, SEH·buffer guard·반환값 검사를 수행합니다. 비정상 Worker는 종료하고 다음 호출에서 새로 시작합니다.

@@ -77,14 +77,14 @@ static void AddRow(QTableWidget* table, const QStringList& values) {
     }
 }
 
-static QString InitialAlgorithmDll(const QString& executableFolder) {
+static QString InitialAlgorithmDirectory(const QString& executableFolder) {
     QDir folder(executableFolder);
-    const QString sibling = folder.filePath("../FingerprintAlgorithm/FingerprintAlgorithm.dll");
-    if (QFileInfo(sibling).isFile()) return QDir::cleanPath(sibling);
+    const QString sibling = folder.filePath("../FingerprintAlgorithm");
+    if (QDir(sibling).exists()) return QDir::cleanPath(sibling);
     do {
         if (QFileInfo::exists(folder.filePath("CMakeLists.txt"))
             && QFileInfo::exists(folder.filePath("src/main.cpp")))
-            return folder.filePath("dist/FingerprintAlgorithm/FingerprintAlgorithm.dll");
+            return folder.filePath("dist/FingerprintAlgorithm");
     } while (folder.cdUp());
     return executableFolder;
 }
@@ -339,7 +339,7 @@ QWizardPage* Window::TemplatePage() {
     templateTable_ = MakeTable(TemplateHeaders);
     templateTable_->setObjectName("enrollmentTemplates");
     templateTable_->horizontalHeaderItem(5)->setToolTip(
-        "Template generation elapsed time, including worker startup and model loading on the first call.");
+        "Template generation elapsed time, including internal model initialization and any worker restart during the request.");
     inferenceInfo_ = new QLabel(ModelHint);
     inferenceInfo_->setObjectName("inferenceInfo");
     inferenceInfo_->setTextFormat(Qt::PlainText);
@@ -350,8 +350,7 @@ QWizardPage* Window::TemplatePage() {
     calibrationInfo_->setWordWrap(true);
     layout->addWidget(dllPath_);
     layout->addWidget(browse);
-    QLabel* dllHelp = new QLabel("Project DLL: FingerprintAlgorithm.dll (dist/FingerprintAlgorithm). "
-                                "For another implementation, select the External K-NBTC DLL filter.");
+    QLabel* dllHelp = new QLabel("Select a K-NBTC algorithm DLL (any filename), configure workers and timeout, then click Load.");
     dllHelp->setWordWrap(true);
     layout->addWidget(dllHelp);
     workerCount_ = new QSpinBox;
@@ -364,8 +363,14 @@ QWizardPage* Window::TemplatePage() {
     options->addWidget(new QLabel("Parallel workers:")); options->addWidget(workerCount_);
     options->addWidget(new QLabel("Timeout per call:")); options->addWidget(timeout_);
     layout->addLayout(options);
-    connect(workerCount_, QOverload<int>::of(&QSpinBox::valueChanged), this, [this] { ReloadModels(); });
-    connect(timeout_, QOverload<int>::of(&QSpinBox::valueChanged), this, [this] { ReloadModels(); });
+    loadDll_ = new QPushButton("Load selected DLL with these settings");
+    loadDll_->setObjectName("loadAlgorithm");
+    loadDll_->setEnabled(false);
+    layout->addWidget(loadDll_);
+    connect(loadDll_, &QPushButton::clicked, this, &Window::LoadSelectedDll);
+    connect(dllPath_, &QLineEdit::textChanged, this, [this] { InvalidateAlgorithm(); });
+    connect(workerCount_, QOverload<int>::of(&QSpinBox::valueChanged), this, [this] { InvalidateAlgorithm(); });
+    connect(timeout_, QOverload<int>::of(&QSpinBox::valueChanged), this, [this] { InvalidateAlgorithm(); });
     layout->addWidget(modelTable_);
     layout->addWidget(createTemplates_);
     layout->addWidget(templateTable_);
@@ -373,21 +378,16 @@ QWizardPage* Window::TemplatePage() {
     layout->addWidget(calibrationInfo_);
     connect(browse, &QPushButton::clicked, this, [this] {
         const QString initial = dllPath_->text().isEmpty()
-            ? InitialAlgorithmDll(QCoreApplication::applicationDirPath()) : dllPath_->text();
+            ? InitialAlgorithmDirectory(QCoreApplication::applicationDirPath()) : dllPath_->text();
         const QFileInfo location(initial);
         QFileDialog dialog(this, WeightsFolderDialog, location.isDir() ? initial : location.absolutePath());
         dialog.setObjectName("algorithmDllDialog");
         dialog.setFileMode(QFileDialog::ExistingFile);
         dialog.setAcceptMode(QFileDialog::AcceptOpen);
-        const QString projectFilter = "Project algorithm (FingerprintAlgorithm.dll)";
-        const QString externalFilter = "External K-NBTC DLL (*.dll)";
-        dialog.setNameFilters({projectFilter, externalFilter});
-        dialog.selectNameFilter(!dllPath_->text().isEmpty() && location.fileName() != "FingerprintAlgorithm.dll"
-            ? externalFilter : projectFilter);
+        dialog.setNameFilter("K-NBTC algorithm DLL (*.dll)");
         if (!location.isDir()) dialog.selectFile(location.fileName());
         if (dialog.exec() == QDialog::Accepted && !dialog.selectedFiles().isEmpty()) {
             dllPath_->setText(dialog.selectedFiles().front());
-            ReloadModels();
         }
     });
     connect(createTemplates_, &QPushButton::clicked, this, &Window::CreateEnrollmentTemplates);
@@ -665,7 +665,9 @@ void Window::LoadDatabase(const QString& folder, const QString& database_id) {
         preview_->setText("No readable TIFF images. Check the folder and Qt TIFF image plugin.");
         UpdateEnrollment();
     }
-    ReloadModels();
+    ClearTemplates(); UpdateEnrollment();
+    if (!dllHash_.isEmpty())
+        inferenceInfo_->setText("Database changed. DLL remains loaded; create new enrollment templates.");
 }
 
 void Window::ShowImage(int row) {
@@ -753,39 +755,70 @@ static QString DllHash(const QString& path, QString* error = nullptr) {
     return QString::fromLatin1(hash.result().toHex());
 }
 bool Window::AlgorithmUnchanged() {
-    if (dllHash_.isEmpty() || dllHash_ != DllHash(dllPath_->text())) {
-        ReloadModels();
-        if (!dllHash_.isEmpty()) inferenceInfo_->setText("Algorithm changed; generate new enrollment templates.");
+    if (dllHash_.isEmpty()) {
+        inferenceInfo_->setText("Select a DLL and click Load selected DLL with these settings first.");
+        return false;
+    }
+    if (dllHash_ != DllHash(dllPath_->text())) {
+        InvalidateAlgorithm();
+        inferenceInfo_->setText("Algorithm files changed. Click Load selected DLL with these settings again.");
         return false;
     }
     return true;
 }
-void Window::ReloadModels() {
+void Window::InvalidateAlgorithm() {
     if (busy_) return;
     engine_.Configure(nullptr, "");
     algorithm_.reset();
-    QString error;
-    dllHash_ = DllHash(dllPath_->text(), &error);
+    dllHash_.clear();
     modelTable_->setRowCount(0);
-    if (!dllHash_.isEmpty()) {
-        engine::DllOptions options;
-        options.workers = workerCount_->value(); options.timeout_ms = timeout_->value();
-        const QString worker = QDir(QCoreApplication::applicationDirPath()).filePath("FingerprintWorker.exe");
-        algorithm_.reset(new engine::KisaDllAlgorithm(dllPath_->text().toStdString(), worker.toStdString(), options));
-        engine_.SetConcurrency(options.workers);
-        engine_.Configure(algorithm_.get(), dllPath_->text().toStdString());
-        AddRow(modelTable_, {"K-NBTC DLL", QFileInfo(dllPath_->text()).fileName(), "On first call"});
+    loadDll_->setEnabled(!dllPath_->text().isEmpty());
+    inferenceInfo_->setText(dllPath_->text().isEmpty() ? ModelHint
+        : "DLL or settings changed. Click Load selected DLL with these settings.");
+    ClearTemplates(); UpdateEnrollment();
+}
+
+void Window::LoadSelectedDll() {
+    if (busy_ || dllPath_->text().isEmpty()) return;
+    InvalidateAlgorithm();
+    const QString path = dllPath_->text();
+    engine::DllOptions options;
+    options.workers = workerCount_->value(); options.timeout_ms = timeout_->value();
+    const QString worker = QDir(QCoreApplication::applicationDirPath()).filePath("FingerprintWorker.exe");
+    algorithm_.reset(new engine::KisaDllAlgorithm(path.toStdString(), worker.toStdString(), options));
+    engine_.SetConcurrency(options.workers);
+    engine_.Configure(algorithm_.get(), path.toStdString());
+    QString signature, error;
+    std::string loadError;
+    std::atomic<int> ready{0};
+    bool loaded = false;
+    const bool completed = RunWithProgress("Loading selected DLL", [&] {
+        signature = DllHash(path, &error);
+        if (signature.isEmpty() || engine_.Cancelled()) return;
+        loaded = algorithm_->Load(loadError, [&] { ++ready; });
+        if (!loaded) error = QString::fromStdString(loadError);
+    }, [&] { return std::make_pair(ready.load(), options.workers); });
+    if (!completed || !loaded) {
+        engine_.Configure(nullptr, "");
+        algorithm_.reset();
+        AddRow(modelTable_, {"K-NBTC DLL", QFileInfo(path).fileName(), completed ? "Error" : "Stopped"});
+        inferenceInfo_->setText(completed ? (error.isEmpty() ? "Cannot load selected DLL." : error)
+            + "\nCheck the DLL and its dependencies, then click Load again."
+            : "Stopped; DLL workers released. Click Load to retry.");
+        ClearTemplates(); UpdateEnrollment();
+        return;
     }
+    dllHash_ = signature;
+    AddRow(modelTable_, {"K-NBTC DLL", QFileInfo(path).fileName(),
+        QString("Loaded (%1 worker%2)").arg(options.workers).arg(options.workers == 1 ? "" : "s")});
+    modelTable_->item(0, 2)->setToolTip(QString("KISA exports loaded in %1 workers; timeout per call: %2 ms. "
+        "Internal model initialization may occur on the first inference call.").arg(options.workers).arg(options.timeout_ms));
     genuine_.threshold->setValue(engine::GenuineThreshold);
     impostor_.threshold->setValue(engine::ImpostorThreshold);
     const QString hint = "Threshold starts at 0.5; adjust it in Results for this DLL.";
     calibrationInfo_->setText(hint); resultCalibrationInfo_->setText(hint);
-    if (!error.isEmpty()) {
-        AddRow(modelTable_, {"K-NBTC DLL", QFileInfo(dllPath_->text()).fileName(), "Error"});
-        inferenceInfo_->setText(error + "\nRestore a complete deployment folder and select the DLL again.");
-    } else {
-        inferenceInfo_->setText(dllHash_.isEmpty() ? ModelHint : "DLL registered. Click Create enrollment templates. Models load on the first call.");
-    }
+    inferenceInfo_->setText("DLL loaded with the selected settings. Click Create enrollment templates. "
+                           "The DLL may initialize internal models on its first inference call.");
     ClearTemplates(); UpdateEnrollment();
 }
 bool Window::RunWithProgress(const QString& title, const std::function<void()>& work,

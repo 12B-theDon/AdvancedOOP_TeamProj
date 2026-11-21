@@ -83,6 +83,7 @@ private:
     QTableWidget* modelTable_ = nullptr;
     QTableWidget* templateTable_ = nullptr;
     QPushButton* createTemplates_ = nullptr;
+    QPushButton* loadDll_ = nullptr;
     QLabel* inferenceInfo_ = nullptr;
     QLabel* calibrationInfo_ = nullptr;
     QLabel* resultCalibrationInfo_ = nullptr;
@@ -121,7 +122,8 @@ private:
     std::vector<bool> SelectedMetrics() const;
     void UpdateMetrics();
     void ShowImage(int row);
-    void ReloadModels();
+    void InvalidateAlgorithm();
+    void LoadSelectedDll();
     void ClearTemplates();
     void CreateEnrollmentTemplates();
     void DisplayComparisons(ComparisonControls& controls);
