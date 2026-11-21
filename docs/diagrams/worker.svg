@@ -7,7 +7,7 @@
 <g data-node="worker" data-source="src/Worker/worker.cpp"><rect x="340" y="300" width="260" height="110" fill="#fff1e2" stroke="#c96818" stroke-width="2"/><rect x="340" y="300" width="260" height="32.5" fill="#c96818"/></g>
 <g data-node="dll" data-source=""><rect x="660" y="300" width="260" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="300" width="260" height="32.5" fill="#2864b4"/></g>
 <g data-node="errors" data-source=""><rect x="20" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="20" y="550" width="260" height="32.5" fill="#73818d"/></g>
-<g data-node="lifecycle" data-source=""><rect x="340" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="340" y="550" width="260" height="32.5" fill="#73818d"/></g>
+<g data-node="lifecycle" data-source=""><rect x="340" y="550" width="260" height="110" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="340" y="550" width="260" height="32.5" fill="#73818d"/></g>
 <g data-node="buffers" data-source=""><rect x="660" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="660" y="550" width="260" height="32.5" fill="#73818d"/></g>
 <g data-from="host" data-to="options" data-relation="include"><polyline points="150.0,300 150.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="150.0,202 153.3,210.0 146.7,210.0" fill="#81909b"/></g>
 <g data-from="worker" data-to="protocol" data-relation="include"><polyline points="470.0,300 470.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="470.0,202 473.3,210.0 466.7,210.0" fill="#81909b"/></g>
@@ -33,8 +33,8 @@
 <text x="150.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">kisaDll.cpp</text>
 <text x="150.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">State::Call() / Start() / Stop()</text>
 <text x="150.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">owns pipe / process / job handles</text>
-<text x="150.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">overlapped writes / read polling</text>
-<text x="150.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">deadline or Stop terminates worker</text>
+<text x="150.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Cancel(): terminate every worker job</text>
+<text x="150.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">cleanup thread / IPC polling</text>
 <text x="470.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">worker.cpp</text>
 <text x="470.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">LoadLibraryExW() / GetProcAddress()</text>
 <text x="470.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Read() → Invoke() → Write()</text>
@@ -50,9 +50,10 @@
 <text x="150.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">TIMEOUT · CRASH · MISMATCH</text>
 <text x="150.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CANCELLED · stopped run discarded</text>
 <text x="470.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Worker lifecycle</text>
-<text x="470.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">job kills worker on handle close</text>
-<text x="470.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">fault → fresh process on next call</text>
-<text x="470.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">first call allows ≥120 seconds</text>
+<text x="470.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Stop: active + idle + job children</text>
+<text x="470.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CancellationFinished(): cleanup done</text>
+<text x="470.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">fault → fresh process on next call</text>
+<text x="470.0" y="652.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">first call allows ≥120 seconds</text>
 <text x="790.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Buffer contract</text>
 <text x="790.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">template length &gt;0 and &lt;1,000,000</text>
 <text x="790.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">error message: 256 bytes</text>

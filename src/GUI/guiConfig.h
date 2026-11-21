@@ -106,6 +106,7 @@ inline constexpr const char* SaveFailureMessage = "Select enrollment images, cor
 inline constexpr const char* MetricHint = "Checked metrics appear in the report. Unavailable metrics are disabled; hover for details. CSV files keep all metrics and raw results.";
 inline constexpr const char* ExitTitle = "Exit application";
 inline constexpr const char* ExitQuestion = "Are you sure you want to exit?";
+inline constexpr const char* StopAndExitQuestion = "Stop all workers and exit? Unfinished results will be discarded.";
 inline const QStringList PageTitles = {"1. Select a fingerprint DB", "2. Select enrollment images",
     "3. Create enrollment templates", "4. Select comparison type", "5. Select comparison rules",
     "6. Run comparisons", "7. Results and report"};

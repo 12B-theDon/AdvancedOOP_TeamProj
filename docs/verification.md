@@ -1,16 +1,20 @@
 # 검증 결과 — 2026-11-21
 
-Windows·MSVC 전용 프로젝트입니다. 이번 전환에서 수행한 검사는 아래와 같으며, 실제 Windows에서의 빌드·DLL 로딩·GUI 실행은 아직 검증하지 않았습니다.
+Windows·MSVC 전용 프로젝트입니다. Windows에서 받은 설치 로그는 Qt 설치 중 `UnicodeDecodeError`로 중단된 상태입니다. 아래 수정 후 검사는 macOS 검증 환경에서 수행했으며, 실제 Windows 설치·MSVC 빌드·DLL 로딩은 아직 재검증하지 않았습니다.
 
 | 현재 검사 | 결과 |
 |---|---|
 | 플랫폼 제한 | CMake가 Windows 외 OS와 MSVC 외 toolchain을 거부하는지 확인 |
-| Windows 코드 보존 | 전처리 결과 9개 조합에서 기존 Windows/MSVC 코드·include 선택과 일치 |
+| Windows 전용 전환 | 전환 당시 전처리 결과 9개 조합이 기존 Windows/MSVC 코드·include 선택과 일치. 이번 Stop 수정 이전의 검사 |
 | 공개 KISA ABI | Clang의 Windows x64·x86 target에서 함수 포인터 자료형·export 선언의 구문 검사 통과. MSVC 링크·실행 검사는 아님 |
 | 원본·학습 보존 | 원본 241개·디렉터리·가중치·설정·학습/검증 함수 본문 보존 검사 통과 |
-| 설치 스크립트 | PowerShell 구문·helper·격리 모의 실행 통과: 다운로드 우선, 학습 생략·fallback, 패키징·GUI 실행, 실패 시 중단 |
+| 설치 스크립트 | PowerShell 7.7에서 구문·helper·격리 모의 실행 통과: 한글 프로젝트 경로·ASCII 의존성 경로, Qt 설치 실패·완료 기록·경로·버전 검사, 부분 설치 보관·재설치, 다운로드 우선·학습 생략·fallback, 패키징·GUI 실행, 실패 시 중단. Windows PowerShell 5.1 실실행은 미검증 |
+| 전체 Worker 취소 | 현재 `kisaDll.cpp`를 WinAPI mock으로 컴파일·실행: 실행·대기 slot 전체 종료, job 자식 종료 대기, handle 해제, 비차단 Cancel, Reset 대기, 반복 Stop, destructor 정리, 시작 도중 취소·취소 후 대기 Worker 생성 방지 통과. 실제 Windows job·pipe 검사는 아님 |
+| GUI 종료 | 현재 GUI·Engine을 Qt 5.15 offscreen·검증용 backend로 컴파일·실행: Stop 버튼, 정리 대기·결과 폐기·저장 차단·재실행, 실행 중 창 닫기의 Yes/No, 확인 중 작업 완료, 정리 후 지연 종료, 예외 시 정리 통과 |
 | 패키징 검사 | manifest 누락·손상·경로 보호·가중치 누락 거부 검사 통과 |
-| 그림 | Windows Arial로 통일하고 SVG·PNG의 크기·aspect ratio 유지 |
+| 그림 | 전체 Worker 종료·cleanup·GUI 종료 대기를 구조도에 반영. Arial·SVG/PNG의 크기·aspect ratio 유지 |
+
+이번 검증용 mock은 Windows 이외의 실행 지원 코드에 포함하지 않습니다. 배포 대상은 Windows·MSVC로 유지합니다. 실제 Windows의 설치·MSVC 빌드·DLL/IPC·Stop·종료 범위는 추가 실행 검증이 필요합니다.
 
 <details>
 <summary>Windows 전용 전환 이전 검증 기록</summary>

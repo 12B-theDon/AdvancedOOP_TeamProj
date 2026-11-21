@@ -14,6 +14,8 @@ public:
     virtual bool Compare(const std::vector<unsigned char>& enrollment,
                          const std::vector<unsigned char>& attempt, double& score, std::string& error, double* time_ms = nullptr) = 0;
     virtual void Cancel() = 0;
+    // True only after all cancelled workers have exited and released their handles.
+    virtual bool CancellationFinished() const = 0;
     // Call after outstanding operations have joined.
     virtual void ResetCancel() = 0;
 };

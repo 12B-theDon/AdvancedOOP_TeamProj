@@ -150,9 +150,10 @@ void Engine::Cancel() {
     if (backend_) backend_->Cancel();
 }
 void Engine::ResetCancel() {
-    cancelled_.store(false);
     if (backend_) backend_->ResetCancel();
+    cancelled_.store(false);
 }
+bool Engine::CancellationFinished() const { return !backend_ || backend_->CancellationFinished(); }
 void Engine::ParallelFor(int count, const std::function<void(int)>& action) {
     std::atomic<int> next{0};
     std::vector<std::thread> threads;

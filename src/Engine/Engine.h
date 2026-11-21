@@ -128,6 +128,7 @@ public:
     const std::vector<ModelState>& Models() const { return models_; }
     void SetConcurrency(int count);
     void Cancel();
+    bool CancellationFinished() const;
     void ResetCancel();
     bool Cancelled() const { return cancelled_.load(); }
     int ProgressDone() const { return progress_done_.load(); }

@@ -108,13 +108,56 @@ function Test-GitLfs {
     } catch { return $false }
 }
 
-function Test-QtLayout {
+function Test-QtFiles {
     param([string]$Root)
     foreach ($relative in @('bin\qmake.exe', 'bin\windeployqt.exe',
         'lib\cmake\Qt6Widgets\Qt6WidgetsConfig.cmake', 'plugins\imageformats\qtiff.dll')) {
         if (-not (Test-Path -LiteralPath (Join-Path $Root $relative) -PathType Leaf)) { return $false }
     }
     return $true
+}
+
+function Test-QtLayout {
+    param([string]$Root, [string]$Version = '6.8.3')
+    if (-not (Test-QtFiles $Root)) { return $false }
+    try {
+        $receipt = Get-Content -LiteralPath (Join-Path $Root '.fingerprint-qt-setup.json') -Raw | ConvertFrom-Json
+        return ($receipt.format -eq 'fingerprint-qt-setup-v1' -and $receipt.version -eq $Version `
+            -and $receipt.arch -eq 'win64_msvc2022_64' `
+            -and $receipt.prefix -eq [IO.Path]::GetFullPath($Root).Replace('\', '/').TrimEnd('/'))
+    } catch { return $false }
+}
+
+function Complete-QtInstallation {
+    param([string]$Root, [string]$Version)
+    if (-not (Test-QtFiles $Root)) { throw 'Qt installation is incomplete (Widgets, TIFF or windeployqt missing).' }
+    $qmake = Join-Path $Root 'bin\qmake.exe'
+    $prefix = @(& $qmake -query QT_INSTALL_PREFIX)
+    if ($LASTEXITCODE -ne 0 -or $prefix.Count -ne 1) { throw 'qmake could not report the installed Qt prefix.' }
+    $expected = [IO.Path]::GetFullPath($Root).Replace('\', '/').TrimEnd('/')
+    if ($prefix[0].Trim().Replace('\', '/').TrimEnd('/') -ne $expected) {
+        throw 'Qt relocation is incomplete: qmake reports a different installation prefix.'
+    }
+    $actualVersion = @(& $qmake -query QT_VERSION)
+    if ($LASTEXITCODE -ne 0 -or $actualVersion.Count -ne 1 -or $actualVersion[0].Trim() -ne $Version) {
+        throw 'qmake reports an unexpected Qt version.'
+    }
+    $receipt = [ordered]@{ format = 'fingerprint-qt-setup-v1'; version = $Version; arch = 'win64_msvc2022_64'; prefix = $expected }
+    [IO.File]::WriteAllText((Join-Path $Root '.fingerprint-qt-setup.json'),
+        ($receipt | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
+}
+
+function Resolve-DependenciesPath {
+    param([string]$Path)
+    if (-not $Path) {
+        if (-not $env:ProgramData) { throw 'ProgramData is missing. Use -DependenciesPath C:\FingerprintDeps.' }
+        $Path = Join-Path $env:ProgramData 'FingerprintDeps'
+    }
+    $resolved = [IO.Path]::GetFullPath($Path)
+    if ($resolved -match '[^\x00-\x7F]') {
+        throw 'DependenciesPath must contain ASCII characters only (for example C:\FingerprintDeps). The project folder may contain Korean characters.'
+    }
+    return $resolved
 }
 
 function Test-TorchLayout {
@@ -202,8 +245,7 @@ function Write-WeightsManifest {
 if ($env:OS -ne 'Windows_NT' -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64' -or [IntPtr]::Size -ne 8) {
     throw 'Run this script in 64-bit PowerShell on Windows x64.'
 }
-if (-not $DependenciesPath) { $DependenciesPath = Join-Path $env:LOCALAPPDATA 'FingerprintDeps' }
-$DependenciesPath = [IO.Path]::GetFullPath($DependenciesPath)
+$DependenciesPath = Resolve-DependenciesPath $DependenciesPath
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $buildRoot = Join-Path $projectRoot 'build'
 $modelsRoot = Join-Path $projectRoot 'models\trained_result'
@@ -281,11 +323,16 @@ try {
     }
 
     Write-Host "[3/9] Qt $qtVersion (Widgets and TIFF)"
-    if (-not (Test-QtLayout $qtRoot)) {
+    if (-not (Test-QtLayout $qtRoot $qtVersion)) {
+        if (Test-Path -LiteralPath $qtRoot) {
+            $qtBackup = "${qtRoot}_incomplete_$(Get-Date -Format yyyyMMdd_HHmmss)_$([guid]::NewGuid().ToString('N').Substring(0, 8))"
+            Move-Item -LiteralPath $qtRoot -Destination $qtBackup
+            Write-Host "Preserved incomplete Qt installation: $qtBackup"
+        }
         Invoke-Checked $python @('-m', 'pip', 'install', 'aqtinstall==3.3.0')
         Invoke-Checked $python @('-m', 'aqt', 'install-qt', 'windows', 'desktop', $qtVersion,
             'win64_msvc2022_64', '-O', (Join-Path $DependenciesPath 'Qt'), '-m', 'qtimageformats')
-        if (-not (Test-QtLayout $qtRoot)) { throw 'Qt installation is incomplete (Widgets, TIFF or windeployqt missing).' }
+        Complete-QtInstallation $qtRoot $qtVersion
     }
 
     Write-Host "[4/9] LibTorch $torchVersion CPU Release"
@@ -313,6 +360,8 @@ try {
 
     Write-Host '[6/9] Configure and build Release'
     Invoke-Checked $cmake @('-S', $projectRoot, '-B', $buildRoot, '-G', 'Visual Studio 17 2022', '-A', 'x64',
+        '-UQt*_DIR', '-UQT_DIR', '-UTorch_DIR', '-UWINDEPLOYQT',
+        "-DQt6_DIR=$qtRoot\lib\cmake\Qt6", "-DQT_DIR=$qtRoot\lib\cmake\Qt6", "-DTorch_DIR=$torchRoot\share\cmake\Torch",
         "-DCMAKE_PREFIX_PATH=$qtRoot;$torchRoot", "-DPython3_EXECUTABLE=$python", "-DFINGERPRINT_PACKAGE_MODELS=$modelsRoot",
         '-DFINGERPRINT_BUILD_ALGORITHM=ON', '-DFINGERPRINT_BUILD_TRAINING=ON', '-DFINGERPRINT_BUILD_GUI=ON')
     Invoke-Checked $cmake @('--build', $buildRoot, '--config', 'Release', '--parallel', "$Jobs")

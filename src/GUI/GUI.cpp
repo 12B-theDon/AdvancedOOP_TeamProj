@@ -33,6 +33,7 @@
 #include <QEventLoop>
 #include <QProgressDialog>
 #include <QTimer>
+#include <exception>
 #include <future>
 #include <chrono>
 #include <utility>
@@ -173,11 +174,20 @@ void Window::resizeEvent(QResizeEvent* event) {
 }
 
 void Window::done(int result) {
-    if (busy_) return;
-    const QMessageBox::StandardButton answer = QMessageBox::question(this, ExitTitle, ExitQuestion,
+    if (exitQuestionOpen_) return;
+    if (closeRequested_) {
+        if (!busy_) QWizard::done(closeResult_);
+        return;
+    }
+    exitQuestionOpen_ = true;
+    const QMessageBox::StandardButton answer = QMessageBox::question(this, ExitTitle, busy_ ? StopAndExitQuestion : ExitQuestion,
                                               QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-    if (answer == QMessageBox::Yes)
-        QWizard::done(result);
+    exitQuestionOpen_ = false;
+    if (answer != QMessageBox::Yes) return;
+    closeRequested_ = true;
+    closeResult_ = result;
+    if (busy_) engine_.Cancel();
+    else QWizard::done(result);
 }
 
 bool Window::validateCurrentPage() {
@@ -711,25 +721,50 @@ bool Window::RunWithProgress(const QString& title, const std::function<void()>& 
         disabled.push_back({button(which), button(which)->isEnabled()});
     for (const std::pair<QWidget*, bool>& item : disabled) item.first->setEnabled(false);
     QProgressDialog progress(title, "Stop", 0, 0, this);
-    progress.setWindowModality(Qt::ApplicationModal); progress.setMinimumDuration(0);
+    // Pages and navigation are disabled; keep the main window's close action usable.
+    progress.setWindowModality(Qt::NonModal); progress.setMinimumDuration(0);
     progress.setAutoClose(false); progress.setAutoReset(false);
     QEventLoop loop;
     QTimer timer;
-    std::future<void> task = std::async(std::launch::async, work);
+    std::future<void> task;
+    std::exception_ptr launchError;
+    try {
+        task = std::async(std::launch::async, [this, &work] {
+            try { work(); }
+            catch (...) { engine_.Cancel(); throw; }
+        });
+    } catch (...) { launchError = std::current_exception(); engine_.Cancel(); }
+    bool stopping = false;
     const QMetaObject::Connection stopConnection = connect(&progress, &QProgressDialog::canceled, this, [this] { engine_.Cancel(); });
-    connect(&timer, &QTimer::timeout, &loop, [this, title, &progress, &task, &loop] {
+    connect(&timer, &QTimer::timeout, &loop, [this, title, &progress, &task, &loop, &stopping] {
         const int total = engine_.ProgressTotal();
-        if (total > 0) {
+        if (engine_.Cancelled()) {
+            if (!stopping) { stopping = true; progress.setCancelButton(nullptr); progress.setRange(0, 0); }
+            progress.setLabelText("Stopping all workers and releasing resources...");
+            if (!progress.isVisible()) progress.show();
+        } else if (total > 0) {
             progress.setRange(0, total); progress.setValue(engine_.ProgressDone());
             progress.setLabelText(title + QString("\n%1 / %2 completed").arg(engine_.ProgressDone()).arg(total));
         }
-        if (task.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) loop.quit();
+        if ((!task.valid() || task.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+            && engine_.CancellationFinished() && !exitQuestionOpen_) loop.quit();
     });
     timer.start(50); progress.show(); loop.exec(); timer.stop(); disconnect(stopConnection); progress.close();
-    try { task.get(); }
-    catch (const std::exception& e) { engine_.Cancel(); QMessageBox::warning(this, "Execution failed", QString::fromUtf8(e.what())); }
+    try {
+        if (launchError) std::rethrow_exception(launchError);
+        task.get();
+    } catch (const std::exception& e) {
+        if (!closeRequested_) QMessageBox::warning(this, "Execution failed", QString::fromUtf8(e.what()));
+    } catch (...) {
+        if (!closeRequested_) QMessageBox::warning(this, "Execution failed", "Unknown execution error.");
+    }
     busy_ = false;
-    for (const std::pair<QWidget*, bool>& item : disabled) item.first->setEnabled(item.second);
+    if (closeRequested_) {
+        // Let the caller discard unfinished results before delivering the close.
+        QTimer::singleShot(0, this, [this] { if (closeRequested_ && !busy_) QWizard::done(closeResult_); });
+    } else {
+        for (const std::pair<QWidget*, bool>& item : disabled) item.first->setEnabled(item.second);
+    }
     return !engine_.Cancelled();
 }
 

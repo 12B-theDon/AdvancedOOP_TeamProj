@@ -20,6 +20,7 @@ public:
     bool Extract(const fingerprint::Image& image, bool enrollment, std::vector<unsigned char>& bytes, std::string& error) override;
     bool Compare(const std::vector<unsigned char>& enrollment, const std::vector<unsigned char>& attempt, double& score, std::string& error, double* time_ms = nullptr) override;
     void Cancel() override;
+    bool CancellationFinished() const override;
     void ResetCancel() override;
 private:
     struct State;

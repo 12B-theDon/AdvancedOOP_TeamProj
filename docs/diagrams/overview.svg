@@ -42,7 +42,7 @@
 <text x="460.0" y="293.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">kisaDll.cpp</text>
 <text x="460.0" y="318.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">KisaDllAlgorithm</text>
 <text x="460.0" y="336.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">process pool / deadlines</text>
-<text x="460.0" y="354.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Cancel() / ResetCancel()</text>
+<text x="460.0" y="354.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Stop all jobs; await cleanup</text>
 <text x="150.0" y="293.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">report.cpp</text>
 <text x="150.0" y="318.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CalculateMetrics()</text>
 <text x="150.0" y="336.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">WriteGraphs() / Save()</text>

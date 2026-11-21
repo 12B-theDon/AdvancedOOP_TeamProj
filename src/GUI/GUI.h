@@ -66,6 +66,9 @@ private:
     QSpinBox* timeout_ = nullptr;
     QString dllHash_;
     bool busy_ = false;
+    bool closeRequested_ = false;
+    bool exitQuestionOpen_ = false;
+    int closeResult_ = QDialog::Rejected;
     bool RunWithProgress(const QString& title, const std::function<void()>& work);
     bool AlgorithmUnchanged();
     std::vector<engine::EnrollmentTemplates> enrollmentTemplates_;

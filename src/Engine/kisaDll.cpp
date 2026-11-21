@@ -7,8 +7,10 @@
 #include <atomic>
 #include <cmath>
 #include <chrono>
+#include <condition_variable>
 #include <cstring>
 #include <mutex>
+#include <thread>
 #include <windows.h>
 
 namespace engine {
@@ -25,16 +27,86 @@ struct KisaDllAlgorithm::State {
         HANDLE job = nullptr;
         bool first = true;
         std::mutex mutex;
+        std::mutex lifecycle_mutex;
         ~Process() { Stop(); }
+        void Interrupt() {
+            std::lock_guard<std::mutex> lock(lifecycle_mutex);
+            if (job) TerminateJobObject(job, 1);
+            else if (process) TerminateProcess(process, 1);
+        }
         void Stop() {
-            if (job) { CloseHandle(job); job = nullptr; }
-            if (process) { TerminateProcess(process, 1); WaitForSingleObject(process, 5000); CloseHandle(process); process = nullptr; }
+            HANDLE stoppedProcess = nullptr, stoppedJob = nullptr;
+            {
+                std::lock_guard<std::mutex> lock(lifecycle_mutex);
+                std::swap(stoppedProcess, process); std::swap(stoppedJob, job);
+            }
+            if (stoppedJob) TerminateJobObject(stoppedJob, 1);
+            if (stoppedProcess) {
+                TerminateProcess(stoppedProcess, 1);
+                WaitForSingleObject(stoppedProcess, INFINITE);
+                CloseHandle(stoppedProcess);
+            }
+            if (stoppedJob) {
+                JOBOBJECT_BASIC_ACCOUNTING_INFORMATION accounting = {};
+                while (QueryInformationJobObject(stoppedJob, JobObjectBasicAccountingInformation,
+                    &accounting, sizeof(accounting), nullptr) && accounting.ActiveProcesses != 0) Sleep(5);
+                CloseHandle(stoppedJob);
+            }
             if (input) { CloseHandle(input); input = nullptr; }
             if (output) { CloseHandle(output); output = nullptr; }
             first = true;
         }
     };
     std::vector<std::unique_ptr<Process>> processes;
+    std::mutex cancellation_mutex;
+    std::condition_variable cancellation_changed;
+    bool cleanup_requested = false;
+    bool shutting_down = false;
+    std::atomic<bool> cancellation_finished{true};
+    std::thread cleanup_thread;
+    ~State() {
+        if (!cleanup_thread.joinable()) return;
+        Cancel();
+        {
+            std::lock_guard<std::mutex> lock(cancellation_mutex);
+            shutting_down = true;
+        }
+        cancellation_changed.notify_all();
+        cleanup_thread.join();
+    }
+    void StartCleanupThread() {
+        cleanup_thread = std::thread([this] {
+            std::unique_lock<std::mutex> lock(cancellation_mutex);
+            for (;;) {
+                cancellation_changed.wait(lock, [this] { return cleanup_requested || shutting_down; });
+                if (!cleanup_requested) return;
+                lock.unlock();
+                for (const std::unique_ptr<Process>& process : processes) {
+                    std::lock_guard<std::mutex> callLock(process->mutex);
+                    process->Stop();
+                }
+                lock.lock();
+                cleanup_requested = false;
+                cancellation_finished.store(true);
+                cancellation_changed.notify_all();
+            }
+        });
+    }
+    void Cancel() {
+        std::lock_guard<std::mutex> lock(cancellation_mutex);
+        if (cancelled.exchange(true)) return;
+        cancellation_finished.store(false);
+        // Interrupt every slot immediately, including idle workers and DLL children.
+        // Waiting and handle cleanup happen off the GUI thread, under the call lock.
+        for (const std::unique_ptr<Process>& process : processes) process->Interrupt();
+        cleanup_requested = true;
+        cancellation_changed.notify_all();
+    }
+    void ResetCancel() {
+        std::unique_lock<std::mutex> lock(cancellation_mutex);
+        cancellation_changed.wait(lock, [this] { return cancellation_finished.load(); });
+        cancelled.store(false);
+    }
     bool Read(Process& process, void* destination, DWORD length, ULONGLONG deadline, std::string& error) {
         unsigned char* bytes = static_cast<unsigned char*>(destination);
         while (length > 0) {
@@ -127,15 +199,20 @@ struct KisaDllAlgorithm::State {
         CloseHandle(childInput); CloseHandle(childOutput);
         if (nullError != INVALID_HANDLE_VALUE) CloseHandle(nullError);
         if (!created) { error = "[FAIL] Cannot start FingerprintWorker.exe."; return false; }
-        process.process = info.hProcess;
-        process.job = CreateJobObjectW(nullptr, nullptr);
-        JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits = {};
-        limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-        if (!process.job || !SetInformationJobObject(process.job, JobObjectExtendedLimitInformation, &limits, sizeof(limits))
-            || !AssignProcessToJobObject(process.job, process.process)) {
-            CloseHandle(info.hThread); error = "[FAIL] Cannot isolate worker in a Windows job."; return false;
+        {
+            std::lock_guard<std::mutex> lifecycleLock(process.lifecycle_mutex);
+            process.process = info.hProcess;
+            process.job = CreateJobObjectW(nullptr, nullptr);
+            JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits = {};
+            limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+            if (!process.job || !SetInformationJobObject(process.job, JobObjectExtendedLimitInformation, &limits, sizeof(limits))
+                || !AssignProcessToJobObject(process.job, process.process)) {
+                CloseHandle(info.hThread); error = "[FAIL] Cannot isolate worker in a Windows job."; return false;
+            }
+            if (cancelled.load()) { CloseHandle(info.hThread); error = "[CANCELLED] Stopped."; return false; }
+            const DWORD resumed = ResumeThread(info.hThread); CloseHandle(info.hThread);
+            if (resumed == static_cast<DWORD>(-1)) { error = "[FAIL] Cannot resume worker."; return false; }
         }
-        ResumeThread(info.hThread); CloseHandle(info.hThread);
         ipc::Response ready;
         if (!Read(process, &ready, sizeof(ready), GetTickCount64() + options.startup_timeout_ms, error)) return false;
         if (ready.magic != ipc::Magic || ready.version != ipc::Version || !std::memchr(ready.message, '\0', sizeof(ready.message))) { error = "[MISMATCH] Invalid worker handshake."; return false; }
@@ -150,14 +227,22 @@ struct KisaDllAlgorithm::State {
         if (!process.process) {
             static std::mutex launches;
             std::lock_guard<std::mutex> launchLock(launches);
-            if (!Start(process, error)) { process.Stop(); return false; }
+            if (cancelled.load()) { error = "[CANCELLED] Stopped."; return false; }
+            if (!Start(process, error)) {
+                if (cancelled.load()) error = "[CANCELLED] Stopped.";
+                process.Stop(); return false;
+            }
         }
         const int timeout = process.first ? std::max(options.timeout_ms, options.first_call_timeout_ms) : options.timeout_ms;
         const ULONGLONG deadline = GetTickCount64() + timeout;
         request.first_size = static_cast<std::uint32_t>(first.size()); request.second_size = static_cast<std::uint32_t>(second.size());
         ipc::Response response;
         if (!Write(process, &request, sizeof(request), deadline, error) || !Write(process, first.data(), request.first_size, deadline, error)
-            || !Write(process, second.data(), request.second_size, deadline, error) || !Read(process, &response, sizeof(response), deadline, error)) { process.Stop(); return false; }
+            || !Write(process, second.data(), request.second_size, deadline, error) || !Read(process, &response, sizeof(response), deadline, error)) {
+            if (cancelled.load()) error = "[CANCELLED] Stopped.";
+            process.Stop(); return false;
+        }
+        if (cancelled.load()) { error = "[CANCELLED] Stopped."; process.Stop(); return false; }
         process.first = false;
         const bool comparison = request.operation == ipc::Operation::Compare;
         if (response.magic != ipc::Magic || response.version != ipc::Version || !std::memchr(response.message, '\0', sizeof(response.message))
@@ -174,7 +259,10 @@ struct KisaDllAlgorithm::State {
         }
         if (!response.result) { error = "[FAIL] DLL error " + std::to_string(response.error_code) + ": " + response.message; return false; }
         bytes.resize(response.data_size);
-        if (!Read(process, bytes.data(), response.data_size, deadline, error)) { bytes.clear(); process.Stop(); return false; }
+        if (!Read(process, bytes.data(), response.data_size, deadline, error) || cancelled.load()) {
+            if (cancelled.load()) error = "[CANCELLED] Stopped.";
+            bytes.clear(); process.Stop(); return false;
+        }
         score = response.score; return true;
     }
 };
@@ -186,13 +274,12 @@ KisaDllAlgorithm::KisaDllAlgorithm(const std::string& dll, const std::string& wo
     state_->options.timeout_ms = std::max(1, options.timeout_ms);
     state_->options.startup_timeout_ms = std::max(1, options.startup_timeout_ms);
     for (int i = 0; i < state_->options.workers; ++i) state_->processes.emplace_back(new State::Process);
+    state_->StartCleanupThread();
 }
 KisaDllAlgorithm::~KisaDllAlgorithm() = default;
-void KisaDllAlgorithm::Cancel() { state_->cancelled.store(true); }
-void KisaDllAlgorithm::ResetCancel() {
-    if (state_->cancelled.load()) for (const std::unique_ptr<State::Process>& process : state_->processes) { std::lock_guard<std::mutex> lock(process->mutex); process->Stop(); }
-    state_->cancelled.store(false);
-}
+void KisaDllAlgorithm::Cancel() { state_->Cancel(); }
+bool KisaDllAlgorithm::CancellationFinished() const { return state_->cancellation_finished.load(); }
+void KisaDllAlgorithm::ResetCancel() { state_->ResetCancel(); }
 bool KisaDllAlgorithm::Extract(const fingerprint::Image& image, bool enrollment, std::vector<unsigned char>& bytes, std::string& error) {
     bytes.clear(); error.clear();
     const int type = kisa::ImageType(image.database_id, image.width, image.height);
