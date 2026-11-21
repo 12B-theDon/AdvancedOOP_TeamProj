@@ -15,9 +15,9 @@ macOS arm64, AppleClang 21, Qt 5.15.17, LibTorch 2.15.0 CPU에서 수행한 결�
 | 패키징·소스 | 누락 파일·SHA·경로 보호 검사, `git diff --check` 통과 |
 | Windows 설치 스크립트 | PowerShell 7.7 구문·격리 모의 실행 통과: 다운로드 우선·학습 생략, 부분 모델 보관·학습, 패키징·GUI 재실행, 공백·한글 경로, 실패 시 중단 |
 
-검사 범위와 재실행 명령은 [Tests](../tests/readme.md), 보존 기준은 [baseline](baseline/training_configuration.md)에 정리했습니다. 합성 모델 검사는 실제 인식 성능을 검증하지 않습니다.
+위 결과는 정리 전 로컬 테스트로 확인한 기록입니다. 테스트 코드는 Git 배포 대상에서 제외하며, 로컬에 `tests/CMakeLists.txt`가 있을 때만 CMake에서 등록합니다. 보존 기준은 [baseline](baseline/training_configuration.md)에 정리했습니다. 합성 모델 검사는 실제 인식 성능을 검증하지 않습니다.
 
-미검증 항목은 Windows 설치 스크립트의 실제 도구 설치·Windows 빌드·PE export/import·실제 worker IPC/장애/timeout/Stop/재시작·Unicode DLL 교체·1/4-process 점수 일치·배포 런타임/TIFF 구성과 Microsoft Word에서의 RTF 열기입니다. worker·PE export 등에 대한 Windows 자동 검사는 코드에 포함되어 있습니다.
+미검증 항목은 Windows 설치 스크립트의 실제 도구 설치·Windows 빌드·PE export/import·실제 worker IPC/장애/timeout/Stop/재시작·Unicode DLL 교체·1/4-process 점수 일치·배포 런타임/TIFF 구성과 Microsoft Word에서의 RTF 열기입니다.
 
 2026-11-21 기존 설정(각 40 epochs·seed 42)으로 모델 4개를 새로 학습했습니다. `models/trained_result`의 네 `.bin`은 총 1,066,301,763 bytes이며 `weights.json`에 SHA-256을 기록했습니다. 네 모델 모두 batch 1·2·4 재로딩, native self-score=1, 고정 Backbone·버퍼 보존 검사를 통과했습니다. native 비교 24개를 검증했고 cache/native 점수의 최대 차이는 약 6.18×10⁻⁷입니다.
 

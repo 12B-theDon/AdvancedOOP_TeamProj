@@ -23,14 +23,13 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 C++17, CMake 3.21+, Qt 5.15/6 Widgets·TIFF 플러그인이 필요합니다. 알고리즘·학습은 호환되는 LibTorch CPU를 사용합니다. Windows는 MSVC와 동일한 architecture의 Qt·LibTorch를 준비하고, 빌드 디렉터리 실행 시 Qt `bin`·LibTorch `lib`를 PATH에 추가합니다. 외부 32-bit DLL은 32-bit evaluator·worker가 필요합니다.
 
-알고리즘·학습을 준비할 때는 submodule과 LFS 파일을 가져옵니다. upstream 수정 적용은 [NOTICE](../third_party/deepprint.NOTICE.txt)를 따릅니다. Python 3.11+은 선택적인 검사·manifest 도구에 사용됩니다.
+알고리즘·학습을 준비할 때는 submodule과 LFS 파일을 가져옵니다. upstream 수정 적용은 [NOTICE](../third_party/deepprint.NOTICE.txt)를 따릅니다. Python 3.11+은 배포 파일의 SHA-256 검사에 사용됩니다.
 
 ```sh
 git submodule update --init --recursive
 git lfs pull
 cmake -S . -B build -DCMAKE_PREFIX_PATH="<Qt>;<LibTorch>" -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release --parallel 4
-ctest --test-dir build -C Release --output-on-failure
 ```
 
 ## 실행

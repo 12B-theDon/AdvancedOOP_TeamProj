@@ -13,4 +13,4 @@ SVG는 편집 원본, PNG는 README 표시용입니다. 미리보기를 누르�
 | <a href="deepprint_finetuning.svg"><img src="deepprint_finetuning.png" width="220" alt="DeepPrint 부분 학습 구조"></a><br>Fine-tuning | Backbone·projection·cosine classifier | [Training](../../src/Training/readme.md) · [학습 설정](../baseline/training_configuration.md) |
 | <a href="deepprint_blocks.svg"><img src="deepprint_blocks.png" width="220" alt="Inception·Reduction 내부 구조"></a><br>Blocks | Inception·Reduction 내부 경로 | [Algorithm](../../src/Algorithm/readme.md) · [upstream 소스](../../third_party/deepprint/flx/models/InceptionV4.py) |
 
-`source_manifest.json`은 기준 소스의 SHA-256을 기록합니다. [재생성](../../tools/diagram_renderer/README.md) · [스타일](../diagram_style.md) · [검증 상태](../verification.md)
+`source_manifest.json`은 기준 소스의 SHA-256을 기록합니다. [스타일](../diagram_style.md) · [검증 상태](../verification.md)

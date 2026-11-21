@@ -16,7 +16,7 @@
 .\build\Release\FingerprintTrain.exe data\original models\pretrained\deepprint.bin models\trained_result --verify-only
 ```
 
-기존 가중치는 덮어쓰지 않으므로 학습에는 새 출력 폴더를 사용합니다. `--augment-only`는 증강만 실행하며, cache 재사용에는 원본·전처리·가중치의 일치가 필요합니다. Python 변환 도구 `tools/prepare_deepprint.py`는 upstream 체크포인트를 처음 준비할 때 사용합니다.
+기존 가중치는 덮어쓰지 않으므로 학습에는 새 출력 폴더를 사용합니다. `--augment-only`는 증강만 실행하며, cache 재사용에는 원본·전처리·가중치의 일치가 필요합니다.
 
 ![데이터 증강·feature cache·모델 4개 학습·검증 및 export 흐름](../../docs/diagrams/training.png)
 

@@ -36,14 +36,16 @@ CMakeUserPresets.json
 .DS_Store
 __pycache__/
 
-# Local drawing rules; keep generated figures and the model conversion tool versioned.
-/tools/readme.md
+# Keep development tests and optional authoring tools local.
+/tests/
+/tools/*
+!/tools/setup_windows.ps1
+!/tools/verify_manifest.py
 
 # Local reference paper and diagram PDF exports.
 /Deepprint.pdf
 /output/pdf/deepprint_blocks.pdf
 /output/pdf/deepprint_finetuning.pdf
 
-# Deployment packages and generated focused-test outputs.
+# Generated deployment packages.
 /dist/
-/tests/output/

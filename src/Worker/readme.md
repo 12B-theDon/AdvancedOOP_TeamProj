@@ -8,4 +8,4 @@ Host는 pipe·process·job handle을 소유합니다. 비동기 쓰기·읽기 p
 
 기본값은 worker 1개(최대 16개), 호출 30초, 새 worker의 첫 호출 최소 120초, 시작 30초입니다. 실패는 `FAIL`(DLL 코드·메시지), `TIMEOUT`, `CRASH`, `MISMATCH`, `CANCELLED`로 구분합니다.
 
-[구조도 SVG 원본](../../docs/diagrams/worker.svg) · [오류 주입 테스트](../../tests/readme.md) · [검증 상태](../../docs/verification.md)
+[구조도 SVG 원본](../../docs/diagrams/worker.svg) · [검증 상태](../../docs/verification.md)

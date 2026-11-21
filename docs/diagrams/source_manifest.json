@@ -1,5 +1,5 @@
 {
-  "CMakeLists.txt": "5555eedb2600993956d128c95c86ab7dd4bbfbf20ee964f5b2b53c0a808f25e6",
+  "CMakeLists.txt": "5cae9ff1a87f7efe19a5b7eba1d6b31d7aa4430edf1f8b8314fb4ae4a60449f9",
   "src/Algorithm/Algorithm.h": "8cd464d4aa3857c271104b67324b613cce0e10de55e1d0e8b9169087233f2661",
   "src/Algorithm/encoder.cpp": "b6620a6baf0bf46827197e97064d38763257ac4351f1d96454e262cc1584ba34",
   "src/Algorithm/encoder.h": "bc9216525c829ad010ace1ad53f88d5dcd572f7e009118362f30968a43677e9b",
@@ -36,6 +36,5 @@
   "src/main.cpp": "7115dc05c52fd459f5087303f6df60cd06d262dd5f0e85d565b70bfdf4c9a035",
   "third_party/deepprint/flx/models/InceptionV4.py": "1710c5f122cb7f4a4173fb34c57b32abdb6276ef9285e1922b67fef229e8cf73",
   "third_party/deepprint/flx/models/deep_print_arch.py": "b2bfaa2806cdd68c3d7c42e61d3ebdfd4cef356f73e400932c3037705d7c71f1",
-  "tools/prepare_deepprint.py": "d2d3bea5e8ca77b0e7fc26529dceed70824223c2ca3ec85f733f9f7107424387",
   "tools/setup_windows.ps1": "60cd64d0ced16c0422e5c892570ce7674a295a16a1f620e30c8e5a4ccff63c31"
 }

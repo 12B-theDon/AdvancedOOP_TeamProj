@@ -62,9 +62,9 @@ FinalProject/
 │  └─ trained_result/ # Git LFS로 배포하는 학습 모델 4개·검증 manifest
 ├─ docs/             # 빌드·검증·출처 문서, 구조도, 보존 기준
 ├─ cmake/            # 알고리즘·평가 프로그램 배포 폴더 생성
-├─ tests/            # 보존·추론·평가·ABI·worker·패키징 검사
-├─ tools/            # 설치·빌드·체크포인트 변환·SHA 검증·구조도 도구
-│  └─ setup_windows.ps1  # 도구 설치·모델 다운로드·필요 시 학습·패키징
+├─ tools/            # Windows 설치·빌드·패키징·배포 파일 검사
+│  ├─ setup_windows.ps1  # 도구 설치·모델 다운로드·필요 시 학습·패키징
+│  └─ verify_manifest.py # 배포 파일 누락·SHA-256 검사
 ├─ third_party/      # DeepPrint 외부 소스·라이선스·수정 patch
 ├─ 프로젝트 관련 자료-20261029/  # K-NBTC 안내서·DLL 예제·DB 압축본
 ├─ build*/           # 빌드 결과(자동 생성)
@@ -79,7 +79,7 @@ FinalProject/
 │  └─ <a href="docs/build.md#package">FingerprintEvaluator/</a>
 │     ├─ <a href="src/GUI/readme.md">FingerprintGUI.exe</a>           # 평가 GUI
 │     └─ <a href="src/Worker/readme.md">FingerprintWorker.exe</a>        # DLL 호출용 프로세스
-└─ CMakeLists.txt    # 빌드 대상·의존성·테스트·패키징 명령 정의
+└─ CMakeLists.txt    # 빌드 대상·의존성·패키징 명령 정의
 </pre>
 
 외부 DLL은 GUI Step 3에서 선택합니다. 이 프로젝트의 알고리즘을 배포할 때는 `FingerprintAlgorithm/` 전체를 함께 배포합니다. DLL·모델을 교체한 뒤에는 GUI를 다시 실행하고 템플릿을 재생성합니다.
