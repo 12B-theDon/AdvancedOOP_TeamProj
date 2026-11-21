@@ -7,6 +7,8 @@
 
 Git clone 후 설치 스크립트가 LFS 파일을 가져오므로 보통 로컬 재학습은 필요하지 않습니다. 학습 로그·feature cache는 Git에 포함하지 않습니다. 비교용·이전 weight는 로컬 Git 제외 폴더 `models/noise_experiment_weights/`에 보관합니다.
 
+[후속 전수·Grouped CV 평가](../docs/experiments/noise_followup.md)에서도 현재 모델을 reference로 유지했습니다. 새로운 bundle의 엄격한 개선은 확립되지 않아 네 bin과 manifest는 변경하지 않았습니다. DB별 threshold profile은 자동 적용하지 않는 실험용이며, 현재 weight SHA에만 연결됩니다.
+
 패키징 시 `FINGERPRINT_PACKAGE_MODELS`로 학습 출력 폴더를 지정합니다. 배포 폴더에는 네 모델을 알고리즘 DLL 옆에 배치합니다.
 
 [학습](../src/Training/readme.md) · [패키징](../docs/build.md#package) · [검증 상태](../docs/verification.md)

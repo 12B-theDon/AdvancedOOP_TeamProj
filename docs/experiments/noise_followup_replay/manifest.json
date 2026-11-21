@@ -1,0 +1,81 @@
+{
+  "purpose": "Original full-pair Windows GUI replay, no new training or threshold retuning",
+  "candidate": "noise_80_seed42",
+  "weights": {
+    "fvc2000_db3": {
+      "sha256": "1b9aa8ae95bb766f45976ec3720998ba74a0839eaa9ba1fa9d41689ae0487b65",
+      "bytes": 266543269
+    },
+    "fvc2002_db3": {
+      "sha256": "fbd6bcde95221b5b0b36ee2c6419d5d85f98379b3455b3c05bfa3059ab24e9c6",
+      "bytes": 266543269
+    },
+    "fvc2004_db1": {
+      "sha256": "95f3bad4332f477b42d6b6e5667e06566263bc805e03cc84bb1e547f983b2919",
+      "bytes": 266543269
+    },
+    "combined": {
+      "sha256": "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12",
+      "bytes": 266570213
+    }
+  },
+  "thresholds": {
+    "FVC2000_DB3_B": 0.5824,
+    "FVC2002_DB3_B": 0.8086,
+    "FVC2004_DB1_B": 0.8842
+  },
+  "genuine_impostor_shared_threshold": true,
+  "expected_score_tolerance_atol": 1e-06,
+  "actual_windows_verified": false,
+  "preprocessing_version": "gray01-white-square-aa299-gabor1.8-v1",
+  "pair_order": "unique unordered within DB, all80 images enrolled; CSV contains filenames relative to selectedDB",
+  "files": [
+    {
+      "file": "FVC2000_DB3_B_genuine.csv",
+      "pairs": 280,
+      "sha256": "4b2dd80a01fd9f6d2cc51feaba33b1927e853b71ab6ec9f51f1491ccb2d9c67a"
+    },
+    {
+      "file": "FVC2000_DB3_B_impostor.csv",
+      "pairs": 2880,
+      "sha256": "6305422950816657ccfef8c39a2650c5a4e9b35dce362ae44e2d53345ed4da70"
+    },
+    {
+      "file": "FVC2000_DB3_B_expected_scores.csv.gz",
+      "pairs": 3160,
+      "sha256": "f43ae1f8e35b4e24cb46bc95c22601718ce86a4db5210f10e8f066dc5745184e"
+    },
+    {
+      "file": "FVC2002_DB3_B_genuine.csv",
+      "pairs": 280,
+      "sha256": "4b2dd80a01fd9f6d2cc51feaba33b1927e853b71ab6ec9f51f1491ccb2d9c67a"
+    },
+    {
+      "file": "FVC2002_DB3_B_impostor.csv",
+      "pairs": 2880,
+      "sha256": "6305422950816657ccfef8c39a2650c5a4e9b35dce362ae44e2d53345ed4da70"
+    },
+    {
+      "file": "FVC2002_DB3_B_expected_scores.csv.gz",
+      "pairs": 3160,
+      "sha256": "43b3923d6f7cd7e7bab35d0a057cce3dc0e7a85c26c0e68f88814062720da5a5"
+    },
+    {
+      "file": "FVC2004_DB1_B_genuine.csv",
+      "pairs": 280,
+      "sha256": "4b2dd80a01fd9f6d2cc51feaba33b1927e853b71ab6ec9f51f1491ccb2d9c67a"
+    },
+    {
+      "file": "FVC2004_DB1_B_impostor.csv",
+      "pairs": 2880,
+      "sha256": "6305422950816657ccfef8c39a2650c5a4e9b35dce362ae44e2d53345ed4da70"
+    },
+    {
+      "file": "FVC2004_DB1_B_expected_scores.csv.gz",
+      "pairs": 3160,
+      "sha256": "ef8da761e81c5546872f3f97be7d29e60cae32fcbf4540590736f139a0543955"
+    }
+  ],
+  "failure_policy": "Report all enrollment/attempt/compare/timeouts; do not drop failures while comparing matcher scores.",
+  "instructions": "Select each DB originalfolder; enroll all80; Load the project FingerprintAlgorithm.dll with desired Worker settings; import Genuine/Impostor CSVs; evaluate; enter identical per-DB threshold for both Results; export rawscores and compare against expected score CSV. Check actual DLL and weight hashes first."
+}

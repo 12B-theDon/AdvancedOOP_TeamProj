@@ -18,6 +18,8 @@ Stop은 전체 Worker를 종료하고 생성 중인 Template·비교 결과를 �
 
 Results에서 임계값(초기 0.5)을 바꾸면 저장된 점수로 다시 판정합니다. Save는 원시 CSV, 선택 지표의 HTML·Word 호환 RTF, 별도 SVG 그래프를 background에서 생성하며 진행 건수·비율과 Stop을 표시합니다. CSV 행·지표·그래프 계산과 파일 쓰기 중 취소를 확인합니다. 임시 폴더에 작성한 파일은 완료 후 `run_N`으로 저장합니다. 보고서 Stop·창 닫기는 미완성 파일만 폐기하고, 완료된 Template·비교 결과와 기존 보고서는 보존합니다. Stop 후 다시 저장할 수 있습니다.
 
+현재 모델의 [실험용 calibration](../../docs/experiments/noise_followup.md#threshold-선정)은 FVC2000 `0.5824`, FVC2002 `0.8086`, FVC2004 `0.8842`입니다. 해당 weight SHA를 확인하고 Results의 Genuine·Impostor threshold에 같은 값을 수동 입력합니다. GUI 기본값은 유지하며 이 값을 외부 DB·다른 팀 DLL에 자동 적용하지 않습니다. 실제 Windows replay와 엄격한 성능 보존은 아직 확립되지 않은 profile입니다.
+
 | 지표 | 계산 기준 |
 |---|---|
 | FTE | 전체 등록 시도 중 실패 비율. 실패 유형별 횟수 포함 |

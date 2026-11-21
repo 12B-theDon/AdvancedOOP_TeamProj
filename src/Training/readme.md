@@ -8,6 +8,8 @@
 - `train.cpp`: 검증된 feature cache로 두 projection과 cosine classifier를 학습합니다.
 - `validation.cpp`·`ValidationEngine`: 저장 모델, 고정 parameter·buffer, native 점수와 calibration을 검증합니다.
 
+[후속 전수·Grouped CV 평가](../../docs/experiments/noise_followup.md)는 원본 240장·고유 기존/재생성 증강·별도 Test noise와 120개의 capture 보류 학습 bundle을 비교합니다. Noise FRR는 개선됐지만 모든 DB의 원본 성능을 보존하는 엄격한 조건은 통과하지 못해, 현재 production 모델·학습 코드는 유지했습니다.
+
 배포 모델은 Git LFS로 받아 재사용합니다. 설치 스크립트는 모델이 없을 때만 자동 학습합니다. 직접 재학습할 때는 새 출력 폴더를 사용합니다.
 
 ```powershell

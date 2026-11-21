@@ -1,0 +1,68 @@
+{
+  "format": "fingerprint-experimental-calibration-v1",
+  "status": "research-only; no automatic deployment acceptance; actualWindows verification pending",
+  "algorithm": "FingerprintAlgorithm.dll matchingDB/combined minimum ofprobability30cosine01",
+  "source_commit": "98f68b7f455c497ee64a34d830b0cee63b95b7d3",
+  "score_range": [
+    0.5,
+    1
+  ],
+  "threshold_policy": "per_db",
+  "thresholds": {
+    "FVC2000_DB3_B": 0.5824,
+    "FVC2002_DB3_B": 0.8086,
+    "FVC2004_DB1_B": 0.8842
+  },
+  "threshold_precision": 4,
+  "genuine_impostor_shared_threshold": true,
+  "candidate": "noise_80_seed42",
+  "weights": {
+    "fvc2000_db3": {
+      "sha256": "1b9aa8ae95bb766f45976ec3720998ba74a0839eaa9ba1fa9d41689ae0487b65",
+      "bytes": 266543269
+    },
+    "fvc2002_db3": {
+      "sha256": "fbd6bcde95221b5b0b36ee2c6419d5d85f98379b3455b3c05bfa3059ab24e9c6",
+      "bytes": 266543269
+    },
+    "fvc2004_db1": {
+      "sha256": "95f3bad4332f477b42d6b6e5667e06566263bc805e03cc84bb1e547f983b2919",
+      "bytes": 266543269
+    },
+    "combined": {
+      "sha256": "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12",
+      "bytes": 266570213
+    }
+  },
+  "windows_dll_sha256": null,
+  "auto_application_allowed": false,
+  "data_scope": "knownFVC B identities; capture7andfreshselectionnoise calibrated; independenttestnoise separate; notunseenidentityvalidation",
+  "validation_target_far": 0.01,
+  "validation_target_feasible": true,
+  "noise_reference": {
+    "in": [
+      1,
+      80
+    ],
+    "out": [
+      80,
+      160
+    ],
+    "mixture": [
+      0.8,
+      0.2
+    ]
+  },
+  "foreign_dll_calibration_allowed": false,
+  "preprocessing_version": "gray01-white-square-aa299-gabor1.8-v1",
+  "preprocessing_and_scoring_sources": {
+    "src/Algorithm/encoder.cpp": "6326790707f07e7b6b77742d15362eedc888c4347680eceb26a89a6fee109d51",
+    "src/Algorithm/encoderConfig.h": "a12f7134e31891c6e3f72d0976d568f56daff79d5da4efebb5e540b2e4c2e9d5",
+    "src/Kisa/core.cpp": "33304717e854c34029ec93b13b3491c7713c6ec19bebc4ee03dd037f008a2b47"
+  },
+  "pretrained_sha256": "5b9cfcb321dc52a3d26aa29833aedcb8f719890dfb719ffa7f616bff7080987c",
+  "threshold_application": "Manually set the same DB threshold for Genuine and Impostor in Results; no automatic GUI application; actual Windows DLL hash must be verified before deployment.",
+  "retrospective_known_capture_calibration": true,
+  "nested_selected_procedure_zero_margin_clean_gate_pass": false,
+  "population_strict_noninferiority_established": false
+}

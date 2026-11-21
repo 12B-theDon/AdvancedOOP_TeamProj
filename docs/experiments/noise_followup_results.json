@@ -1,0 +1,5112 @@
+{
+  "protocol_sha256": "34e9e83ce03e0ee5c10d9df198116431276b359b8e322f22f8a3f21f36f17f9d",
+  "coverage": {
+    "originals": 240,
+    "identities": 30,
+    "existing_logical_augmentations": 5760,
+    "reconstructed_logical_augmentations": 28800,
+    "static_logical_rows": 34800,
+    "static_unique_db_pixel_inputs": 22419,
+    "noise_cases": 48000,
+    "noisy_original_cases": 36000,
+    "compound_cases": 12000,
+    "all_noise_pixel_hashes_match_independent_regeneration": true,
+    "every_original_has10noise_slots_per_seed_8in2out": true,
+    "all_source_capture_identity_links_valid": true,
+    "folds": [
+      {
+        "fold": 0,
+        "train_sources": 120,
+        "calibration_sources": 60,
+        "test_sources": 60,
+        "descendant_parent_disjoint": true
+      },
+      {
+        "fold": 1,
+        "train_sources": 120,
+        "calibration_sources": 60,
+        "test_sources": 60,
+        "descendant_parent_disjoint": true
+      },
+      {
+        "fold": 2,
+        "train_sources": 120,
+        "calibration_sources": 60,
+        "test_sources": 60,
+        "descendant_parent_disjoint": true
+      },
+      {
+        "fold": 3,
+        "train_sources": 120,
+        "calibration_sources": 60,
+        "test_sources": 60,
+        "descendant_parent_disjoint": true
+      }
+    ],
+    "nonfinite_feature_failures": 0,
+    "source_exclusions": []
+  },
+  "archive": [
+    {
+      "candidate": "noise_05_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.1851851851851852,
+          "auc": 0.9999305555555557,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 2.500000000000002,
+          "tar_pct": 97.5,
+          "balanced_accuracy_pct": 98.70949074074075,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9831196581196582,
+          "mcc": 0.9816294895319979,
+          "source_macro_frr_pct": 1.5646258503401358,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.8047,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.0,
+              "frr_pct": 5.000000000000004,
+              "tar_pct": 95.0,
+              "threshold": 0.8595,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8688,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 5.805654614081125,
+          "auc": 0.9824512828595822,
+          "far_pct": 0.38810680038000306,
+          "frr_pct": 15.574367795651746,
+          "tar_pct": 84.42563220434826,
+          "balanced_accuracy_pct": 92.01876270198413,
+          "precision_pct": 95.18511380838147,
+          "f1": 0.8921016915781127,
+          "mcc": 0.8862240244568004,
+          "source_macro_frr_pct": 15.5736928885608,
+          "source_macro_far_pct": 0.3940052398646532,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 1.4310176125244618,
+              "far_pct": 0.32542174023338405,
+              "frr_pct": 4.223744292237441,
+              "tar_pct": 95.77625570776256,
+              "threshold": 0.8047,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 12.878195488721806,
+              "far_pct": 0.6773879142300195,
+              "frr_pct": 31.530827067669176,
+              "tar_pct": 68.46917293233082,
+              "threshold": 0.8595,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 3.107750740997107,
+              "far_pct": 0.16151074667660578,
+              "frr_pct": 10.968532027048617,
+              "tar_pct": 89.03146797295139,
+              "threshold": 0.8688,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 14.171155753968252,
+          "auc": 0.9139494523602845,
+          "far_pct": 0.9911458333333333,
+          "frr_pct": 37.574999999999996,
+          "tar_pct": 62.42500000000001,
+          "balanced_accuracy_pct": 80.71692708333335,
+          "precision_pct": 82.51583594378876,
+          "f1": 0.6971827028333859,
+          "mcc": 0.6907132835297066,
+          "source_macro_frr_pct": 37.575,
+          "source_macro_far_pct": 0.9911458333333333,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 4.2703125,
+              "far_pct": 0.9961805555555555,
+              "frr_pct": 13.587499999999997,
+              "tar_pct": 86.41250000000001,
+              "threshold": 0.8047,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 31.63958333333333,
+              "far_pct": 1.5767361111111111,
+              "frr_pct": 71.76607142857144,
+              "tar_pct": 28.233928571428574,
+              "threshold": 0.8595,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 6.603571428571428,
+              "far_pct": 0.4005208333333334,
+              "frr_pct": 27.37142857142857,
+              "tar_pct": 72.62857142857143,
+              "threshold": 0.8688,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 13.996031746031745,
+          "auc": 0.9192531758662185,
+          "far_pct": 0.9014274691358025,
+          "frr_pct": 37.132936507936506,
+          "tar_pct": 62.86706349206349,
+          "balanced_accuracy_pct": 80.98281801146385,
+          "precision_pct": 84.38475712417481,
+          "f1": 0.7076857251699433,
+          "mcc": 0.7024329366660744,
+          "source_macro_frr_pct": 37.132936507936506,
+          "source_macro_far_pct": 0.9014274691358025,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 4.339285714285714,
+              "far_pct": 0.9282407407407408,
+              "frr_pct": 12.970238095238095,
+              "tar_pct": 87.0297619047619,
+              "threshold": 0.8047,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 30.392857142857142,
+              "far_pct": 1.4791666666666667,
+              "frr_pct": 68.83333333333333,
+              "tar_pct": 31.166666666666664,
+              "threshold": 0.8595,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 7.255952380952381,
+              "far_pct": 0.296875,
+              "frr_pct": 29.595238095238095,
+              "tar_pct": 70.4047619047619,
+              "threshold": 0.8688,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_05_seed43",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.2777777777777778,
+          "auc": 0.9998875661375662,
+          "far_pct": 0.17361111111111113,
+          "frr_pct": 2.500000000000002,
+          "tar_pct": 97.5,
+          "balanced_accuracy_pct": 98.66319444444446,
+          "precision_pct": 98.19343065693431,
+          "f1": 0.9784296028880867,
+          "mcc": 0.9763702238845132,
+          "source_macro_frr_pct": 1.5646258503401358,
+          "source_macro_far_pct": 0.17361111111111108,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.8419,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.5555555555555556,
+              "far_pct": 0.2777777777777778,
+              "frr_pct": 5.000000000000004,
+              "tar_pct": 95.0,
+              "threshold": 0.8403,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8575,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 5.754865765516286,
+          "auc": 0.9825230911085473,
+          "far_pct": 0.44009877765976907,
+          "frr_pct": 15.579325688057958,
+          "tar_pct": 84.42067431194204,
+          "balanced_accuracy_pct": 91.99028776714114,
+          "precision_pct": 94.61050381975868,
+          "f1": 0.8899761122580534,
+          "mcc": 0.8833785103959402,
+          "source_macro_frr_pct": 15.58443737315829,
+          "source_macro_far_pct": 0.4436834616285459,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 1.467710371819961,
+              "far_pct": 0.38487760020294265,
+              "frr_pct": 5.020792563600784,
+              "tar_pct": 94.97920743639922,
+              "threshold": 0.8419,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 12.761904761904763,
+              "far_pct": 0.7756335282651072,
+              "frr_pct": 30.963408521303258,
+              "tar_pct": 69.03659147869674,
+              "threshold": 0.8403,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 3.034982162824131,
+              "far_pct": 0.15978520451125744,
+              "frr_pct": 10.75377597926983,
+              "tar_pct": 89.24622402073017,
+              "threshold": 0.8575,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 14.01607142857143,
+          "auc": 0.9143586001880788,
+          "far_pct": 1.072511574074074,
+          "frr_pct": 37.61071428571429,
+          "tar_pct": 62.38928571428571,
+          "balanced_accuracy_pct": 80.6583870701058,
+          "precision_pct": 81.9351551711163,
+          "f1": 0.6945536723701053,
+          "mcc": 0.6873707539929992,
+          "source_macro_frr_pct": 37.61071428571429,
+          "source_macro_far_pct": 1.072511574074074,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 4.314285714285714,
+              "far_pct": 1.2798611111111111,
+              "frr_pct": 15.183928571428574,
+              "tar_pct": 84.81607142857143,
+              "threshold": 0.8419,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 31.387500000000003,
+              "far_pct": 1.5571180555555555,
+              "frr_pct": 71.15714285714286,
+              "tar_pct": 28.84285714285714,
+              "threshold": 0.8403,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 6.346428571428571,
+              "far_pct": 0.38055555555555554,
+              "frr_pct": 26.491071428571434,
+              "tar_pct": 73.50892857142857,
+              "threshold": 0.8575,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 13.897376543209878,
+          "auc": 0.91947111338459,
+          "far_pct": 0.9722222222222222,
+          "frr_pct": 36.982142857142854,
+          "tar_pct": 63.01785714285714,
+          "balanced_accuracy_pct": 81.02281746031747,
+          "precision_pct": 83.75816188510076,
+          "f1": 0.7072645732352486,
+          "mcc": 0.7006011707120005,
+          "source_macro_frr_pct": 36.982142857142854,
+          "source_macro_far_pct": 0.9722222222222222,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 4.277777777777778,
+              "far_pct": 1.09375,
+              "frr_pct": 14.642857142857146,
+              "tar_pct": 85.35714285714285,
+              "threshold": 0.8419,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 30.258101851851855,
+              "far_pct": 1.53125,
+              "frr_pct": 68.125,
+              "tar_pct": 31.874999999999996,
+              "threshold": 0.8403,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 7.15625,
+              "far_pct": 0.2916666666666667,
+              "frr_pct": 28.17857142857143,
+              "tar_pct": 71.82142857142857,
+              "threshold": 0.8575,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_05_seed44",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.1851851851851852,
+          "auc": 0.9999570105820106,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 2.500000000000002,
+          "tar_pct": 97.5,
+          "balanced_accuracy_pct": 98.70949074074075,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9831196581196582,
+          "mcc": 0.9816294895319979,
+          "source_macro_frr_pct": 1.5646258503401358,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.8411,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.0,
+              "frr_pct": 5.000000000000004,
+              "tar_pct": 95.0,
+              "threshold": 0.8477,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.837,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 5.849968239519067,
+          "auc": 0.9822858519326566,
+          "far_pct": 0.3689322201244174,
+          "frr_pct": 15.631230130930254,
+          "tar_pct": 84.36876986906975,
+          "balanced_accuracy_pct": 91.99991882447266,
+          "precision_pct": 95.43051194194567,
+          "f1": 0.8928021307023709,
+          "mcc": 0.8871322286914928,
+          "source_macro_frr_pct": 15.625396535874515,
+          "source_macro_far_pct": 0.37248420187359166,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 1.531781139015728,
+              "far_pct": 0.32799816083206496,
+              "frr_pct": 5.018754076973253,
+              "tar_pct": 94.98124592302675,
+              "threshold": 0.8411,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 12.880200501253134,
+              "far_pct": 0.6077972709551657,
+              "frr_pct": 31.39448621553885,
+              "tar_pct": 68.60551378446115,
+              "threshold": 0.8477,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 3.1379230782883414,
+              "far_pct": 0.17100122858602174,
+              "frr_pct": 10.480450100278649,
+              "tar_pct": 89.51954989972135,
+              "threshold": 0.837,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 14.084143518518518,
+          "auc": 0.9130977472408235,
+          "far_pct": 0.9365162037037037,
+          "frr_pct": 37.753571428571426,
+          "tar_pct": 62.24642857142857,
+          "balanced_accuracy_pct": 80.65495618386244,
+          "precision_pct": 83.40259234406803,
+          "f1": 0.6969192058971253,
+          "mcc": 0.6926798176079528,
+          "source_macro_frr_pct": 37.753571428571426,
+          "source_macro_far_pct": 0.9365162037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 4.193576388888888,
+              "far_pct": 1.0722222222222222,
+              "frr_pct": 15.067857142857143,
+              "tar_pct": 84.93214285714285,
+              "threshold": 0.8411,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 31.452256944444446,
+              "far_pct": 1.331423611111111,
+              "frr_pct": 72.13928571428572,
+              "tar_pct": 27.860714285714284,
+              "threshold": 0.8477,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 6.606597222222223,
+              "far_pct": 0.4059027777777778,
+              "frr_pct": 26.05357142857143,
+              "tar_pct": 73.94642857142857,
+              "threshold": 0.837,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 14.02061287477954,
+          "auc": 0.9182320449138374,
+          "far_pct": 0.8520447530864197,
+          "frr_pct": 37.01190476190476,
+          "tar_pct": 62.98809523809524,
+          "balanced_accuracy_pct": 81.0680252425044,
+          "precision_pct": 85.15271862000425,
+          "f1": 0.7101739657394801,
+          "mcc": 0.706243417176266,
+          "source_macro_frr_pct": 37.01190476190476,
+          "source_macro_far_pct": 0.8520447530864197,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 4.3321759259259265,
+              "far_pct": 0.9288194444444444,
+              "frr_pct": 14.708333333333334,
+              "tar_pct": 85.29166666666667,
+              "threshold": 0.8411,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 30.351190476190474,
+              "far_pct": 1.2829861111111112,
+              "frr_pct": 68.94047619047619,
+              "tar_pct": 31.05952380952381,
+              "threshold": 0.8477,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 7.378472222222222,
+              "far_pct": 0.3443287037037037,
+              "frr_pct": 27.386904761904763,
+              "tar_pct": 72.61309523809524,
+              "threshold": 0.837,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_10_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.1851851851851852,
+          "auc": 0.9999537037037038,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 2.500000000000002,
+          "tar_pct": 97.5,
+          "balanced_accuracy_pct": 98.70949074074075,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9831196581196582,
+          "mcc": 0.9816294895319979,
+          "source_macro_frr_pct": 1.5646258503401358,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.7944,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.0,
+              "frr_pct": 5.000000000000004,
+              "tar_pct": 95.0,
+              "threshold": 0.8755,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8595,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 5.710910996134872,
+          "auc": 0.9834461364819078,
+          "far_pct": 0.35831794060355265,
+          "frr_pct": 15.528732181032167,
+          "tar_pct": 84.47126781896783,
+          "balanced_accuracy_pct": 92.05647493918214,
+          "precision_pct": 95.56287652913112,
+          "f1": 0.8938401557972137,
+          "mcc": 0.8883536452060538,
+          "source_macro_frr_pct": 15.510926512098687,
+          "source_macro_far_pct": 0.3655543339740737,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 1.386170906718852,
+              "far_pct": 0.3204670852359209,
+              "frr_pct": 4.217628832354858,
+              "tar_pct": 95.78237116764514,
+              "threshold": 0.7944,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 12.663659147869675,
+              "far_pct": 0.5914230019493177,
+              "frr_pct": 31.288220551378444,
+              "tar_pct": 68.71177944862156,
+              "threshold": 0.8755,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 3.0829029338160905,
+              "far_pct": 0.16306373462541932,
+              "frr_pct": 11.08034715936319,
+              "tar_pct": 88.91965284063681,
+              "threshold": 0.8595,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 13.958945105820106,
+          "auc": 0.9164373921130952,
+          "far_pct": 0.9178819444444445,
+          "frr_pct": 37.640476190476186,
+          "tar_pct": 62.35952380952381,
+          "balanced_accuracy_pct": 80.7208209325397,
+          "precision_pct": 83.68716037346736,
+          "f1": 0.6991049282901738,
+          "mcc": 0.6949305916858212,
+          "source_macro_frr_pct": 37.64047619047619,
+          "source_macro_far_pct": 0.9178819444444444,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 4.173263888888889,
+              "far_pct": 0.9897569444444445,
+              "frr_pct": 13.53928571428571,
+              "tar_pct": 86.46071428571429,
+              "threshold": 0.7944,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 31.18035714285714,
+              "far_pct": 1.3569444444444445,
+              "frr_pct": 71.56428571428572,
+              "tar_pct": 28.435714285714287,
+              "threshold": 0.8755,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 6.523214285714286,
+              "far_pct": 0.4069444444444444,
+              "frr_pct": 27.81785714285714,
+              "tar_pct": 72.18214285714286,
+              "threshold": 0.8595,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 13.804480820105821,
+          "auc": 0.9213780549584802,
+          "far_pct": 0.8535879629629629,
+          "frr_pct": 37.160714285714285,
+          "tar_pct": 62.839285714285715,
+          "balanced_accuracy_pct": 80.99284887566138,
+          "precision_pct": 85.13984118523469,
+          "f1": 0.7094563097693413,
+          "mcc": 0.7054479273857468,
+          "source_macro_frr_pct": 37.160714285714285,
+          "source_macro_far_pct": 0.8535879629629631,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 4.238095238095238,
+              "far_pct": 0.9091435185185185,
+              "frr_pct": 13.119047619047619,
+              "tar_pct": 86.88095238095238,
+              "threshold": 0.7944,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 30.008680555555557,
+              "far_pct": 1.3512731481481481,
+              "frr_pct": 68.54761904761905,
+              "tar_pct": 31.452380952380953,
+              "threshold": 0.8755,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 7.166666666666667,
+              "far_pct": 0.3003472222222222,
+              "frr_pct": 29.815476190476186,
+              "tar_pct": 70.18452380952381,
+              "threshold": 0.8595,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_120_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.6712962962962963,
+          "auc": 0.999832175925926,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 1.666666666666668,
+          "tar_pct": 98.33333333333333,
+          "balanced_accuracy_pct": 99.1261574074074,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9874472573839662,
+          "mcc": 0.9862641732521378,
+          "source_macro_frr_pct": 1.0884353741496597,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.5857,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 1.7361111111111112,
+              "far_pct": 0.0,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.7732,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8473,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 3.1046187731157215,
+          "auc": 0.9942941245820113,
+          "far_pct": 0.4764659049447597,
+          "frr_pct": 8.030939042648294,
+          "tar_pct": 91.9690609573517,
+          "balanced_accuracy_pct": 95.74629752620348,
+          "precision_pct": 94.89314185758997,
+          "f1": 0.9324183566630163,
+          "mcc": 0.9272962692773454,
+          "source_macro_frr_pct": 8.048198258206599,
+          "source_macro_far_pct": 0.46898320512382036,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.5463144161774298,
+              "far_pct": 0.6805714104515475,
+              "frr_pct": 0.4545825179386842,
+              "tar_pct": 99.54541748206131,
+              "threshold": 0.5857,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 8.268810916179337,
+              "far_pct": 0.6307992202729045,
+              "frr_pct": 20.060150375939845,
+              "tar_pct": 79.93984962406016,
+              "threshold": 0.7732,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.4987309869903981,
+              "far_pct": 0.1180270841098273,
+              "frr_pct": 3.5780842340663477,
+              "tar_pct": 96.42191576593365,
+              "threshold": 0.8473,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 8.257299933862432,
+          "auc": 0.9618806796771661,
+          "far_pct": 0.9567708333333335,
+          "frr_pct": 19.52559523809524,
+          "tar_pct": 80.47440476190476,
+          "balanced_accuracy_pct": 89.75881696428571,
+          "precision_pct": 87.56581365136283,
+          "f1": 0.8293216440144512,
+          "mcc": 0.8217533781046175,
+          "source_macro_frr_pct": 19.52559523809524,
+          "source_macro_far_pct": 0.9567708333333332,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 1.6035714285714284,
+              "far_pct": 1.1809027777777779,
+              "frr_pct": 1.9750000000000045,
+              "tar_pct": 98.02499999999999,
+              "threshold": 0.5857,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 22.114756944444444,
+              "far_pct": 1.5157986111111112,
+              "frr_pct": 51.787499999999994,
+              "tar_pct": 48.212500000000006,
+              "threshold": 0.7732,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 1.0535714285714286,
+              "far_pct": 0.1736111111111111,
+              "frr_pct": 4.814285714285715,
+              "tar_pct": 95.18571428571428,
+              "threshold": 0.8473,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 8.257908950617283,
+          "auc": 0.9630966765873016,
+          "far_pct": 0.9359567901234568,
+          "frr_pct": 19.70238095238095,
+          "tar_pct": 80.29761904761905,
+          "balanced_accuracy_pct": 89.6808311287478,
+          "precision_pct": 87.85337630106297,
+          "f1": 0.8304415657199776,
+          "mcc": 0.8225542268807291,
+          "source_macro_frr_pct": 19.70238095238095,
+          "source_macro_far_pct": 0.9359567901234568,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 1.4821428571428572,
+              "far_pct": 1.140625,
+              "frr_pct": 1.749999999999996,
+              "tar_pct": 98.25,
+              "threshold": 0.5857,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 21.94039351851852,
+              "far_pct": 1.541087962962963,
+              "frr_pct": 50.89880952380952,
+              "tar_pct": 49.101190476190474,
+              "threshold": 0.7732,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 1.351190476190476,
+              "far_pct": 0.1261574074074074,
+              "frr_pct": 6.458333333333332,
+              "tar_pct": 93.54166666666667,
+              "threshold": 0.8473,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_15_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.0925925925925926,
+          "auc": 0.9999768518518519,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 2.500000000000002,
+          "tar_pct": 97.5,
+          "balanced_accuracy_pct": 98.70949074074075,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9831196581196582,
+          "mcc": 0.9816294895319979,
+          "source_macro_frr_pct": 1.5646258503401358,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.7569,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 5.000000000000004,
+              "tar_pct": 95.0,
+              "threshold": 0.9005,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8359,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 5.491046549657746,
+          "auc": 0.9853483632314234,
+          "far_pct": 0.3458355202641585,
+          "frr_pct": 15.140352270813986,
+          "tar_pct": 84.85964772918602,
+          "balanced_accuracy_pct": 92.25690610446092,
+          "precision_pct": 95.75523221008946,
+          "f1": 0.8968449435216419,
+          "mcc": 0.8915445537660861,
+          "source_macro_frr_pct": 15.12633947098572,
+          "source_macro_far_pct": 0.35313205368780154,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 1.2943540715372908,
+              "far_pct": 0.32740360223236936,
+              "frr_pct": 3.964856490541424,
+              "tar_pct": 96.03514350945858,
+              "threshold": 0.7569,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 12.170426065162907,
+              "far_pct": 0.5460038986354776,
+              "frr_pct": 30.62255639097744,
+              "tar_pct": 69.37744360902256,
+              "threshold": 0.9005,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 3.008359512273042,
+              "far_pct": 0.1640990599246283,
+              "frr_pct": 10.833643930923099,
+              "tar_pct": 89.1663560690769,
+              "threshold": 0.8359,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 13.5083167989418,
+          "auc": 0.9218064521226026,
+          "far_pct": 0.8951388888888889,
+          "frr_pct": 36.73690476190476,
+          "tar_pct": 63.26309523809524,
+          "balanced_accuracy_pct": 81.18397817460318,
+          "precision_pct": 84.3985481429736,
+          "f1": 0.7072516043844423,
+          "mcc": 0.7035268474223512,
+          "source_macro_frr_pct": 36.73690476190476,
+          "source_macro_far_pct": 0.8951388888888888,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 3.877083333333333,
+              "far_pct": 0.99375,
+              "frr_pct": 12.889285714285714,
+              "tar_pct": 87.11071428571428,
+              "threshold": 0.7569,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 30.435714285714287,
+              "far_pct": 1.2842013888888888,
+              "frr_pct": 70.43571428571428,
+              "tar_pct": 29.564285714285717,
+              "threshold": 0.9005,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 6.212152777777778,
+              "far_pct": 0.40746527777777775,
+              "frr_pct": 26.88571428571429,
+              "tar_pct": 73.11428571428571,
+              "threshold": 0.8359,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 13.455246913580245,
+          "auc": 0.9258551203795561,
+          "far_pct": 0.8229166666666666,
+          "frr_pct": 36.26190476190476,
+          "tar_pct": 63.73809523809524,
+          "balanced_accuracy_pct": 81.45758928571428,
+          "precision_pct": 85.87605047004239,
+          "f1": 0.716685568527956,
+          "mcc": 0.7137220983061634,
+          "source_macro_frr_pct": 36.261904761904766,
+          "source_macro_far_pct": 0.8229166666666666,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 3.9074074074074074,
+              "far_pct": 0.9502314814814814,
+              "frr_pct": 12.422619047619044,
+              "tar_pct": 87.57738095238096,
+              "threshold": 0.7569,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 29.541666666666664,
+              "far_pct": 1.2216435185185184,
+              "frr_pct": 68.08333333333334,
+              "tar_pct": 31.916666666666664,
+              "threshold": 0.9005,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 6.916666666666667,
+              "far_pct": 0.296875,
+              "frr_pct": 28.2797619047619,
+              "tar_pct": 71.7202380952381,
+              "threshold": 0.8359,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_160_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.763888888888889,
+          "auc": 0.9998106812169313,
+          "far_pct": 0.16203703703703706,
+          "frr_pct": 2.3809523809523796,
+          "tar_pct": 97.61904761904763,
+          "balanced_accuracy_pct": 98.72850529100528,
+          "precision_pct": 98.35722819593786,
+          "f1": 0.9796312275535217,
+          "mcc": 0.9778152415439044,
+          "source_macro_frr_pct": 1.4965986394557822,
+          "source_macro_far_pct": 0.16534391534391535,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.2777777777777778,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.6171,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 1.7361111111111112,
+              "far_pct": 0.0,
+              "frr_pct": 4.642857142857137,
+              "tar_pct": 95.35714285714286,
+              "threshold": 0.7651,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.5555555555555556,
+              "far_pct": 0.20833333333333334,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.904,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 3.153548415098449,
+          "auc": 0.9940177498983309,
+          "far_pct": 0.4614329872400847,
+          "frr_pct": 8.507111934623934,
+          "tar_pct": 91.49288806537606,
+          "balanced_accuracy_pct": 95.51572753906798,
+          "precision_pct": 95.0013990841677,
+          "f1": 0.9301093038409839,
+          "mcc": 0.9251173708832381,
+          "source_macro_frr_pct": 8.51137072904586,
+          "source_macro_far_pct": 0.4580267540973026,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.17938682322243965,
+              "far_pct": 0.6678874936580416,
+              "frr_pct": 0.12027071102413966,
+              "tar_pct": 99.87972928897587,
+              "threshold": 0.6171,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 8.557393483709273,
+              "far_pct": 0.6265107212475634,
+              "frr_pct": 21.76441102756892,
+              "tar_pct": 78.23558897243107,
+              "threshold": 0.7651,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.7238649383636339,
+              "far_pct": 0.08990074681464916,
+              "frr_pct": 3.636654065278744,
+              "tar_pct": 96.36334593472125,
+              "threshold": 0.904,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 8.133043981481482,
+          "auc": 0.9615652008101852,
+          "far_pct": 0.8618634259259258,
+          "frr_pct": 19.38095238095238,
+          "tar_pct": 80.6190476190476,
+          "balanced_accuracy_pct": 89.87859209656085,
+          "precision_pct": 88.53274470171355,
+          "f1": 0.8323070841406405,
+          "mcc": 0.8267923046508326,
+          "source_macro_frr_pct": 19.380952380952383,
+          "source_macro_far_pct": 0.861863425925926,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.7605902777777778,
+              "far_pct": 1.129513888888889,
+              "frr_pct": 0.5249999999999977,
+              "tar_pct": 99.47500000000001,
+              "threshold": 0.6171,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 22.425,
+              "far_pct": 1.3321180555555554,
+              "frr_pct": 53.14642857142857,
+              "tar_pct": 46.85357142857143,
+              "threshold": 0.7651,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 1.2135416666666665,
+              "far_pct": 0.12395833333333334,
+              "frr_pct": 4.471428571428571,
+              "tar_pct": 95.52857142857142,
+              "threshold": 0.904,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 8.044587742504408,
+          "auc": 0.9625103335354203,
+          "far_pct": 0.8533950617283952,
+          "frr_pct": 19.53174603174603,
+          "tar_pct": 80.46825396825398,
+          "balanced_accuracy_pct": 89.80742945326278,
+          "precision_pct": 88.53612568121468,
+          "f1": 0.8336239744071263,
+          "mcc": 0.8268778272331946,
+          "source_macro_frr_pct": 19.531746031746028,
+          "source_macro_far_pct": 0.8533950617283951,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.6785714285714286,
+              "far_pct": 0.9837962962962963,
+              "frr_pct": 0.6249999999999978,
+              "tar_pct": 99.375,
+              "threshold": 0.6171,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 22.26190476190476,
+              "far_pct": 1.478587962962963,
+              "frr_pct": 52.08333333333333,
+              "tar_pct": 47.91666666666667,
+              "threshold": 0.7651,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 1.193287037037037,
+              "far_pct": 0.09780092592592592,
+              "frr_pct": 5.886904761904765,
+              "tar_pct": 94.11309523809524,
+              "threshold": 0.904,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_20_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.0925925925925926,
+          "auc": 0.9999768518518519,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 2.500000000000002,
+          "tar_pct": 97.5,
+          "balanced_accuracy_pct": 98.70949074074075,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9831196581196582,
+          "mcc": 0.9816294895319979,
+          "source_macro_frr_pct": 1.5646258503401358,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.6918,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 5.000000000000004,
+              "tar_pct": 95.0,
+              "threshold": 0.926,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.823,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 5.222516678144653,
+          "auc": 0.9872066629846654,
+          "far_pct": 0.3776067387083548,
+          "frr_pct": 14.421065390318402,
+          "tar_pct": 85.5789346096816,
+          "balanced_accuracy_pct": 92.60066393548662,
+          "precision_pct": 95.44349126651078,
+          "f1": 0.8995846775997892,
+          "mcc": 0.8940562977190735,
+          "source_macro_frr_pct": 14.407343099458886,
+          "source_macro_far_pct": 0.3842775316431128,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 1.1401652080162354,
+              "far_pct": 0.3761574074074074,
+              "frr_pct": 3.0984996738421366,
+              "tar_pct": 96.90150032615786,
+              "threshold": 0.6918,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 11.652631578947368,
+              "far_pct": 0.5908382066276803,
+              "frr_pct": 29.746365914786963,
+              "tar_pct": 70.25363408521304,
+              "threshold": 0.926,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 2.8747532474703554,
+              "far_pct": 0.16582460208997668,
+              "frr_pct": 10.418330582326107,
+              "tar_pct": 89.5816694176739,
+              "threshold": 0.823,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 12.997833994708996,
+          "auc": 0.927210056712963,
+          "far_pct": 1.0181712962962963,
+          "frr_pct": 35.277976190476195,
+          "tar_pct": 64.7220238095238,
+          "balanced_accuracy_pct": 81.85192625661375,
+          "precision_pct": 83.14615412196041,
+          "f1": 0.7132804246817885,
+          "mcc": 0.7068615333800795,
+          "source_macro_frr_pct": 35.27797619047619,
+          "source_macro_far_pct": 1.018171296296296,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 3.489930555555556,
+              "far_pct": 1.1303819444444445,
+              "frr_pct": 10.732142857142858,
+              "tar_pct": 89.26785714285714,
+              "threshold": 0.6918,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 29.680357142857144,
+              "far_pct": 1.5039930555555556,
+              "frr_pct": 69.34285714285716,
+              "tar_pct": 30.657142857142855,
+              "threshold": 0.926,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 5.823214285714286,
+              "far_pct": 0.4201388888888889,
+              "frr_pct": 25.758928571428573,
+              "tar_pct": 74.24107142857143,
+              "threshold": 0.823,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 12.988150352733685,
+          "auc": 0.9308294040040784,
+          "far_pct": 0.945023148148148,
+          "frr_pct": 34.50595238095238,
+          "tar_pct": 65.4940476190476,
+          "balanced_accuracy_pct": 82.27451223544973,
+          "precision_pct": 84.69260895843654,
+          "f1": 0.7244928692537059,
+          "mcc": 0.7189877224617751,
+          "source_macro_frr_pct": 34.50595238095238,
+          "source_macro_far_pct": 0.9450231481481483,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 3.5358796296296298,
+              "far_pct": 1.1099537037037037,
+              "frr_pct": 9.98809523809524,
+              "tar_pct": 90.01190476190476,
+              "threshold": 0.6918,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 28.869047619047617,
+              "far_pct": 1.4155092592592593,
+              "frr_pct": 66.82738095238095,
+              "tar_pct": 33.172619047619044,
+              "threshold": 0.926,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 6.559523809523809,
+              "far_pct": 0.3096064814814815,
+              "frr_pct": 26.702380952380956,
+              "tar_pct": 73.29761904761905,
+              "threshold": 0.823,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_30_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.2777777777777778,
+          "auc": 0.999920634920635,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 2.500000000000002,
+          "tar_pct": 97.5,
+          "balanced_accuracy_pct": 98.70949074074075,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9831196581196582,
+          "mcc": 0.9816294895319979,
+          "source_macro_frr_pct": 1.5646258503401358,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.5777,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.0,
+              "frr_pct": 5.000000000000004,
+              "tar_pct": 95.0,
+              "threshold": 0.9696,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.5555555555555556,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.7837,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 4.575739367415458,
+          "auc": 0.9903607621582432,
+          "far_pct": 0.36768946700133204,
+          "frr_pct": 13.225012851299184,
+          "tar_pct": 86.7749871487008,
+          "balanced_accuracy_pct": 93.20364884084974,
+          "precision_pct": 95.70357468075224,
+          "f1": 0.9065949160551057,
+          "mcc": 0.9018457341040761,
+          "source_macro_frr_pct": 13.229660046692237,
+          "source_macro_far_pct": 0.36961500459175106,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 1.105482623033993,
+              "far_pct": 0.46217021816336884,
+              "frr_pct": 1.9712165688193117,
+              "tar_pct": 98.02878343118068,
+              "threshold": 0.5777,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 10.25764411027569,
+              "far_pct": 0.46023391812865494,
+              "frr_pct": 29.305263157894736,
+              "tar_pct": 70.69473684210527,
+              "threshold": 0.9696,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 2.3640913689366916,
+              "far_pct": 0.1806642647119725,
+              "frr_pct": 8.3985588271835,
+              "tar_pct": 91.6014411728165,
+              "threshold": 0.7837,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 11.730952380952381,
+          "auc": 0.937960879174934,
+          "far_pct": 1.0364583333333333,
+          "frr_pct": 31.35119047619047,
+          "tar_pct": 68.64880952380952,
+          "balanced_accuracy_pct": 83.80617559523809,
+          "precision_pct": 83.7515569427898,
+          "f1": 0.7375592711388572,
+          "mcc": 0.7319131473042789,
+          "source_macro_frr_pct": 31.35119047619047,
+          "source_macro_far_pct": 1.0364583333333333,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 3.075,
+              "far_pct": 1.2487847222222221,
+              "frr_pct": 6.923214285714286,
+              "tar_pct": 93.07678571428572,
+              "threshold": 0.5777,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 27.3875,
+              "far_pct": 1.4104166666666667,
+              "frr_pct": 68.01607142857142,
+              "tar_pct": 31.98392857142857,
+              "threshold": 0.9696,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 4.730357142857143,
+              "far_pct": 0.4501736111111111,
+              "frr_pct": 19.114285714285717,
+              "tar_pct": 80.88571428571429,
+              "threshold": 0.7837,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 11.726631393298062,
+          "auc": 0.9412127159804894,
+          "far_pct": 0.9120370370370371,
+          "frr_pct": 30.88888888888889,
+          "tar_pct": 69.1111111111111,
+          "balanced_accuracy_pct": 84.09953703703702,
+          "precision_pct": 85.88896445877761,
+          "f1": 0.7485471215006446,
+          "mcc": 0.7448183973633773,
+          "source_macro_frr_pct": 30.88888888888889,
+          "source_macro_far_pct": 0.9120370370370372,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 3.0476190476190474,
+              "far_pct": 1.193865740740741,
+              "frr_pct": 6.601190476190477,
+              "tar_pct": 93.39880952380952,
+              "threshold": 0.5777,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 26.620370370370374,
+              "far_pct": 1.2037037037037037,
+              "frr_pct": 65.70238095238095,
+              "tar_pct": 34.29761904761905,
+              "threshold": 0.9696,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 5.511904761904762,
+              "far_pct": 0.3385416666666667,
+              "frr_pct": 20.36309523809524,
+              "tar_pct": 79.63690476190476,
+              "threshold": 0.7837,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_40_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.1851851851851852,
+          "auc": 0.9999570105820106,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 2.500000000000002,
+          "tar_pct": 97.5,
+          "balanced_accuracy_pct": 98.70949074074075,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9831196581196582,
+          "mcc": 0.9816294895319979,
+          "source_macro_frr_pct": 1.5646258503401358,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.5693,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 5.000000000000004,
+              "tar_pct": 95.0,
+              "threshold": 0.9158,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.5555555555555556,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.7399,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 3.884014152745299,
+          "auc": 0.9926336968083181,
+          "far_pct": 0.34949283555971156,
+          "frr_pct": 11.115984202814852,
+          "tar_pct": 88.88401579718516,
+          "balanced_accuracy_pct": 94.2672614808127,
+          "precision_pct": 96.06337016497166,
+          "f1": 0.92041911328138,
+          "mcc": 0.9158917808205757,
+          "source_macro_frr_pct": 11.111626245625123,
+          "source_macro_far_pct": 0.3471620594386027,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.9968199608610567,
+              "far_pct": 0.49269089294774226,
+              "frr_pct": 1.6491356816699332,
+              "tar_pct": 98.35086431833007,
+              "threshold": 0.5693,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 9.043664717348927,
+              "far_pct": 0.39824561403508774,
+              "frr_pct": 25.495739348370925,
+              "tar_pct": 74.50426065162907,
+              "threshold": 0.9158,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 1.6115577800259129,
+              "far_pct": 0.15754199969630459,
+              "frr_pct": 6.203077578403704,
+              "tar_pct": 93.79692242159629,
+              "threshold": 0.7399,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 10.436681547619049,
+          "auc": 0.9482100241712136,
+          "far_pct": 0.9108217592592592,
+          "frr_pct": 26.611904761904764,
+          "tar_pct": 73.38809523809523,
+          "balanced_accuracy_pct": 86.23863673941798,
+          "precision_pct": 86.64475917284351,
+          "f1": 0.778248508254769,
+          "mcc": 0.773918930823104,
+          "source_macro_frr_pct": 26.611904761904764,
+          "source_macro_far_pct": 0.9108217592592593,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.6339285714285716,
+              "far_pct": 1.1796875,
+              "frr_pct": 5.8339285714285705,
+              "tar_pct": 94.16607142857143,
+              "threshold": 0.5693,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 25.0921875,
+              "far_pct": 1.1930555555555555,
+              "frr_pct": 62.46071428571429,
+              "tar_pct": 37.53928571428571,
+              "threshold": 0.9158,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 3.5839285714285714,
+              "far_pct": 0.3597222222222222,
+              "frr_pct": 11.541071428571426,
+              "tar_pct": 88.45892857142857,
+              "threshold": 0.7399,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 10.386904761904761,
+          "auc": 0.9506665717087376,
+          "far_pct": 0.8196373456790124,
+          "frr_pct": 26.37301587301587,
+          "tar_pct": 73.62698412698413,
+          "balanced_accuracy_pct": 86.40367339065256,
+          "precision_pct": 88.07301649313247,
+          "f1": 0.7870057820949707,
+          "mcc": 0.7829890711011687,
+          "source_macro_frr_pct": 26.373015873015873,
+          "source_macro_far_pct": 0.8196373456790124,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.4702380952380953,
+              "far_pct": 1.1157407407407407,
+              "frr_pct": 5.422619047619048,
+              "tar_pct": 94.57738095238095,
+              "threshold": 0.5693,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 24.44047619047619,
+              "far_pct": 1.1186342592592593,
+              "frr_pct": 60.03571428571428,
+              "tar_pct": 39.964285714285715,
+              "threshold": 0.9158,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 4.25,
+              "far_pct": 0.22453703703703703,
+              "frr_pct": 13.660714285714281,
+              "tar_pct": 86.33928571428572,
+              "threshold": 0.7399,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_60_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.0925925925925926,
+          "auc": 0.9999768518518519,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 1.666666666666668,
+          "tar_pct": 98.33333333333333,
+          "balanced_accuracy_pct": 99.1261574074074,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9874472573839662,
+          "mcc": 0.9862641732521378,
+          "source_macro_frr_pct": 1.0884353741496597,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.5693,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8273,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8273,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 3.5451727924141623,
+          "auc": 0.9941762051498936,
+          "far_pct": 0.3972246357626403,
+          "frr_pct": 8.978841792752522,
+          "tar_pct": 91.02115820724748,
+          "balanced_accuracy_pct": 95.31196678574241,
+          "precision_pct": 95.70722512633652,
+          "f1": 0.9311556423875803,
+          "mcc": 0.9263247159903599,
+          "source_macro_frr_pct": 8.98891426339008,
+          "source_macro_far_pct": 0.39225291083171004,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.9594193937087773,
+              "far_pct": 0.6092243784880771,
+              "frr_pct": 1.1986301369863006,
+              "tar_pct": 98.8013698630137,
+              "threshold": 0.5693,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 8.292731829573935,
+              "far_pct": 0.44561403508771924,
+              "frr_pct": 20.493233082706762,
+              "tar_pct": 79.50676691729323,
+              "threshold": 0.8273,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 1.3833671539597743,
+              "far_pct": 0.13683549371212433,
+              "frr_pct": 5.2446621585645055,
+              "tar_pct": 94.75533784143549,
+              "threshold": 0.8273,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 9.730952380952381,
+          "auc": 0.9568608491753473,
+          "far_pct": 0.8921874999999999,
+          "frr_pct": 22.34642857142857,
+          "tar_pct": 77.65357142857142,
+          "balanced_accuracy_pct": 88.38069196428573,
+          "precision_pct": 88.1383915007533,
+          "f1": 0.8138276281581197,
+          "mcc": 0.8076955219338696,
+          "source_macro_frr_pct": 22.34642857142857,
+          "source_macro_far_pct": 0.8921875,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.6410714285714287,
+              "far_pct": 1.257986111111111,
+              "frr_pct": 3.962500000000002,
+              "tar_pct": 96.0375,
+              "threshold": 0.5693,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 23.52857142857143,
+              "far_pct": 1.2328125,
+              "frr_pct": 54.12678571428571,
+              "tar_pct": 45.87321428571428,
+              "threshold": 0.8273,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 3.023214285714286,
+              "far_pct": 0.1857638888888889,
+              "frr_pct": 8.950000000000003,
+              "tar_pct": 91.05,
+              "threshold": 0.8273,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 9.659143518518517,
+          "auc": 0.9584088027263373,
+          "far_pct": 0.8817515432098766,
+          "frr_pct": 22.726190476190478,
+          "tar_pct": 77.27380952380952,
+          "balanced_accuracy_pct": 88.19602899029981,
+          "precision_pct": 88.31851433927777,
+          "f1": 0.8134252386885853,
+          "mcc": 0.8068196653848078,
+          "source_macro_frr_pct": 22.72619047619047,
+          "source_macro_far_pct": 0.8817515432098766,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.4693287037037037,
+              "far_pct": 1.2395833333333333,
+              "frr_pct": 3.833333333333333,
+              "tar_pct": 96.16666666666667,
+              "threshold": 0.5693,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 23.006944444444443,
+              "far_pct": 1.2638888888888888,
+              "frr_pct": 53.154761904761905,
+              "tar_pct": 46.845238095238095,
+              "threshold": 0.8273,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 3.501157407407408,
+              "far_pct": 0.1417824074074074,
+              "frr_pct": 11.190476190476195,
+              "tar_pct": 88.80952380952381,
+              "threshold": 0.8273,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.0925925925925926,
+          "auc": 0.9999768518518519,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 1.666666666666668,
+          "tar_pct": 98.33333333333333,
+          "balanced_accuracy_pct": 99.1261574074074,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9874472573839662,
+          "mcc": 0.9862641732521378,
+          "source_macro_frr_pct": 1.0884353741496597,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.5824,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8086,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8842,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 3.2860458873589757,
+          "auc": 0.9947324092903399,
+          "far_pct": 0.38672452970835547,
+          "frr_pct": 8.6872920233655,
+          "tar_pct": 91.3127079766345,
+          "balanced_accuracy_pct": 95.46299172346308,
+          "precision_pct": 95.79790347852914,
+          "f1": 0.9334191278311094,
+          "mcc": 0.9285704527888567,
+          "source_macro_frr_pct": 8.685951251104202,
+          "source_macro_far_pct": 0.3808189349712123,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.9560502283105022,
+              "far_pct": 0.5495703323186201,
+              "frr_pct": 1.1660143509458543,
+              "tar_pct": 98.83398564905414,
+              "threshold": 0.5824,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 7.858479532163742,
+              "far_pct": 0.48343079922027293,
+              "frr_pct": 19.775438596491224,
+              "tar_pct": 80.22456140350877,
+              "threshold": 0.8086,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 1.0436079016026836,
+              "far_pct": 0.12717245758617357,
+              "frr_pct": 5.120423122659423,
+              "tar_pct": 94.87957687734058,
+              "threshold": 0.8842,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 8.974074074074075,
+          "auc": 0.9607400437231316,
+          "far_pct": 0.9014467592592593,
+          "frr_pct": 21.59226190476191,
+          "tar_pct": 78.4077380952381,
+          "balanced_accuracy_pct": 88.75314566798941,
+          "precision_pct": 88.10389991328834,
+          "f1": 0.8195480813982048,
+          "mcc": 0.8124949148930831,
+          "source_macro_frr_pct": 21.5922619047619,
+          "source_macro_far_pct": 0.9014467592592594,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.5267857142857144,
+              "far_pct": 1.2019097222222224,
+              "frr_pct": 3.9267857142857188,
+              "tar_pct": 96.07321428571429,
+              "threshold": 0.5824,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 22.147222222222222,
+              "far_pct": 1.3302083333333334,
+              "frr_pct": 52.582142857142856,
+              "tar_pct": 47.417857142857144,
+              "threshold": 0.8086,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 2.2482142857142855,
+              "far_pct": 0.17222222222222222,
+              "frr_pct": 8.267857142857139,
+              "tar_pct": 91.73214285714286,
+              "threshold": 0.8842,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 8.991512345679013,
+          "auc": 0.9619346013144842,
+          "far_pct": 0.8510802469135803,
+          "frr_pct": 21.98611111111111,
+          "tar_pct": 78.0138888888889,
+          "balanced_accuracy_pct": 88.58140432098764,
+          "precision_pct": 88.69133026547087,
+          "f1": 0.8206438342410866,
+          "mcc": 0.813574706725249,
+          "source_macro_frr_pct": 21.986111111111114,
+          "source_macro_far_pct": 0.8510802469135803,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.3599537037037037,
+              "far_pct": 1.1087962962962963,
+              "frr_pct": 3.6845238095238098,
+              "tar_pct": 96.31547619047619,
+              "threshold": 0.5824,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 21.916666666666668,
+              "far_pct": 1.3148148148148149,
+              "frr_pct": 51.68452380952381,
+              "tar_pct": 48.31547619047619,
+              "threshold": 0.8086,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 2.6979166666666665,
+              "far_pct": 0.12962962962962962,
+              "frr_pct": 10.589285714285712,
+              "tar_pct": 89.41071428571429,
+              "threshold": 0.8842,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_80_seed43",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.0925925925925926,
+          "auc": 0.9999768518518519,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 1.666666666666668,
+          "tar_pct": 98.33333333333333,
+          "balanced_accuracy_pct": 99.1261574074074,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9874472573839662,
+          "mcc": 0.9862641732521378,
+          "source_macro_frr_pct": 1.0884353741496597,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.5923,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8047,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.8468,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 3.222722773859989,
+          "auc": 0.9947560683466112,
+          "far_pct": 0.3249150468337606,
+          "frr_pct": 8.533310032595823,
+          "tar_pct": 91.46668996740418,
+          "balanced_accuracy_pct": 95.57088746028522,
+          "precision_pct": 96.43935028288347,
+          "f1": 0.9371870849986014,
+          "mcc": 0.9328465584059397,
+          "source_macro_frr_pct": 8.549447252795588,
+          "source_macro_far_pct": 0.32294197850046075,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.9550592973110096,
+              "far_pct": 0.46831399036022325,
+              "frr_pct": 1.2475538160469646,
+              "tar_pct": 98.75244618395304,
+              "threshold": 0.5923,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 7.659147869674185,
+              "far_pct": 0.40721247563352825,
+              "frr_pct": 20.00401002506266,
+              "tar_pct": 79.99598997493734,
+              "threshold": 0.8047,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 1.0539611545947738,
+              "far_pct": 0.09921867450753026,
+              "frr_pct": 4.348366256677849,
+              "tar_pct": 95.65163374332215,
+              "threshold": 0.8468,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 8.757051917989418,
+          "auc": 0.9610313559647817,
+          "far_pct": 0.8346064814814814,
+          "frr_pct": 21.78035714285714,
+          "tar_pct": 78.21964285714286,
+          "balanced_accuracy_pct": 88.69251818783069,
+          "precision_pct": 88.86305742462605,
+          "f1": 0.8199661216216713,
+          "mcc": 0.8145560092496337,
+          "source_macro_frr_pct": 21.78035714285714,
+          "source_macro_far_pct": 0.8346064814814814,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.6046875000000003,
+              "far_pct": 1.1789930555555554,
+              "frr_pct": 4.142857142857148,
+              "tar_pct": 95.85714285714285,
+              "threshold": 0.5923,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 21.42361111111111,
+              "far_pct": 1.1409722222222223,
+              "frr_pct": 53.56428571428571,
+              "tar_pct": 46.43571428571428,
+              "threshold": 0.8047,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 2.242857142857143,
+              "far_pct": 0.18385416666666668,
+              "frr_pct": 7.633928571428572,
+              "tar_pct": 92.36607142857143,
+              "threshold": 0.8468,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 8.923197751322752,
+          "auc": 0.961722487002131,
+          "far_pct": 0.7862654320987654,
+          "frr_pct": 21.817460317460316,
+          "tar_pct": 78.18253968253968,
+          "balanced_accuracy_pct": 88.69813712522046,
+          "precision_pct": 89.47343955357253,
+          "f1": 0.823875340961879,
+          "mcc": 0.8180804298504589,
+          "source_macro_frr_pct": 21.817460317460313,
+          "source_macro_far_pct": 0.7862654320987654,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.4207175925925926,
+              "far_pct": 1.0804398148148149,
+              "frr_pct": 3.880952380952385,
+              "tar_pct": 96.11904761904762,
+              "threshold": 0.5923,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 21.66435185185185,
+              "far_pct": 1.1550925925925926,
+              "frr_pct": 51.976190476190474,
+              "tar_pct": 48.023809523809526,
+              "threshold": 0.8047,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 2.6845238095238098,
+              "far_pct": 0.12326388888888888,
+              "frr_pct": 9.59523809523809,
+              "tar_pct": 90.40476190476191,
+              "threshold": 0.8468,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    },
+    {
+      "candidate": "noise_80_seed44",
+      "policy": "per_db",
+      "panels": {
+        "clean": {
+          "eer_pct": 0.0925925925925926,
+          "auc": 0.9999768518518519,
+          "far_pct": 0.08101851851851852,
+          "frr_pct": 1.666666666666668,
+          "tar_pct": 98.33333333333333,
+          "balanced_accuracy_pct": 99.1261574074074,
+          "precision_pct": 99.16666666666667,
+          "f1": 0.9874472573839662,
+          "mcc": 0.9862641732521378,
+          "source_macro_frr_pct": 1.0884353741496597,
+          "source_macro_far_pct": 0.05787037037037037,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 0.0,
+              "tar_pct": 100.0,
+              "threshold": 0.5777,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 0.0,
+              "far_pct": 0.0,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.7999,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 0.2777777777777778,
+              "far_pct": 0.24305555555555555,
+              "frr_pct": 2.500000000000002,
+              "tar_pct": 97.5,
+              "threshold": 0.7996,
+              "genuine_pairs": 280,
+              "impostor_pairs": 2880
+            }
+          }
+        },
+        "static_aug": {
+          "eer_pct": 3.319468009460582,
+          "auc": 0.9946536807341942,
+          "far_pct": 0.39947253964235946,
+          "frr_pct": 8.407303332244327,
+          "tar_pct": 91.59269666775567,
+          "balanced_accuracy_pct": 95.59661206405666,
+          "precision_pct": 95.73489531485603,
+          "f1": 0.9341946346728437,
+          "mcc": 0.929601848080713,
+          "source_macro_frr_pct": 8.413618836200556,
+          "source_macro_far_pct": 0.3920494909763724,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 0.9825505544683626,
+              "far_pct": 0.6552035768645358,
+              "frr_pct": 1.121167645140253,
+              "tar_pct": 98.87883235485975,
+              "threshold": 0.5777,
+              "genuine_pairs": 49056,
+              "impostor_pairs": 504576
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 7.92514619883041,
+              "far_pct": 0.40896686159844053,
+              "frr_pct": 19.991979949874683,
+              "tar_pct": 80.00802005012531,
+              "threshold": 0.7999,
+              "genuine_pairs": 49875,
+              "impostor_pairs": 513000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 1.050707275082974,
+              "far_pct": 0.1342471804641018,
+              "frr_pct": 4.108762401718047,
+              "tar_pct": 95.89123759828195,
+              "threshold": 0.7996,
+              "genuine_pairs": 56343,
+              "impostor_pairs": 579528
+            }
+          }
+        },
+        "noisy_original": {
+          "eer_pct": 8.888169642857141,
+          "auc": 0.9607244205109128,
+          "far_pct": 0.8271990740740739,
+          "frr_pct": 21.389880952380953,
+          "tar_pct": 78.61011904761905,
+          "balanced_accuracy_pct": 88.89145998677247,
+          "precision_pct": 89.13075459428818,
+          "f1": 0.8223144412288003,
+          "mcc": 0.8176597508041566,
+          "source_macro_frr_pct": 21.38988095238095,
+          "source_macro_far_pct": 0.8271990740740741,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.4734374999999997,
+              "far_pct": 1.2272569444444443,
+              "frr_pct": 3.873214285714288,
+              "tar_pct": 96.12678571428572,
+              "threshold": 0.5777,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 21.93392857142857,
+              "far_pct": 1.0444444444444443,
+              "frr_pct": 53.39821428571428,
+              "tar_pct": 46.60178571428572,
+              "threshold": 0.7999,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 2.257142857142857,
+              "far_pct": 0.20989583333333334,
+              "frr_pct": 6.898214285714288,
+              "tar_pct": 93.10178571428571,
+              "threshold": 0.7996,
+              "genuine_pairs": 56000,
+              "impostor_pairs": 576000
+            }
+          }
+        },
+        "compound": {
+          "eer_pct": 9.031663359788359,
+          "auc": 0.961389749021715,
+          "far_pct": 0.7806712962962963,
+          "frr_pct": 21.436507936507933,
+          "tar_pct": 78.56349206349206,
+          "balanced_accuracy_pct": 88.89141038359789,
+          "precision_pct": 89.75212675220264,
+          "f1": 0.8259214658468741,
+          "mcc": 0.8210495793356563,
+          "source_macro_frr_pct": 21.436507936507937,
+          "source_macro_far_pct": 0.7806712962962963,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "eer_pct": 2.3154761904761902,
+              "far_pct": 1.171875,
+              "frr_pct": 3.505952380952382,
+              "tar_pct": 96.49404761904762,
+              "threshold": 0.5777,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2002_DB3_B": {
+              "eer_pct": 22.00115740740741,
+              "far_pct": 1.035300925925926,
+              "frr_pct": 51.94642857142857,
+              "tar_pct": 48.05357142857143,
+              "threshold": 0.7999,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            },
+            "FVC2004_DB1_B": {
+              "eer_pct": 2.778356481481482,
+              "far_pct": 0.13483796296296297,
+              "frr_pct": 8.857142857142852,
+              "tar_pct": 91.14285714285715,
+              "threshold": 0.7996,
+              "genuine_pairs": 16800,
+              "impostor_pairs": 172800
+            }
+          }
+        }
+      }
+    }
+  ],
+  "nested_folds": [
+    {
+      "fold": 0,
+      "selected": {
+        "noise_max": 5,
+        "policy": "per_db",
+        "eligible": true,
+        "objective_macroFRR_worstDB_EER": [
+          26.83846450617284,
+          46.21773726851851,
+          9.21960450002294
+        ],
+        "mean_clean": {
+          "FVC2000_DB3_B": {
+            "far_pct": 0.0,
+            "frr_pct": 5.000000000000004,
+            "eer_pct": 0.1851851851851852
+          },
+          "FVC2002_DB3_B": {
+            "far_pct": 0.0,
+            "frr_pct": 8.333333333333334,
+            "eer_pct": 0.1851851851851852
+          },
+          "FVC2004_DB1_B": {
+            "far_pct": 0.9722222222222222,
+            "frr_pct": 0.0,
+            "eer_pct": 0.0
+          }
+        }
+      },
+      "baseline_policy": "per_db",
+      "roles": {
+        "baseline": {
+          "clean": {
+            "eer_pct": 0.3703703703703704,
+            "far_pct": 0.3703703703703704,
+            "frr_pct": 5.416666666666667,
+            "tar_pct": 94.58333333333333,
+            "balanced_accuracy_pct": 97.10648148148148,
+            "mcc": 0.9512524204631703
+          },
+          "static_aug": {
+            "eer_pct": 6.487678425796258,
+            "far_pct": 0.34498663912237554,
+            "frr_pct": 18.405934984438165,
+            "tar_pct": 81.59406501556185,
+            "balanced_accuracy_pct": 90.62453918821973,
+            "mcc": 0.8740776377586283
+          },
+          "noisy_original": {
+            "eer_pct": 15.644135802469135,
+            "far_pct": 0.8515432098765433,
+            "frr_pct": 39.111111111111114,
+            "tar_pct": 60.888888888888886,
+            "balanced_accuracy_pct": 80.01867283950618,
+            "mcc": 0.6980803823992375
+          },
+          "compound": {
+            "eer_pct": 14.712448559670783,
+            "far_pct": 0.7037037037037037,
+            "frr_pct": 39.342592592592595,
+            "tar_pct": 60.657407407407405,
+            "balanced_accuracy_pct": 79.97685185185186,
+            "mcc": 0.7081142982601694
+          }
+        },
+        "selected_procedure": {
+          "clean": {
+            "eer_pct": 0.3703703703703704,
+            "far_pct": 0.3703703703703704,
+            "frr_pct": 5.416666666666667,
+            "tar_pct": 94.58333333333333,
+            "balanced_accuracy_pct": 97.10648148148148,
+            "mcc": 0.9512524204631703
+          },
+          "static_aug": {
+            "eer_pct": 6.487678425796258,
+            "far_pct": 0.34498663912237554,
+            "frr_pct": 18.405934984438165,
+            "tar_pct": 81.59406501556185,
+            "balanced_accuracy_pct": 90.62453918821973,
+            "mcc": 0.8740776377586283
+          },
+          "noisy_original": {
+            "eer_pct": 15.644135802469135,
+            "far_pct": 0.8515432098765433,
+            "frr_pct": 39.111111111111114,
+            "tar_pct": 60.888888888888886,
+            "balanced_accuracy_pct": 80.01867283950618,
+            "mcc": 0.6980803823992375
+          },
+          "compound": {
+            "eer_pct": 14.712448559670783,
+            "far_pct": 0.7037037037037037,
+            "frr_pct": 39.342592592592595,
+            "tar_pct": 60.657407407407405,
+            "balanced_accuracy_pct": 79.97685185185186,
+            "mcc": 0.7081142982601694
+          }
+        },
+        "current_level_diagnostic": {
+          "clean": {
+            "eer_pct": 0.6018518518518519,
+            "far_pct": 0.5555555555555556,
+            "frr_pct": 5.555555555555556,
+            "tar_pct": 94.44444444444444,
+            "balanced_accuracy_pct": 96.94444444444444,
+            "mcc": 0.9419749058300676
+          },
+          "static_aug": {
+            "eer_pct": 5.082543776494577,
+            "far_pct": 0.4953345587317572,
+            "frr_pct": 13.325126150478857,
+            "tar_pct": 86.67487384952113,
+            "balanced_accuracy_pct": 93.0897696453947,
+            "mcc": 0.8972818215761404
+          },
+          "noisy_original": {
+            "eer_pct": 11.380555555555556,
+            "far_pct": 0.927469135802469,
+            "frr_pct": 28.948611111111113,
+            "tar_pct": 71.05138888888888,
+            "balanced_accuracy_pct": 85.0619598765432,
+            "mcc": 0.7716056301777378
+          },
+          "compound": {
+            "eer_pct": 10.895061728395062,
+            "far_pct": 0.8209876543209877,
+            "frr_pct": 27.97222222222222,
+            "tar_pct": 72.02777777777777,
+            "balanced_accuracy_pct": 85.60339506172839,
+            "mcc": 0.7836730303554833
+          }
+        }
+      }
+    },
+    {
+      "fold": 1,
+      "selected": {
+        "noise_max": 60,
+        "policy": "global",
+        "eligible": true,
+        "objective_macroFRR_worstDB_EER": [
+          16.154610339506174,
+          38.213859953703704,
+          6.5645007377139715
+        ],
+        "mean_clean": {
+          "FVC2000_DB3_B": {
+            "far_pct": 0.0,
+            "frr_pct": 0.0,
+            "eer_pct": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "far_pct": 0.0,
+            "frr_pct": 9.999999999999998,
+            "eer_pct": 0.23148148148148148
+          },
+          "FVC2004_DB1_B": {
+            "far_pct": 0.0,
+            "frr_pct": 0.0,
+            "eer_pct": 0.0
+          }
+        }
+      },
+      "baseline_policy": "per_db",
+      "roles": {
+        "baseline": {
+          "clean": {
+            "eer_pct": 0.1234567901234568,
+            "far_pct": 0.3703703703703704,
+            "frr_pct": 2.222222222222223,
+            "tar_pct": 97.77777777777777,
+            "balanced_accuracy_pct": 98.70370370370371,
+            "mcc": 0.9702083477986011
+          },
+          "static_aug": {
+            "eer_pct": 6.654504432177449,
+            "far_pct": 0.6430997708963374,
+            "frr_pct": 16.877127054565065,
+            "tar_pct": 83.12287294543495,
+            "balanced_accuracy_pct": 91.2398865872693,
+            "mcc": 0.8684129543511923
+          },
+          "noisy_original": {
+            "eer_pct": 15.950308641975312,
+            "far_pct": 1.4101851851851852,
+            "frr_pct": 36.68194444444444,
+            "tar_pct": 63.31805555555556,
+            "balanced_accuracy_pct": 80.9539351851852,
+            "mcc": 0.68338376136778
+          },
+          "compound": {
+            "eer_pct": 15.581790123456791,
+            "far_pct": 1.1003086419753088,
+            "frr_pct": 37.402777777777786,
+            "tar_pct": 62.59722222222222,
+            "balanced_accuracy_pct": 80.74845679012346,
+            "mcc": 0.6995103758048122
+          }
+        },
+        "selected_procedure": {
+          "clean": {
+            "eer_pct": 0.1234567901234568,
+            "far_pct": 0.15432098765432098,
+            "frr_pct": 1.111111111111112,
+            "tar_pct": 98.88888888888889,
+            "balanced_accuracy_pct": 99.36728395061726,
+            "mcc": 0.9861837066980144
+          },
+          "static_aug": {
+            "eer_pct": 4.101744880596062,
+            "far_pct": 0.39048120243361906,
+            "frr_pct": 13.92708794239709,
+            "tar_pct": 86.07291205760292,
+            "balanced_accuracy_pct": 92.84121542758464,
+            "mcc": 0.8993415026366134
+          },
+          "noisy_original": {
+            "eer_pct": 10.165740740740741,
+            "far_pct": 0.5881172839506172,
+            "frr_pct": 29.53194444444444,
+            "tar_pct": 70.46805555555555,
+            "balanced_accuracy_pct": 84.93996913580246,
+            "mcc": 0.7829598205000143
+          },
+          "compound": {
+            "eer_pct": 10.678497942386834,
+            "far_pct": 0.5303497942386831,
+            "frr_pct": 31.20370370370371,
+            "tar_pct": 68.79629629629629,
+            "balanced_accuracy_pct": 84.13297325102882,
+            "mcc": 0.7753618290664248
+          }
+        },
+        "current_level_diagnostic": {
+          "clean": {
+            "eer_pct": 0.1851851851851852,
+            "far_pct": 0.2623456790123457,
+            "frr_pct": 1.6666666666666683,
+            "tar_pct": 98.33333333333333,
+            "balanced_accuracy_pct": 99.03549382716048,
+            "mcc": 0.9777373781074186
+          },
+          "static_aug": {
+            "eer_pct": 3.941319335487949,
+            "far_pct": 0.4229001536787751,
+            "frr_pct": 12.899949337271826,
+            "tar_pct": 87.10005066272817,
+            "balanced_accuracy_pct": 93.33857525452471,
+            "mcc": 0.9038102683039411
+          },
+          "noisy_original": {
+            "eer_pct": 9.686265432098766,
+            "far_pct": 0.6194444444444444,
+            "frr_pct": 27.016666666666666,
+            "tar_pct": 72.98333333333332,
+            "balanced_accuracy_pct": 86.18194444444445,
+            "mcc": 0.7969091537440712
+          },
+          "compound": {
+            "eer_pct": 10.287551440329217,
+            "far_pct": 0.5504115226337448,
+            "frr_pct": 28.523148148148152,
+            "tar_pct": 71.47685185185186,
+            "balanced_accuracy_pct": 85.46322016460906,
+            "mcc": 0.7916316269126387
+          }
+        }
+      }
+    },
+    {
+      "fold": 2,
+      "selected": {
+        "noise_max": 120,
+        "policy": "per_db",
+        "eligible": true,
+        "objective_macroFRR_worstDB_EER": [
+          16.25690586419753,
+          43.10135995370371,
+          7.208666420828135
+        ],
+        "mean_clean": {
+          "FVC2000_DB3_B": {
+            "far_pct": 0.0,
+            "frr_pct": 0.0,
+            "eer_pct": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "far_pct": 0.0,
+            "frr_pct": 15.000000000000002,
+            "eer_pct": 2.0833333333333335
+          },
+          "FVC2004_DB1_B": {
+            "far_pct": 0.7870370370370371,
+            "frr_pct": 1.666666666666668,
+            "eer_pct": 0.4166666666666667
+          }
+        }
+      },
+      "baseline_policy": "per_db",
+      "roles": {
+        "baseline": {
+          "clean": {
+            "eer_pct": 2.993827160493827,
+            "far_pct": 0.0,
+            "frr_pct": 8.333333333333334,
+            "tar_pct": 91.66666666666667,
+            "balanced_accuracy_pct": 95.83333333333333,
+            "mcc": 0.9514140653924164
+          },
+          "static_aug": {
+            "eer_pct": 7.419308573049684,
+            "far_pct": 0.34503354743880527,
+            "frr_pct": 20.290472581900236,
+            "tar_pct": 79.70952741809977,
+            "balanced_accuracy_pct": 89.68224693533048,
+            "mcc": 0.8538531570625091
+          },
+          "noisy_original": {
+            "eer_pct": 13.91929012345679,
+            "far_pct": 0.8966049382716049,
+            "frr_pct": 35.337500000000006,
+            "tar_pct": 64.6625,
+            "balanced_accuracy_pct": 81.8829475308642,
+            "mcc": 0.6993323348477537
+          },
+          "compound": {
+            "eer_pct": 14.523148148148145,
+            "far_pct": 0.9393004115226338,
+            "frr_pct": 34.111111111111114,
+            "tar_pct": 65.88888888888889,
+            "balanced_accuracy_pct": 82.47479423868313,
+            "mcc": 0.713657224184076
+          }
+        },
+        "selected_procedure": {
+          "clean": {
+            "eer_pct": 2.0833333333333335,
+            "far_pct": 0.0154320987654321,
+            "frr_pct": 3.3333333333333326,
+            "tar_pct": 96.66666666666667,
+            "balanced_accuracy_pct": 98.32561728395062,
+            "mcc": 0.9803874072123939
+          },
+          "static_aug": {
+            "eer_pct": 5.384932171972938,
+            "far_pct": 0.6786918554803352,
+            "frr_pct": 13.063500039414215,
+            "tar_pct": 86.93649996058578,
+            "balanced_accuracy_pct": 93.12890405255274,
+            "mcc": 0.8866197531815962
+          },
+          "noisy_original": {
+            "eer_pct": 10.735185185185186,
+            "far_pct": 0.8703703703703705,
+            "frr_pct": 24.431944444444444,
+            "tar_pct": 75.56805555555556,
+            "balanced_accuracy_pct": 87.34884259259259,
+            "mcc": 0.788154094603871
+          },
+          "compound": {
+            "eer_pct": 10.784465020576132,
+            "far_pct": 0.8369341563786008,
+            "frr_pct": 24.212962962962962,
+            "tar_pct": 75.78703703703704,
+            "balanced_accuracy_pct": 87.47505144032922,
+            "mcc": 0.7931481917840493
+          }
+        },
+        "current_level_diagnostic": {
+          "clean": {
+            "eer_pct": 3.1018518518518516,
+            "far_pct": 0.0154320987654321,
+            "frr_pct": 4.722222222222222,
+            "tar_pct": 95.27777777777777,
+            "balanced_accuracy_pct": 97.63117283950618,
+            "mcc": 0.9723150377999761
+          },
+          "static_aug": {
+            "eer_pct": 5.469738415661117,
+            "far_pct": 0.734701888089853,
+            "frr_pct": 13.230531139236483,
+            "tar_pct": 86.76946886076352,
+            "balanced_accuracy_pct": 93.01738348633684,
+            "mcc": 0.8827270564024651
+          },
+          "noisy_original": {
+            "eer_pct": 11.114660493827163,
+            "far_pct": 0.9415123456790124,
+            "frr_pct": 24.90138888888889,
+            "tar_pct": 75.09861111111111,
+            "balanced_accuracy_pct": 87.07854938271605,
+            "mcc": 0.7817466907172158
+          },
+          "compound": {
+            "eer_pct": 11.132201646090534,
+            "far_pct": 0.9022633744855967,
+            "frr_pct": 24.52314814814815,
+            "tar_pct": 75.47685185185185,
+            "balanced_accuracy_pct": 87.28729423868313,
+            "mcc": 0.7885845946874266
+          }
+        }
+      }
+    },
+    {
+      "fold": 3,
+      "selected": {
+        "noise_max": 160,
+        "policy": "per_db",
+        "eligible": true,
+        "objective_macroFRR_worstDB_EER": [
+          12.90660686728395,
+          28.84079861111111,
+          4.9880039439839825
+        ],
+        "mean_clean": {
+          "FVC2000_DB3_B": {
+            "far_pct": 0.0,
+            "frr_pct": 0.0,
+            "eer_pct": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "far_pct": 0.0,
+            "frr_pct": 0.0,
+            "eer_pct": 0.0
+          },
+          "FVC2004_DB1_B": {
+            "far_pct": 0.5555555555555556,
+            "frr_pct": 0.0,
+            "eer_pct": 0.0
+          }
+        }
+      },
+      "baseline_policy": "per_db",
+      "roles": {
+        "baseline": {
+          "clean": {
+            "eer_pct": 0.3395061728395061,
+            "far_pct": 0.2469135802469136,
+            "frr_pct": 4.444444444444445,
+            "tar_pct": 95.55555555555556,
+            "balanced_accuracy_pct": 97.65432098765433,
+            "mcc": 0.9628419595148219
+          },
+          "static_aug": {
+            "eer_pct": 6.894951363773789,
+            "far_pct": 0.22274369829603988,
+            "frr_pct": 18.991591482283784,
+            "tar_pct": 81.0084085177162,
+            "balanced_accuracy_pct": 90.39283240971008,
+            "mcc": 0.8753028728911175
+          },
+          "noisy_original": {
+            "eer_pct": 15.458641975308641,
+            "far_pct": 0.3899691358024691,
+            "frr_pct": 40.275000000000006,
+            "tar_pct": 59.724999999999994,
+            "balanced_accuracy_pct": 79.66751543209877,
+            "mcc": 0.7032764412753756
+          },
+          "compound": {
+            "eer_pct": 15.498971193415636,
+            "far_pct": 0.3477366255144033,
+            "frr_pct": 39.995370370370374,
+            "tar_pct": 60.004629629629626,
+            "balanced_accuracy_pct": 79.82844650205762,
+            "mcc": 0.7103279806430527
+          }
+        },
+        "selected_procedure": {
+          "clean": {
+            "eer_pct": 1.2345679012345678,
+            "far_pct": 0.2006172839506173,
+            "frr_pct": 3.333333333333334,
+            "tar_pct": 96.66666666666667,
+            "balanced_accuracy_pct": 98.23302469135803,
+            "mcc": 0.9713804706499379
+          },
+          "static_aug": {
+            "eer_pct": 4.450432594507807,
+            "far_pct": 0.29238126588170776,
+            "frr_pct": 11.144709393767325,
+            "tar_pct": 88.85529060623267,
+            "balanced_accuracy_pct": 94.28145467017549,
+            "mcc": 0.9189726362994759
+          },
+          "noisy_original": {
+            "eer_pct": 11.455246913580247,
+            "far_pct": 0.4029320987654321,
+            "frr_pct": 25.694444444444443,
+            "tar_pct": 74.30555555555554,
+            "balanced_accuracy_pct": 86.95131172839507,
+            "mcc": 0.8043043186677208
+          },
+          "compound": {
+            "eer_pct": 10.866255144032923,
+            "far_pct": 0.4583333333333333,
+            "frr_pct": 24.569444444444443,
+            "tar_pct": 75.43055555555556,
+            "balanced_accuracy_pct": 87.48611111111111,
+            "mcc": 0.810555560732215
+          }
+        },
+        "current_level_diagnostic": {
+          "clean": {
+            "eer_pct": 0.0617283950617284,
+            "far_pct": 0.2469135802469136,
+            "frr_pct": 2.222222222222222,
+            "tar_pct": 97.77777777777777,
+            "balanced_accuracy_pct": 98.76543209876543,
+            "mcc": 0.9757218825444416
+          },
+          "static_aug": {
+            "eer_pct": 5.000256332286806,
+            "far_pct": 0.22113011515557976,
+            "frr_pct": 10.683630748367985,
+            "tar_pct": 89.31636925163201,
+            "balanced_accuracy_pct": 94.54761956823822,
+            "mcc": 0.9265453958702324
+          },
+          "noisy_original": {
+            "eer_pct": 12.940895061728394,
+            "far_pct": 0.3274691358024691,
+            "frr_pct": 27.447222222222223,
+            "tar_pct": 72.55277777777778,
+            "balanced_accuracy_pct": 86.11265432098766,
+            "mcc": 0.8015749304839949
+          },
+          "compound": {
+            "eer_pct": 12.568415637860081,
+            "far_pct": 0.32921810699588483,
+            "frr_pct": 27.337962962962962,
+            "tar_pct": 72.66203703703702,
+            "balanced_accuracy_pct": 86.16640946502058,
+            "mcc": 0.8052373628299294
+          }
+        }
+      }
+    }
+  ],
+  "uncertainty": {
+    "archive_clean_all": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": 0.0,
+          "paired_cluster_ci95_pp": [
+            0.0,
+            0.0
+          ],
+          "degenerate_interval": true,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": 0.0,
+          "paired_cluster_ci95_pp": [
+            0.0,
+            0.0
+          ],
+          "degenerate_interval": true,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": 0.0,
+          "paired_cluster_ci95_pp": [
+            0.0,
+            0.0
+          ],
+          "degenerate_interval": true,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -2.5,
+          "paired_cluster_ci95_pp": [
+            -7.5,
+            0.0
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": 0.0,
+          "paired_cluster_ci95_pp": [
+            0.0,
+            0.0
+          ],
+          "degenerate_interval": true,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": 0.0,
+          "paired_cluster_ci95_pp": [
+            0.0,
+            0.0
+          ],
+          "degenerate_interval": true,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": 0.0,
+          "paired_cluster_ci95_pp": [
+            0.0,
+            0.0
+          ]
+        },
+        "frr": {
+          "difference_pp": -0.8333333333333334,
+          "paired_cluster_ci95_pp": [
+            -2.5,
+            0.0
+          ]
+        }
+      }
+    },
+    "archive_static_aug_all": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": 0.22414859208523602,
+          "paired_cluster_ci95_pp": [
+            -0.0889755483092515,
+            0.836058929901572
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -3.0577299412915853,
+          "paired_cluster_ci95_pp": [
+            -5.648261356221924,
+            -0.8638231157374185
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": -0.1939571150097466,
+          "paired_cluster_ci95_pp": [
+            -0.6779727267910172,
+            0.1948480337070675
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -11.755388471177941,
+          "paired_cluster_ci95_pp": [
+            -14.817066058045782,
+            -8.607997861544716
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.03433828909043221,
+          "paired_cluster_ci95_pp": [
+            -0.12947119409899643,
+            0.0
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -5.848108904389188,
+          "paired_cluster_ci95_pp": [
+            -8.173752640866148,
+            -3.4461280522943123
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.001382270671647599,
+          "paired_cluster_ci95_pp": [
+            -0.20540451246481964,
+            0.24678345414329775
+          ]
+        },
+        "frr": {
+          "difference_pp": -6.887075772286238,
+          "paired_cluster_ci95_pp": [
+            -8.508798544587368,
+            -5.253694898964276
+          ]
+        }
+      }
+    },
+    "archive_noisy_original_all": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": 0.20572916666666685,
+          "paired_cluster_ci95_pp": [
+            -0.5304912336482556,
+            1.5376613898026308
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -9.660714285714285,
+          "paired_cluster_ci95_pp": [
+            -20.201205357142854,
+            -1.9446428571428571
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": -0.24652777777777768,
+          "paired_cluster_ci95_pp": [
+            -1.4028320312499993,
+            0.5687590144230769
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -19.18392857142858,
+          "paired_cluster_ci95_pp": [
+            -23.14808035714286,
+            -14.654419642857139
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.22829861111111116,
+          "paired_cluster_ci95_pp": [
+            -1.615341796875,
+            0.10856366335044937
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -19.103571428571428,
+          "paired_cluster_ci95_pp": [
+            -28.564553571428572,
+            -11.119508928571431
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.089699074074074,
+          "paired_cluster_ci95_pp": [
+            -0.7283468688084229,
+            0.4818457921266106
+          ]
+        },
+        "frr": {
+          "difference_pp": -15.982738095238098,
+          "paired_cluster_ci95_pp": [
+            -20.597499999999993,
+            -11.854568452380954
+          ]
+        }
+      }
+    },
+    "archive_noisy_original_in": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": -0.10633680555555558,
+          "paired_cluster_ci95_pp": [
+            -0.714888835202526,
+            0.13492838541666635
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -5.879464285714286,
+          "paired_cluster_ci95_pp": [
+            -14.264118303571427,
+            -0.20530133928571434
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": -0.6462673611111112,
+          "paired_cluster_ci95_pp": [
+            -2.225949171112805,
+            0.47647437118902425
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -23.433035714285715,
+          "paired_cluster_ci95_pp": [
+            -28.678850446428566,
+            -17.336997767857156
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.2456597222222222,
+          "paired_cluster_ci95_pp": [
+            -1.6020996093749997,
+            0.049084770388719286
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -13.752232142857142,
+          "paired_cluster_ci95_pp": [
+            -21.78169642857143,
+            -7.068861607142858
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.33275462962962965,
+          "paired_cluster_ci95_pp": [
+            -1.0076051043910201,
+            0.12695641896081344
+          ]
+        },
+        "frr": {
+          "difference_pp": -14.354910714285714,
+          "paired_cluster_ci95_pp": [
+            -18.402957589285716,
+            -10.768750000000002
+          ]
+        }
+      }
+    },
+    "archive_noisy_original_out": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": 1.453993055555555,
+          "paired_cluster_ci95_pp": [
+            -2.9198111185213413,
+            7.8255126953125
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -24.78571428571428,
+          "paired_cluster_ci95_pp": [
+            -45.83883928571428,
+            -7.0316964285714345
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": 1.3524305555555558,
+          "paired_cluster_ci95_pp": [
+            -0.04101819490131579,
+            3.2094111785184563
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -2.1875,
+          "paired_cluster_ci95_pp": [
+            -5.884374999999999,
+            0.0
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.15885416666666669,
+          "paired_cluster_ci95_pp": [
+            -1.4803641183035714,
+            0.5068835746951219
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -40.50892857142858,
+          "paired_cluster_ci95_pp": [
+            -55.57433035714285,
+            -26.78169642857143
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": 0.882523148148148,
+          "paired_cluster_ci95_pp": [
+            -0.7072529796987486,
+            3.1397778825581897
+          ]
+        },
+        "frr": {
+          "difference_pp": -22.49404761904762,
+          "paired_cluster_ci95_pp": [
+            -31.382738095238096,
+            -14.44330357142857
+          ]
+        }
+      }
+    },
+    "archive_compound_all": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": 0.18055555555555547,
+          "paired_cluster_ci95_pp": [
+            -0.7363546806469298,
+            1.3047607879924952
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -9.285714285714285,
+          "paired_cluster_ci95_pp": [
+            -18.92455357142857,
+            -1.9876488095238096
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": -0.16435185185185186,
+          "paired_cluster_ci95_pp": [
+            -1.0814557678250112,
+            0.5822288876488092
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -17.14880952380952,
+          "paired_cluster_ci95_pp": [
+            -20.55505952380954,
+            -13.45223214285714
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.16724537037037038,
+          "paired_cluster_ci95_pp": [
+            -0.859499007936508,
+            0.024834857723577186
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -19.00595238095238,
+          "paired_cluster_ci95_pp": [
+            -28.483482142857145,
+            -11.249255952380949
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.05034722222222226,
+          "paired_cluster_ci95_pp": [
+            -0.561053453917752,
+            0.4142488143631436
+          ]
+        },
+        "frr": {
+          "difference_pp": -15.146825396825394,
+          "paired_cluster_ci95_pp": [
+            -19.717113095238094,
+            -11.457390873015875
+          ]
+        }
+      }
+    },
+    "archive_compound_in": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": -0.07089120370370372,
+          "paired_cluster_ci95_pp": [
+            -0.8066565040650407,
+            0.30615234374999983
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -5.282738095238095,
+          "paired_cluster_ci95_pp": [
+            -11.592447916666668,
+            -0.7429315476190486
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": -0.5461516203703705,
+          "paired_cluster_ci95_pp": [
+            -1.7568012020452233,
+            0.5349242064329955
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -21.049107142857146,
+          "paired_cluster_ci95_pp": [
+            -25.417038690476186,
+            -16.300967261904766
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.18229166666666666,
+          "paired_cluster_ci95_pp": [
+            -0.8682774017375168,
+            0.0
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -15.602678571428573,
+          "paired_cluster_ci95_pp": [
+            -24.110491071428573,
+            -8.604352678571432
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.2664448302469136,
+          "paired_cluster_ci95_pp": [
+            -0.7945723307795766,
+            0.15723596619138278
+          ]
+        },
+        "frr": {
+          "difference_pp": -13.978174603174603,
+          "paired_cluster_ci95_pp": [
+            -17.850508432539684,
+            -10.734064980158731
+          ]
+        }
+      }
+    },
+    "archive_compound_out": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": 1.1863425925925926,
+          "paired_cluster_ci95_pp": [
+            -3.527591765873016,
+            6.914380081300814
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -25.297619047619047,
+          "paired_cluster_ci95_pp": [
+            -48.63392857142858,
+            -6.4531250000000036
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": 1.362847222222222,
+          "paired_cluster_ci95_pp": [
+            -0.10423344017094018,
+            3.711108826754386
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -1.547619047619051,
+          "paired_cluster_ci95_pp": [
+            -4.375,
+            0.0
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.10706018518518516,
+          "paired_cluster_ci95_pp": [
+            -0.8619043082171894,
+            0.16451223273026325
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -32.619047619047606,
+          "paired_cluster_ci95_pp": [
+            -46.24999999999999,
+            -20.354910714285715
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": 0.8140432098765432,
+          "paired_cluster_ci95_pp": [
+            -0.7994806988571533,
+            2.793757597608625
+          ]
+        },
+        "frr": {
+          "difference_pp": -19.82142857142857,
+          "paired_cluster_ci95_pp": [
+            -28.344990079365086,
+            -12.310267857142852
+          ]
+        }
+      }
+    },
+    "nested_clean_all": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": 0.0,
+          "paired_cluster_ci95_pp": [
+            0.0,
+            0.0
+          ],
+          "degenerate_interval": true,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -0.8333333333333335,
+          "paired_cluster_ci95_pp": [
+            -2.5,
+            0.0
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": 0.023148148148148147,
+          "paired_cluster_ci95_pp": [
+            -0.16036184210526316,
+            0.35761325952075196
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -5.000000000000001,
+          "paired_cluster_ci95_pp": [
+            -8.75,
+            -1.25
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.20833333333333334,
+          "paired_cluster_ci95_pp": [
+            -0.9146341463414633,
+            0.0
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": 0.4166666666666667,
+          "paired_cluster_ci95_pp": [
+            0.0,
+            2.5
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.0617283950617284,
+          "paired_cluster_ci95_pp": [
+            -0.26862532421169194,
+            0.07823867394179888
+          ]
+        },
+        "frr": {
+          "difference_pp": -1.8055555555555556,
+          "paired_cluster_ci95_pp": [
+            -3.4722222222222214,
+            -0.41319444444444703
+          ]
+        }
+      }
+    },
+    "nested_static_aug_all": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": 0.01598702012514802,
+          "paired_cluster_ci95_pp": [
+            -0.3308635828388371,
+            0.5841456749768256
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -3.594701293759514,
+          "paired_cluster_ci95_pp": [
+            -6.525556271326227,
+            -0.9848373652811329
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": 0.20181936322287208,
+          "paired_cluster_ci95_pp": [
+            -0.2509569744128445,
+            0.6757244167162568
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -8.556725146198826,
+          "paired_cluster_ci95_pp": [
+            -12.43488459270067,
+            -5.382654700456497
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.10514303594189295,
+          "paired_cluster_ci95_pp": [
+            -0.4658918742756432,
+            0.13687610791892774
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -1.3324636600819977,
+          "paired_cluster_ci95_pp": [
+            -2.782002006913459,
+            0.26928503828509326
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": 0.03755444913537572,
+          "paired_cluster_ci95_pp": [
+            -0.17698580487815546,
+            0.26824451375831954
+          ]
+        },
+        "frr": {
+          "difference_pp": -4.4946300333467795,
+          "paired_cluster_ci95_pp": [
+            -6.115927116484149,
+            -2.9499114510772717
+          ]
+        }
+      }
+    },
+    "nested_noisy_original_all": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": -0.4215277777777777,
+          "paired_cluster_ci95_pp": [
+            -1.475375560245987,
+            0.3217193374060147
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -8.242708333333335,
+          "paired_cluster_ci95_pp": [
+            -16.240234375,
+            -1.103932291666669
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": 0.11597222222222214,
+          "paired_cluster_ci95_pp": [
+            -0.8849267700501252,
+            0.9366945344258126
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -10.875,
+          "paired_cluster_ci95_pp": [
+            -15.224375000000002,
+            -6.595911458333331
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.320949074074074,
+          "paired_cluster_ci95_pp": [
+            -1.5057421875,
+            0.03125620039682539
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -5.359375,
+          "paired_cluster_ci95_pp": [
+            -9.000651041666668,
+            -2.101328125000002
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.20883487654320987,
+          "paired_cluster_ci95_pp": [
+            -0.780866920070044,
+            0.22661762958619153
+          ]
+        },
+        "frr": {
+          "difference_pp": -8.159027777777778,
+          "paired_cluster_ci95_pp": [
+            -11.45902777777778,
+            -5.115277777777779
+          ]
+        }
+      }
+    },
+    "nested_noisy_original_in": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": -0.3537326388888889,
+          "paired_cluster_ci95_pp": [
+            -1.1952097039473681,
+            0.01364919062137049
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -6.8046875,
+          "paired_cluster_ci95_pp": [
+            -14.4810546875,
+            -0.4647135416666669
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": 0.19140625,
+          "paired_cluster_ci95_pp": [
+            -0.95950927734375,
+            1.1546211056592988
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -13.656249999999993,
+          "paired_cluster_ci95_pp": [
+            -19.022493489583344,
+            -8.333919270833338
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.384982638888889,
+          "paired_cluster_ci95_pp": [
+            -1.6740576589209402,
+            0.006088785702824084
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -1.893229166666666,
+          "paired_cluster_ci95_pp": [
+            -4.713444010416669,
+            0.4324869791666668
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.18243634259259264,
+          "paired_cluster_ci95_pp": [
+            -0.7658283011079662,
+            0.24419307839134835
+          ]
+        },
+        "frr": {
+          "difference_pp": -7.451388888888886,
+          "paired_cluster_ci95_pp": [
+            -10.760525173611109,
+            -4.363943142361111
+          ]
+        }
+      }
+    },
+    "nested_noisy_original_out": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": -0.6927083333333333,
+          "paired_cluster_ci95_pp": [
+            -3.681116615853658,
+            1.6526537698412698
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -13.994791666666671,
+          "paired_cluster_ci95_pp": [
+            -25.261718749999996,
+            -3.135546875000008
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": -0.18576388888888895,
+          "paired_cluster_ci95_pp": [
+            -0.883079892113095,
+            0.12885438892840204
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": 0.2499999999999858,
+          "paired_cluster_ci95_pp": [
+            -0.28125,
+            1.2195312499999993
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.06481481481481477,
+          "paired_cluster_ci95_pp": [
+            -0.7940207227316599,
+            0.3191243489583332
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -19.223958333333336,
+          "paired_cluster_ci95_pp": [
+            -29.98450520833334,
+            -9.858984374999997
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.314429012345679,
+          "paired_cluster_ci95_pp": [
+            -1.3349148597150053,
+            0.4645770392975029
+          ]
+        },
+        "frr": {
+          "difference_pp": -10.989583333333341,
+          "paired_cluster_ci95_pp": [
+            -16.240494791666663,
+            -6.252560763888889
+          ]
+        }
+      }
+    },
+    "nested_compound_all": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": -0.36882716049382713,
+          "paired_cluster_ci95_pp": [
+            -1.2519256012872628,
+            0.2913580835027099
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -8.791666666666668,
+          "paired_cluster_ci95_pp": [
+            -16.56918402777777,
+            -2.1138020833333337
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": 0.1342592592592593,
+          "paired_cluster_ci95_pp": [
+            -0.736789975071225,
+            0.8750381097560975
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -8.888888888888886,
+          "paired_cluster_ci95_pp": [
+            -12.434114583333328,
+            -4.961197916666669
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.18672839506172845,
+          "paired_cluster_ci95_pp": [
+            -0.9352575231481481,
+            0.09594032622738992
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -5.961805555555555,
+          "paired_cluster_ci95_pp": [
+            -9.885590277777776,
+            -1.6552083333333343
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.14043209876543208,
+          "paired_cluster_ci95_pp": [
+            -0.5596988073549778,
+            0.2545670730670738
+          ]
+        },
+        "frr": {
+          "difference_pp": -7.880787037037035,
+          "paired_cluster_ci95_pp": [
+            -10.990943287037037,
+            -4.910503472222219
+          ]
+        }
+      }
+    },
+    "nested_compound_in": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": -0.26186342592592593,
+          "paired_cluster_ci95_pp": [
+            -1.0094144051535088,
+            0.02481671022067362
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -7.317708333333334,
+          "paired_cluster_ci95_pp": [
+            -14.935655381944441,
+            -1.4233940972222225
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": 0.20302854938271586,
+          "paired_cluster_ci95_pp": [
+            -0.7521512650878978,
+            1.0645450912516936
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -11.197916666666679,
+          "paired_cluster_ci95_pp": [
+            -15.494900173611109,
+            -6.522569444444445
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.22521219135802467,
+          "paired_cluster_ci95_pp": [
+            -0.9285829125381098,
+            0.028935185185185182
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -2.513020833333334,
+          "paired_cluster_ci95_pp": [
+            -5.898654513888889,
+            1.0644531250000007
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.09468235596707825,
+          "paired_cluster_ci95_pp": [
+            -0.4910688804860269,
+            0.289761253481455
+          ]
+        },
+        "frr": {
+          "difference_pp": -7.009548611111117,
+          "paired_cluster_ci95_pp": [
+            -10.13353587962963,
+            -4.266348379629629
+          ]
+        }
+      }
+    },
+    "nested_compound_out": {
+      "FVC2000_DB3_B": {
+        "far": {
+          "difference_pp": -0.796682098765432,
+          "paired_cluster_ci95_pp": [
+            -3.567967691395664,
+            1.629827235772357
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -14.6875,
+          "paired_cluster_ci95_pp": [
+            -26.719618055555557,
+            -2.7595486111111165
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2002_DB3_B": {
+        "far": {
+          "difference_pp": -0.1408179012345679,
+          "paired_cluster_ci95_pp": [
+            -0.8739337897796816,
+            0.2329610070654277
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": 0.3472222222222143,
+          "paired_cluster_ci95_pp": [
+            -0.591145833333341,
+            2.239583333333329
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "FVC2004_DB1_B": {
+        "far": {
+          "difference_pp": -0.03279320987654327,
+          "paired_cluster_ci95_pp": [
+            -0.9674685846560848,
+            0.5476160230352303
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": false,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        },
+        "frr": {
+          "difference_pp": -19.756944444444443,
+          "paired_cluster_ci95_pp": [
+            -28.907552083333332,
+            -11.162760416666673
+          ],
+          "degenerate_interval": false,
+          "zero_margin_improvement_supported_under_cluster_assumptions": true,
+          "population_error_zero_proven": false,
+          "reason": "Conditional paired percentile interval with10fingerclusters/DB; upperendpoint0 doesnot establishstrictzero-marginnoninferiority, anddegenerate zero intervals do not establishzero populationrisk"
+        }
+      },
+      "macro": {
+        "far": {
+          "difference_pp": -0.3234310699588477,
+          "paired_cluster_ci95_pp": [
+            -1.2816566804990968,
+            0.5112167152078432
+          ]
+        },
+        "frr": {
+          "difference_pp": -11.365740740740742,
+          "paired_cluster_ci95_pp": [
+            -16.066550925925924,
+            -6.474681712962965
+          ]
+        }
+      }
+    }
+  },
+  "decision": {
+    "archive_validation_choice": {
+      "name": "noise_80_seed42",
+      "level": 80,
+      "policy": "per_db",
+      "eligible": true,
+      "objective": [
+        16.77920524691358,
+        35.976851851851855,
+        7.016617702587571
+      ],
+      "clean": {
+        "FVC2000_DB3_B": {
+          "far_pct": 0.0,
+          "frr_pct": 0.0,
+          "eer_pct": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "far_pct": 0.0,
+          "frr_pct": 9.999999999999998,
+          "eer_pct": 0.0
+        },
+        "FVC2004_DB1_B": {
+          "far_pct": 0.9259259259259258,
+          "frr_pct": 9.999999999999998,
+          "eer_pct": 1.1111111111111112
+        }
+      }
+    },
+    "thresholds": {
+      "FVC2000_DB3_B": 0.5824,
+      "FVC2002_DB3_B": 0.8086,
+      "FVC2004_DB1_B": 0.8842
+    },
+    "archive_test_clean_observed_non_degradation": true,
+    "winner_weights_already_equal_current_production": true,
+    "production_weights_modified": false,
+    "production_gui_defaults_modified": false,
+    "experimental_threshold_profile_only": true,
+    "actual_windows_execution": false,
+    "statistical_scope": "pairedconditional clusteranalysis; 10fingerclusters/DB; notpopulationzeroerrorproof",
+    "promotion_status": "No differentproductionbundlepromoted. Current4bins retained; calibrationprofile remains explicitlyexperimental pending acceptance/Windowsreplay.",
+    "reason": "Archivewinner alreadymatchescurrentweights",
+    "nested_selected_procedure_clean_by_database": {
+      "FVC2000_DB3_B": {
+        "baseline": {
+          "eer_pct": 0.2777777777777778,
+          "far_pct": 0.2777777777777778,
+          "frr_pct": 3.333333333333334
+        },
+        "selected_procedure": {
+          "eer_pct": 0.2777777777777778,
+          "far_pct": 0.2777777777777778,
+          "frr_pct": 2.4999999999999996
+        },
+        "observed_zero_margin_clean_gate_pass": true
+      },
+      "FVC2002_DB3_B": {
+        "baseline": {
+          "eer_pct": 2.4537037037037037,
+          "far_pct": 0.0462962962962963,
+          "frr_pct": 11.979166666666666
+        },
+        "selected_procedure": {
+          "eer_pct": 2.488425925925926,
+          "far_pct": 0.06944444444444443,
+          "frr_pct": 6.979166666666668
+        },
+        "observed_zero_margin_clean_gate_pass": false
+      },
+      "FVC2004_DB1_B": {
+        "baseline": {
+          "eer_pct": 0.1388888888888889,
+          "far_pct": 0.4166666666666667,
+          "frr_pct": 0.0
+        },
+        "selected_procedure": {
+          "eer_pct": 0.0925925925925926,
+          "far_pct": 0.20833333333333334,
+          "frr_pct": 0.416666666666667
+        },
+        "observed_zero_margin_clean_gate_pass": false
+      }
+    },
+    "nested_selected_procedure_zero_margin_clean_gate_pass": false,
+    "population_strict_noninferiority_established": false,
+    "automatic_threshold_deployment_accepted": false,
+    "reasons": [
+      "Current production4weights equal the Validation-selected archived bundle; no distinct bundle upgrade is established.",
+      "Nested selection procedure did not preserve all per-DB original FAR/FRR/EER at strictzero margin.",
+      "Only10fingerclusters perDB, prior experimenter data exposure, unknown file-level pretrained overlap, and no independent unseenidentity test.",
+      "Actual Windows DLL/Worker replay has not been performed; profile is not automatically applied."
+    ]
+  },
+  "native_validation": {
+    "max_score_error": 5.3921663578648804e-08,
+    "max_probability_error": 4.76837158203125e-07,
+    "max_score_recomputation_error": 0.0,
+    "score_acceptance_atol": 1e-06,
+    "numeric_note": "End-to-endTorchScript versus manuallyfactored frozenfeature/head paths usefloat32; existingproduction reloadverification usesatol1e-6/rtol1e-5. Strict1e-10trial differed1.94e-9 onastrongdevelopmentnoise; decomposednative-templateprobabilitiesanddoublecosines are audited separately.",
+    "native_relocated_core": true,
+    "actual_windows_execution": false,
+    "module_path_api": "test-only macOS shim; production Windows source unchanged",
+    "first_extract_ms": 8281.609333003871,
+    "steady_extract_median_ms": 591.6177080071066,
+    "steady_extract_p95_ms": 614.9528340029065,
+    "compare_median_ms": 0.09887499618344009,
+    "compare_p95_ms": 0.12224999954923987,
+    "peak_rss_bytes": 1499447296,
+    "failures": 0,
+    "timeout_measurement": "No actual Windows worker used; cannot report Windows timeout rate",
+    "case_count": 30,
+    "locked_threshold_decisions_match_all30cases": true,
+    "locked_thresholds": {
+      "FVC2000_DB3_B": 0.5824,
+      "FVC2002_DB3_B": 0.8086,
+      "FVC2004_DB1_B": 0.8842
+    },
+    "minimum_distance_to_locked_threshold": 0.015436804517780955
+  },
+  "numerical_margin_and_gui_eer": [
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2000_DB3_B",
+      "panel": "clean",
+      "threshold": 0.8047,
+      "valid_pairs": 3160,
+      "nearest_threshold_margin": 0.1818514138083206,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.0,
+      "far_plus1e_6_pct": 0.0,
+      "frr_minus1e_6_pct": 0.0,
+      "frr_plus1e_6_pct": 0.0,
+      "eer_pct": 0.0,
+      "zero_eer_exact": true,
+      "separation_margin": 0.4136312702036805,
+      "zero_eer_margin_exceeds2e_6": true,
+      "gui_eer_midpoint_pct": 0.0,
+      "gui_eer_low_pct": 0.0,
+      "gui_eer_high_pct": 0.0
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2000_DB3_B",
+      "panel": "static_aug",
+      "threshold": 0.8047,
+      "valid_pairs": 553632,
+      "nearest_threshold_margin": 4.905412546829524e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.32542174023338405,
+      "far_plus1e_6_pct": 0.32542174023338405,
+      "frr_minus1e_6_pct": 4.223744292237441,
+      "frr_plus1e_6_pct": 4.223744292237441,
+      "eer_pct": 1.4310176125244618,
+      "zero_eer_exact": false,
+      "separation_margin": -0.4971250958696427,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 1.4309609878959195,
+      "gui_eer_low_pct": 1.430904363267377,
+      "gui_eer_high_pct": 1.4310176125244618
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2000_DB3_B",
+      "panel": "noisy_original",
+      "threshold": 0.8047,
+      "valid_pairs": 632000,
+      "nearest_threshold_margin": 1.486709238385231e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.9961805555555555,
+      "far_plus1e_6_pct": 0.9961805555555555,
+      "frr_minus1e_6_pct": 13.587499999999997,
+      "frr_plus1e_6_pct": 13.587499999999997,
+      "eer_pct": 4.2703125,
+      "zero_eer_exact": false,
+      "separation_margin": -0.4983120173714952,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 4.269977678571428,
+      "gui_eer_low_pct": 4.269642857142857,
+      "gui_eer_high_pct": 4.2703125
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2000_DB3_B",
+      "panel": "compound",
+      "threshold": 0.8047,
+      "valid_pairs": 189600,
+      "nearest_threshold_margin": 2.3022423139007486e-05,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.9282407407407408,
+      "far_plus1e_6_pct": 0.9282407407407408,
+      "frr_minus1e_6_pct": 12.970238095238095,
+      "frr_plus1e_6_pct": 12.970238095238095,
+      "eer_pct": 4.339285714285714,
+      "zero_eer_exact": false,
+      "separation_margin": -0.49792786912093345,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 4.339203042328042,
+      "gui_eer_low_pct": 4.33912037037037,
+      "gui_eer_high_pct": 4.339285714285714
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2002_DB3_B",
+      "panel": "clean",
+      "threshold": 0.8595,
+      "valid_pairs": 3160,
+      "nearest_threshold_margin": 0.02971891711378316,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.0,
+      "far_plus1e_6_pct": 0.0,
+      "frr_minus1e_6_pct": 5.000000000000004,
+      "frr_plus1e_6_pct": 5.000000000000004,
+      "eer_pct": 0.2777777777777778,
+      "zero_eer_exact": false,
+      "separation_margin": -0.1540331207565533,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 0.1388888888888889,
+      "gui_eer_low_pct": 0.0,
+      "gui_eer_high_pct": 0.2777777777777778
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2002_DB3_B",
+      "panel": "static_aug",
+      "threshold": 0.8595,
+      "valid_pairs": 562875,
+      "nearest_threshold_margin": 2.2926788663113484e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.6773879142300195,
+      "far_plus1e_6_pct": 0.6773879142300195,
+      "frr_minus1e_6_pct": 31.530827067669176,
+      "frr_plus1e_6_pct": 31.530827067669176,
+      "eer_pct": 12.878195488721806,
+      "zero_eer_exact": false,
+      "separation_margin": -0.4977691753631245,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 12.878181565023672,
+      "gui_eer_low_pct": 12.878167641325536,
+      "gui_eer_high_pct": 12.878195488721806
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2002_DB3_B",
+      "panel": "noisy_original",
+      "threshold": 0.8595,
+      "valid_pairs": 632000,
+      "nearest_threshold_margin": 8.161644554638414e-07,
+      "pairs_within1e_6_threshold": 1,
+      "far_minus1e_6_pct": 1.5765624999999999,
+      "far_plus1e_6_pct": 1.5767361111111111,
+      "frr_minus1e_6_pct": 71.76607142857144,
+      "frr_plus1e_6_pct": 71.76607142857144,
+      "eer_pct": 31.63958333333333,
+      "zero_eer_exact": false,
+      "separation_margin": -0.49775902208928857,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 31.639434523809523,
+      "gui_eer_low_pct": 31.639285714285712,
+      "gui_eer_high_pct": 31.63958333333333
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2002_DB3_B",
+      "panel": "compound",
+      "threshold": 0.8595,
+      "valid_pairs": 189600,
+      "nearest_threshold_margin": 6.247313397822474e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 1.4791666666666667,
+      "far_plus1e_6_pct": 1.4791666666666667,
+      "frr_minus1e_6_pct": 68.83333333333333,
+      "frr_plus1e_6_pct": 68.83333333333333,
+      "eer_pct": 30.392857142857142,
+      "zero_eer_exact": false,
+      "separation_margin": -0.49787485630091577,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 30.392609126984127,
+      "gui_eer_low_pct": 30.39236111111111,
+      "gui_eer_high_pct": 30.392857142857142
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2004_DB1_B",
+      "panel": "clean",
+      "threshold": 0.8688,
+      "valid_pairs": 3160,
+      "nearest_threshold_margin": 6.686755853013704e-05,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.24305555555555555,
+      "far_plus1e_6_pct": 0.24305555555555555,
+      "frr_minus1e_6_pct": 2.500000000000002,
+      "frr_plus1e_6_pct": 2.500000000000002,
+      "eer_pct": 0.2777777777777778,
+      "zero_eer_exact": false,
+      "separation_margin": -0.24593520658649104,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 0.1388888888888889,
+      "gui_eer_low_pct": 0.0,
+      "gui_eer_high_pct": 0.2777777777777778
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2004_DB1_B",
+      "panel": "static_aug",
+      "threshold": 0.8688,
+      "valid_pairs": 635871,
+      "nearest_threshold_margin": 4.63806994388527e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.16151074667660578,
+      "far_plus1e_6_pct": 0.16151074667660578,
+      "frr_minus1e_6_pct": 10.968532027048617,
+      "frr_plus1e_6_pct": 10.968532027048617,
+      "eer_pct": 3.107750740997107,
+      "zero_eer_exact": false,
+      "separation_margin": -0.47521525653352814,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 3.107726090394745,
+      "gui_eer_low_pct": 3.107701439792383,
+      "gui_eer_high_pct": 3.107750740997107
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2004_DB1_B",
+      "panel": "noisy_original",
+      "threshold": 0.8688,
+      "valid_pairs": 632000,
+      "nearest_threshold_margin": 6.891722872048867e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.4005208333333334,
+      "far_plus1e_6_pct": 0.4005208333333334,
+      "frr_minus1e_6_pct": 27.37142857142857,
+      "frr_plus1e_6_pct": 27.37142857142857,
+      "eer_pct": 6.603571428571428,
+      "zero_eer_exact": false,
+      "separation_margin": -0.48313933971461676,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 6.603521825396824,
+      "gui_eer_low_pct": 6.603472222222222,
+      "gui_eer_high_pct": 6.603571428571428
+    },
+    {
+      "candidate": "noise_05_seed42",
+      "database": "FVC2004_DB1_B",
+      "panel": "compound",
+      "threshold": 0.8688,
+      "valid_pairs": 189600,
+      "nearest_threshold_margin": 8.062943264608435e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.296875,
+      "far_plus1e_6_pct": 0.296875,
+      "frr_minus1e_6_pct": 29.595238095238095,
+      "frr_plus1e_6_pct": 29.595238095238095,
+      "eer_pct": 7.255952380952381,
+      "zero_eer_exact": false,
+      "separation_margin": -0.47771560395078494,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 7.255869708994708,
+      "gui_eer_low_pct": 7.255787037037037,
+      "gui_eer_high_pct": 7.255952380952381
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2000_DB3_B",
+      "panel": "clean",
+      "threshold": 0.5824,
+      "valid_pairs": 3160,
+      "nearest_threshold_margin": 0.01617890611448003,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.0,
+      "far_plus1e_6_pct": 0.0,
+      "frr_minus1e_6_pct": 0.0,
+      "frr_plus1e_6_pct": 0.0,
+      "eer_pct": 0.0,
+      "zero_eer_exact": true,
+      "separation_margin": 0.42972701240941336,
+      "zero_eer_margin_exceeds2e_6": true,
+      "gui_eer_midpoint_pct": 0.0,
+      "gui_eer_low_pct": 0.0,
+      "gui_eer_high_pct": 0.0
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2000_DB3_B",
+      "panel": "static_aug",
+      "threshold": 0.5824,
+      "valid_pairs": 553632,
+      "nearest_threshold_margin": 5.4658506870586265e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.5495703323186201,
+      "far_plus1e_6_pct": 0.5495703323186201,
+      "frr_minus1e_6_pct": 1.1660143509458543,
+      "frr_plus1e_6_pct": 1.1660143509458543,
+      "eer_pct": 0.9560502283105022,
+      "zero_eer_exact": false,
+      "separation_margin": -0.4935919066240283,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 0.9560502283105022,
+      "gui_eer_low_pct": 0.9560502283105022,
+      "gui_eer_high_pct": 0.9560502283105022
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2000_DB3_B",
+      "panel": "noisy_original",
+      "threshold": 0.5824,
+      "valid_pairs": 632000,
+      "nearest_threshold_margin": 2.004554876666731e-05,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 1.2019097222222224,
+      "far_plus1e_6_pct": 1.2019097222222224,
+      "frr_minus1e_6_pct": 3.9267857142857188,
+      "frr_plus1e_6_pct": 3.9267857142857188,
+      "eer_pct": 2.5267857142857144,
+      "zero_eer_exact": false,
+      "separation_margin": -0.49625494313296825,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 2.5267609126984127,
+      "gui_eer_low_pct": 2.526736111111111,
+      "gui_eer_high_pct": 2.5267857142857144
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2000_DB3_B",
+      "panel": "compound",
+      "threshold": 0.5824,
+      "valid_pairs": 189600,
+      "nearest_threshold_margin": 2.0960234555778e-05,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 1.1087962962962963,
+      "far_plus1e_6_pct": 1.1087962962962963,
+      "frr_minus1e_6_pct": 3.6845238095238098,
+      "frr_plus1e_6_pct": 3.6845238095238098,
+      "eer_pct": 2.3599537037037037,
+      "zero_eer_exact": false,
+      "separation_margin": -0.4900202222514468,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 2.3585482804232805,
+      "gui_eer_low_pct": 2.357142857142857,
+      "gui_eer_high_pct": 2.3599537037037037
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2002_DB3_B",
+      "panel": "clean",
+      "threshold": 0.8086,
+      "valid_pairs": 3160,
+      "nearest_threshold_margin": 0.007046206454193404,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.0,
+      "far_plus1e_6_pct": 0.0,
+      "frr_minus1e_6_pct": 2.500000000000002,
+      "frr_plus1e_6_pct": 2.500000000000002,
+      "eer_pct": 0.0,
+      "zero_eer_exact": true,
+      "separation_margin": 0.08638973784236337,
+      "zero_eer_margin_exceeds2e_6": true,
+      "gui_eer_midpoint_pct": 0.0,
+      "gui_eer_low_pct": 0.0,
+      "gui_eer_high_pct": 0.0
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2002_DB3_B",
+      "panel": "static_aug",
+      "threshold": 0.8086,
+      "valid_pairs": 562875,
+      "nearest_threshold_margin": 8.484406325726113e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.48343079922027293,
+      "far_plus1e_6_pct": 0.48343079922027293,
+      "frr_minus1e_6_pct": 19.775438596491224,
+      "frr_plus1e_6_pct": 19.775438596491224,
+      "eer_pct": 7.858479532163742,
+      "zero_eer_exact": false,
+      "separation_margin": -0.4320993282184157,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 7.858061821219716,
+      "gui_eer_low_pct": 7.8576441102756895,
+      "gui_eer_high_pct": 7.858479532163742
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2002_DB3_B",
+      "panel": "noisy_original",
+      "threshold": 0.8086,
+      "valid_pairs": 632000,
+      "nearest_threshold_margin": 2.4364937334375725e-07,
+      "pairs_within1e_6_threshold": 2,
+      "far_minus1e_6_pct": 1.3298611111111112,
+      "far_plus1e_6_pct": 1.3302083333333334,
+      "frr_minus1e_6_pct": 52.582142857142856,
+      "frr_plus1e_6_pct": 52.582142857142856,
+      "eer_pct": 22.147222222222222,
+      "zero_eer_exact": false,
+      "separation_margin": -0.41890178560672,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 22.1468253968254,
+      "gui_eer_low_pct": 22.146428571428572,
+      "gui_eer_high_pct": 22.147222222222222
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2002_DB3_B",
+      "panel": "compound",
+      "threshold": 0.8086,
+      "valid_pairs": 189600,
+      "nearest_threshold_margin": 1.7348516222481791e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 1.3148148148148149,
+      "far_plus1e_6_pct": 1.3148148148148149,
+      "frr_minus1e_6_pct": 51.68452380952381,
+      "frr_plus1e_6_pct": 51.68452380952381,
+      "eer_pct": 21.916666666666668,
+      "zero_eer_exact": false,
+      "separation_margin": -0.44370693857854904,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 21.916666666666668,
+      "gui_eer_low_pct": 21.916666666666668,
+      "gui_eer_high_pct": 21.916666666666668
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2004_DB1_B",
+      "panel": "clean",
+      "threshold": 0.8842,
+      "valid_pairs": 3160,
+      "nearest_threshold_margin": 8.216860047927099e-08,
+      "pairs_within1e_6_threshold": 1,
+      "far_minus1e_6_pct": 0.24305555555555555,
+      "far_plus1e_6_pct": 0.2777777777777778,
+      "frr_minus1e_6_pct": 2.500000000000002,
+      "frr_plus1e_6_pct": 2.500000000000002,
+      "eer_pct": 0.2777777777777778,
+      "zero_eer_exact": false,
+      "separation_margin": -0.2224399971009534,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 0.1388888888888889,
+      "gui_eer_low_pct": 0.0,
+      "gui_eer_high_pct": 0.2777777777777778
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2004_DB1_B",
+      "panel": "static_aug",
+      "threshold": 0.8842,
+      "valid_pairs": 635871,
+      "nearest_threshold_margin": 3.232975441802566e-07,
+      "pairs_within1e_6_threshold": 2,
+      "far_minus1e_6_pct": 0.12699990336963873,
+      "far_plus1e_6_pct": 0.1273450118027084,
+      "frr_minus1e_6_pct": 5.120423122659423,
+      "frr_plus1e_6_pct": 5.120423122659423,
+      "eer_pct": 1.0436079016026836,
+      "zero_eer_exact": false,
+      "separation_margin": -0.46482350175497245,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 1.0436079016026836,
+      "gui_eer_low_pct": 1.0436079016026836,
+      "gui_eer_high_pct": 1.0436079016026836
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2004_DB1_B",
+      "panel": "noisy_original",
+      "threshold": 0.8842,
+      "valid_pairs": 632000,
+      "nearest_threshold_margin": 2.025024580021295e-06,
+      "pairs_within1e_6_threshold": 0,
+      "far_minus1e_6_pct": 0.17222222222222222,
+      "far_plus1e_6_pct": 0.17222222222222222,
+      "frr_minus1e_6_pct": 8.267857142857139,
+      "frr_plus1e_6_pct": 8.267857142857139,
+      "eer_pct": 2.2482142857142855,
+      "zero_eer_exact": false,
+      "separation_margin": -0.48934170596787696,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 2.248152281746032,
+      "gui_eer_low_pct": 2.2480902777777776,
+      "gui_eer_high_pct": 2.2482142857142855
+    },
+    {
+      "candidate": "noise_80_seed42",
+      "database": "FVC2004_DB1_B",
+      "panel": "compound",
+      "threshold": 0.8842,
+      "valid_pairs": 189600,
+      "nearest_threshold_margin": 2.7122064183426886e-07,
+      "pairs_within1e_6_threshold": 1,
+      "far_minus1e_6_pct": 0.12962962962962962,
+      "far_plus1e_6_pct": 0.13020833333333331,
+      "frr_minus1e_6_pct": 10.589285714285712,
+      "frr_plus1e_6_pct": 10.589285714285712,
+      "eer_pct": 2.6979166666666665,
+      "zero_eer_exact": false,
+      "separation_margin": -0.4850499269905816,
+      "zero_eer_margin_exceeds2e_6": false,
+      "gui_eer_midpoint_pct": 2.697172619047619,
+      "gui_eer_low_pct": 2.6964285714285716,
+      "gui_eer_high_pct": 2.6979166666666665
+    }
+  ],
+  "artifact_root_relative": "models/noise_experiment_weights/noise_followup_20261122/",
+  "native_performance": {
+    "platform": "macOS-27.2.1-arm64-arm-64bit-Mach-O",
+    "actual_windows_execution": false,
+    "source": "Unchanged current C++ Core with test-only module-path shim; current4productionbins",
+    "library_sha256": "758fe905d556738cceddb372a38754ee9321f7ca63d79e5d96ec4ea65533c365",
+    "background_pipeline_finished_before_benchmark": true,
+    "library_load_ms": 165.79404199728742,
+    "extract_calls": 12,
+    "first_extract_ms": 6963.6459999892395,
+    "steady_extract_median_ms": 299.80541701661423,
+    "steady_extract_p95_ms": 354.0642290026881,
+    "steady_extract_sequential_wall_seconds": 3.4036409580148757,
+    "steady_extract_throughput_per_second": 3.2318332443665243,
+    "compare_calls": 1000,
+    "compare_median_ms": 0.07899999036453664,
+    "compare_p95_ms": 0.07987914723344147,
+    "compare_sequential_wall_seconds": 0.07997074999730103,
+    "compare_throughput_per_second": 12504.57198455372,
+    "peak_rss_bytes": 1655177216,
+    "extract_failures": 0,
+    "compare_failures": 0,
+    "windows_worker_ipc_timeout_rate": null,
+    "limits": "Small sequential native CPU timing probe; disk startup, machine, load and Worker count affect deployment performance. No Windows Worker/IPC reliability claim. Image decoding excluded; buffers prepared before calls. Steady throughput includes Python call-loop and buffer allocation overhead."
+  },
+  "score_integrity": {
+    "all_minimum_fusions_exact": true,
+    "all_labels_and_same_source_pixel_exclusions_verified": true,
+    "all_scores_finite_in_range": true,
+    "metric_records_checked": 18402,
+    "zero_eer_records_including_repeated_threshold_and_component_diagnostics": 1844,
+    "all_zero_eer_sets_nonempty_with_positive_separation_and_no_crossclass_ties": true,
+    "note": "Counts of files/diagnostic records do not represent independent subjects or replications."
+  },
+  "metric_notes": {
+    "original_unordered_source_macro": "Probe-oriented source-macro fields are diagnostic only; headline originalFAR/FRR uses uniqueunordered pair rates.",
+    "nested_static_ci": "Counts pooled withinDB forCI; descriptive table averages foldmetrics, causing small differences.",
+    "low_far": "FAR0.1% values are empirical ROC diagnostics only; population lowFAR support not established with10identities/DB."
+  }
+}

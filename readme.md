@@ -37,7 +37,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 GUI에서 **DB → 등록 이미지 → DLL·옵션·Load·Template 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 파일명에 관계없이 K-NBTC DLL을 선택하고 workers·timeout을 설정한 뒤 **Load selected DLL with these settings**를 누릅니다. 이 프로젝트는 [FingerprintAlgorithm.dll](src/Kisa/readme.md)을 선택합니다. 표에 `Loaded`가 표시되면 **Create enrollment templates**로 상태·크기·오류·생성 시간(ms)을 확인합니다. DLL·설정을 바꾸면 Load를 다시 눌러 적용합니다. Results에서 임계값(초기 0.5)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장합니다. Load·Template 생성·비교·보고서 저장은 진행률과 **Stop**을 제공합니다.
 
-[학습 옵션](src/Training/readme.md) · [노이즈 비교](docs/experiments/noise_augmentation.md) · [GUI·지표](src/GUI/readme.md) · [검증 상태](docs/verification.md)
+[학습 옵션](src/Training/readme.md) · [Noise·Threshold 평가](docs/experiments/noise_followup.md) · [GUI·지표](src/GUI/readme.md) · [검증 상태](docs/verification.md)
 
 ## 3. Project structure
 
