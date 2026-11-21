@@ -1,0 +1,22 @@
+{
+  "format": "fingerprint-production-weights-v1",
+  "torch_version": "2.15.0",
+  "files": {
+    "fvc2000_db3.bin": {
+      "bytes": 266571389,
+      "sha256": "519708f33ef01170d7836c74a32bb93e50091d5c92dc69c1a97834b3b92579ce"
+    },
+    "fvc2002_db3.bin": {
+      "bytes": 266571389,
+      "sha256": "c39504dafd2faf251c52f7a7caf86ae3d9c9cb6625771e232d2ac0c44baf190d"
+    },
+    "fvc2004_db1.bin": {
+      "bytes": 266571389,
+      "sha256": "b49a3bbd35dd073f71656051ed7e423012bf30cb164d65ce20bbde391a097403"
+    },
+    "combined.bin": {
+      "bytes": 266587596,
+      "sha256": "459ca533b40fcc710f91663dd1ce322a745f6b5b634ed00d198ff717a38cb4fd"
+    }
+  }
+}

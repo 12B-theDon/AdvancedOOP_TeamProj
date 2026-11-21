@@ -1,96 +1,94 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="152.6074mm" viewBox="0 0 940 483" role="img">
-<title>FinalProject — High-level data flow</title>
-<desc>All files use compact rectangular cards with colored filename headers. Solid arrows carry requests and data; dashed arrows show verified source includes.</desc>
-<rect width="940" height="483" fill="white"/>
-<line data-role="title-rule" x1="384.145" y1="47" x2="555.855" y2="47" stroke="#73818d" stroke-width="1" opacity="0.7"/>
-<g data-from="Images" data-to="train.cpp" data-relation="flow"><polyline points="215.000,131.160 380.000,131.160" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="380.0,131.16 372.0,134.46 372.0,127.86" fill="#4f5b65"/></g>
-<g data-from="train.cpp" data-to="Models" data-relation="flow"><polyline points="560.000,131.160 720.000,131.160" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="720.0,131.16 712.0,134.46 712.0,127.86" fill="#4f5b65"/></g>
-<g data-from="Images" data-to="GUI.cpp" data-relation="flow"><polyline points="140.000,159.160 140.000,239.360" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="140.0,239.36 136.7,231.36 143.3,231.36" fill="#4f5b65"/></g>
-<g data-from="Models" data-to="encoder.cpp" data-relation="flow"><polyline points="800.000,159.160 800.000,239.360" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="800.0,239.36 796.7,231.36 803.3,231.36" fill="#4f5b65"/></g>
-<g data-from="GUI.cpp" data-to="Engine.cpp" data-relation="flow"><polyline points="238.035,257.000 380.000,257.000" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="380.0,257.0 372.0,260.3 372.0,253.7" fill="#4f5b65"/></g>
-<g data-from="Engine.cpp" data-to="GUI.cpp" data-relation="flow"><polyline points="380.000,295.720 238.035,295.720" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="238.03515625,295.72 246.03515625,292.42 246.03515625,299.02000000000004" fill="#4f5b65"/></g>
-<g data-from="Engine.cpp" data-to="encoder.cpp" data-relation="flow"><polyline points="560.000,257.000 710.000,257.000" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="710.0,257.0 702.0,260.3 702.0,253.7" fill="#4f5b65"/></g>
-<g data-from="encoder.cpp" data-to="Engine.cpp" data-relation="flow"><polyline points="710.000,295.720 560.000,295.720" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="560.0,295.72 568.0,292.42 568.0,299.02000000000004" fill="#4f5b65"/></g>
-<g data-from="GUI.cpp" data-to="report.cpp" data-relation="flow"><polyline points="140.000,313.360 140.000,390.160" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="140.0,390.16 136.7,382.16 143.3,382.16" fill="#4f5b65"/></g>
-<g data-from="Engine.cpp" data-to="Results" data-relation="flow"><polyline points="470.000,313.360 470.000,349.560" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="470.0,349.56 466.7,341.56 473.3,341.56" fill="#4f5b65"/></g>
-<g data-from="report.cpp" data-to="Report" data-relation="flow"><polyline points="230.000,427.160 747.680,427.160" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="747.6796875,427.16 739.6796875,430.46000000000004 739.6796875,423.86" fill="#4f5b65"/></g>
-<g data-file="Images" data-node="file" data-part="Shared" data-source="">
-<rect x="65.0" y="103.16" width="150" height="56" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/>
-<rect data-role="filename-header" x="65.0" y="103.16" width="150" height="32.5" fill="#73818d"/>
-<text x="140.000" y="126.660" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Images</text>
-<text x="140.000" y="151.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">fingerprint images</text>
-</g>
-<g data-file="train.cpp" data-node="file" data-part="Algorithm" data-source="src/Algorithm/train.cpp">
-<rect x="380.0" y="103.16" width="180" height="56" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/>
-<rect data-role="filename-header" x="380.0" y="103.16" width="180" height="32.5" fill="#2864b4"/>
-<text x="470.000" y="126.660" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">train.cpp</text>
-<text x="470.000" y="151.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">RunTraining()</text>
-</g>
-<g data-file="Models" data-node="file" data-part="Shared" data-source="">
-<rect x="720.0" y="103.16" width="160" height="56" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/>
-<rect data-role="filename-header" x="720.0" y="103.16" width="160" height="32.5" fill="#73818d"/>
-<text x="800.000" y="126.660" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Models</text>
-<text x="800.000" y="151.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">trained model weights</text>
-</g>
-<g data-file="GUI.cpp" data-node="file" data-part="GUI" data-source="src/GUI/GUI.cpp">
-<rect x="41.96484375" y="239.36" width="196.0703125" height="74" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/>
-<rect data-role="filename-header" x="41.96484375" y="239.36" width="196.0703125" height="32.5" fill="#7c4db5"/>
-<text x="140.000" y="262.860" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">GUI.cpp</text>
-<text x="140.000" y="287.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CreateEnrollmentTemplates()</text>
-<text x="140.000" y="305.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">RunSelectedComparisons()</text>
-</g>
-<g data-file="Engine.cpp" data-node="file" data-part="Engine" data-source="src/Engine/Engine.cpp">
-<rect x="380.0" y="239.36" width="180" height="74" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/>
-<rect data-role="filename-header" x="380.0" y="239.36" width="180" height="32.5" fill="#21834d"/>
-<text x="470.000" y="262.860" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Engine.cpp</text>
-<text x="470.000" y="287.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Enroll()</text>
-<text x="470.000" y="305.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Execute()</text>
-</g>
-<g data-file="encoder.cpp" data-node="file" data-part="Algorithm" data-source="src/Algorithm/encoder.cpp">
-<rect x="710.0" y="239.36" width="180" height="74" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/>
-<rect data-role="filename-header" x="710.0" y="239.36" width="180" height="32.5" fill="#2864b4"/>
-<text x="800.000" y="262.860" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">encoder.cpp</text>
-<text x="800.000" y="287.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CreateTemplate()</text>
-<text x="800.000" y="305.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Compare()</text>
-</g>
-<g data-file="report.cpp" data-node="file" data-part="GUI" data-source="src/GUI/report.cpp">
-<rect x="50.0" y="390.16" width="180" height="74" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/>
-<rect data-role="filename-header" x="50.0" y="390.16" width="180" height="32.5" fill="#7c4db5"/>
-<text x="140.000" y="413.660" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">report.cpp</text>
-<text x="140.000" y="438.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CalculateMetrics()</text>
-<text x="140.000" y="456.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Save()</text>
-</g>
-<g data-file="Results" data-node="file" data-part="Shared" data-source="">
-<rect x="385.576171875" y="349.56" width="168.84765625" height="56" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/>
-<rect data-role="filename-header" x="385.576171875" y="349.56" width="168.84765625" height="32.5" fill="#73818d"/>
-<text x="470.000" y="373.060" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Results</text>
-<text x="470.000" y="398.060" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">scores / saved templates</text>
-</g>
-<g data-file="Report" data-node="file" data-part="Shared" data-source="">
-<rect x="747.6796875" y="399.16" width="104.640625" height="56" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/>
-<rect data-role="filename-header" x="747.6796875" y="399.16" width="104.640625" height="32.5" fill="#73818d"/>
-<text x="800.000" y="422.660" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Report</text>
-<text x="800.000" y="447.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">metrics + plots</text>
-</g>
-<text x="470.000" y="34.000" font-family="Arial" font-size="30" font-weight="700" text-anchor="middle" fill="#111111">FinalProject</text>
-<text data-role="edge-label" data-placement="above" data-from="train.cpp" data-to="Models" data-segment="560.00000,131.16000 720.00000,131.16000" x="640.000" y="125.160" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">model weights</text>
-<text data-role="edge-label" data-placement="right" data-from="Images" data-to="GUI.cpp" data-segment="140.00000,159.16000 140.00000,239.36000" x="146.000" y="203.460" font-family="Arial" font-size="12" font-weight="400" text-anchor="start" fill="#52606d">images</text>
-<text data-role="edge-label" data-placement="right" data-from="Models" data-to="encoder.cpp" data-segment="800.00000,159.16000 800.00000,239.36000" x="806.000" y="203.460" font-family="Arial" font-size="12" font-weight="400" text-anchor="start" fill="#52606d">weights</text>
-<text data-role="edge-label" data-placement="above" data-from="GUI.cpp" data-to="Engine.cpp" data-segment="238.03516,257.00000 380.00000,257.00000" x="309.018" y="251.000" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">images + pairs</text>
-<text data-role="edge-label" data-placement="above" data-from="Engine.cpp" data-to="GUI.cpp" data-segment="380.00000,295.72000 238.03516,295.72000" x="309.018" y="289.720" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">comparison scores</text>
-<text data-role="edge-label" data-placement="above" data-from="Engine.cpp" data-to="encoder.cpp" data-segment="560.00000,257.00000 710.00000,257.00000" x="635.000" y="251.000" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">image</text>
-<text data-role="edge-label" data-placement="above" data-from="encoder.cpp" data-to="Engine.cpp" data-segment="710.00000,295.72000 560.00000,295.72000" x="635.000" y="289.720" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">score / template</text>
-<text data-role="edge-label" data-placement="right" data-from="GUI.cpp" data-to="report.cpp" data-segment="140.00000,313.36000 140.00000,390.16000" x="146.000" y="355.960" font-family="Arial" font-size="12" font-weight="400" text-anchor="start" fill="#52606d">results + metric choices</text>
-<text data-role="edge-label" data-placement="below" data-from="report.cpp" data-to="Report" data-segment="230.00000,427.16000 747.67969,427.16000" x="488.840" y="442.760" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">metric values + plots</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="300.1596mm" viewBox="0 0 940 950" role="img"><title>Runtime boundaries and training</title><desc>Current project implementation; editable vector source. Generated from verified source paths and selected direct includes.</desc><rect width="940" height="950" fill="white"/>
+<line x1="250" y1="64" x2="690" y2="64" stroke="#73818d"/>
+<rect x="20" y="95" width="580" height="282" fill="#fbfcfe" stroke="#21834d" stroke-width="1"/>
+<rect x="630" y="95" width="290" height="805" fill="#fbfcfe" stroke="#c96818" stroke-width="1"/>
+<rect x="645" y="570" width="260" height="315" fill="#fbfcfe" stroke="#2864b4" stroke-width="1"/>
+<rect x="20" y="735" width="580" height="170" fill="#fbfcfe" stroke="#2864b4" stroke-width="1"/>
+<g data-node="gui" data-source="src/GUI/GUI.cpp"><rect x="40" y="140" width="220" height="92" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/><rect x="40" y="140" width="220" height="32.5" fill="#7c4db5"/></g>
+<g data-node="engine" data-source="src/Engine/Engine.cpp"><rect x="340" y="140" width="240" height="92" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="340" y="140" width="240" height="32.5" fill="#21834d"/></g>
+<g data-node="adapter" data-source="src/Engine/kisaDll.cpp"><rect x="340" y="270" width="240" height="92" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="340" y="270" width="240" height="32.5" fill="#21834d"/></g>
+<g data-node="report" data-source="src/GUI/report.cpp"><rect x="40" y="270" width="220" height="92" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/><rect x="40" y="270" width="220" height="32.5" fill="#7c4db5"/></g>
+<g data-node="worker" data-source="src/Worker/worker.cpp"><rect x="660" y="270" width="240" height="92" fill="#fff1e2" stroke="#c96818" stroke-width="2"/><rect x="660" y="270" width="240" height="32.5" fill="#c96818"/></g>
+<g data-node="public" data-source="src/Kisa/BioApi.cpp"><rect x="660" y="430" width="240" height="92" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="430" width="240" height="32.5" fill="#2864b4"/></g>
+<g data-node="core" data-source="src/Kisa/core.cpp"><rect x="660" y="610" width="240" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="610" width="240" height="32.5" fill="#2864b4"/></g>
+<g data-node="encoder" data-source="src/Algorithm/encoder.cpp"><rect x="660" y="775" width="240" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="775" width="240" height="32.5" fill="#2864b4"/></g>
+<g data-node="outputs" data-source=""><rect x="40" y="440" width="220" height="110" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="40" y="440" width="220" height="32.5" fill="#73818d"/></g>
+<g data-node="train" data-source="src/Training/train.cpp"><rect x="40" y="775" width="220" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="40" y="775" width="220" height="32.5" fill="#2864b4"/></g>
+<g data-node="weights" data-source=""><rect x="340" y="775" width="240" height="110" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="340" y="775" width="240" height="32.5" fill="#73818d"/></g>
+<g data-from="gui" data-to="engine" data-relation="flow"><polyline points="260,186.0 340,186.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="340,186.0 332.0,189.3 332.0,182.7" fill="#4f5b65"/></g>
+<g data-from="engine" data-to="adapter" data-relation="flow"><polyline points="460.0,232 460.0,270" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="460.0,270 456.7,262.0 463.3,262.0" fill="#4f5b65"/></g>
+<g data-from="gui" data-to="report" data-relation="flow"><polyline points="150.0,232 150.0,270" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="150.0,270 146.7,262.0 153.3,262.0" fill="#4f5b65"/></g>
+<g data-from="report" data-to="outputs" data-relation="flow"><polyline points="150.0,362 150.0,440" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="150.0,440 146.7,432.0 153.3,432.0" fill="#4f5b65"/></g>
+<g data-from="adapter" data-to="worker" data-relation="flow"><polyline points="580,300.0 660,300.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="660,300.0 652.0,303.3 652.0,296.7" fill="#4f5b65"/></g>
+<g data-from="worker" data-to="adapter" data-relation="flow"><polyline points="660,332.0 580,332.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="580,332.0 588.0,328.7 588.0,335.3" fill="#4f5b65"/></g>
+<g data-from="worker" data-to="public" data-relation="flow"><polyline points="780.0,362 780.0,430" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="780.0,430 776.7,422.0 783.3,422.0" fill="#4f5b65"/></g>
+<g data-from="public" data-to="core" data-relation="flow"><polyline points="780.0,522 780.0,610" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="780.0,610 776.7,602.0 783.3,602.0" fill="#4f5b65"/></g>
+<g data-from="core" data-to="encoder" data-relation="flow"><polyline points="780.0,720 780.0,775" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="780.0,775 776.7,767.0 783.3,767.0" fill="#4f5b65"/></g>
+<g data-from="core" data-to="weights" data-relation="flow"><polyline points="660,665.0 460.0,665.0 460.0,775" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="460.0,775 456.7,767.0 463.3,767.0" fill="#4f5b65"/></g>
+<g data-from="train" data-to="weights" data-relation="flow"><polyline points="260,830.0 340,830.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="340,830.0 332.0,833.3 332.0,826.7" fill="#4f5b65"/></g>
+<text x="470" y="43" font-family="Arial" font-size="30" font-weight="700" text-anchor="middle" fill="#111111">Runtime boundaries and training</text>
+<text x="32" y="118" font-family="Arial" font-size="16" font-weight="700" text-anchor="start" fill="#21834d">Evaluator process · Qt only</text>
+<text x="642" y="118" font-family="Arial" font-size="16" font-weight="700" text-anchor="start" fill="#c96818">Worker process × N</text>
+<text x="657" y="593" font-family="Arial" font-size="16" font-weight="700" text-anchor="start" fill="#2864b4">Core DLL</text>
+<text x="32" y="758" font-family="Arial" font-size="16" font-weight="700" text-anchor="start" fill="#2864b4">Training process</text>
+<text x="150.0" y="163.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">GUI.cpp</text>
+<text x="150.0" y="188.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Window / seven steps</text>
+<text x="150.0" y="206.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">RunWithProgress()</text>
+<text x="150.0" y="224.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Results / threshold 0.5</text>
+<text x="460.0" y="163.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Engine.cpp</text>
+<text x="460.0" y="188.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">PlanComparisons()</text>
+<text x="460.0" y="206.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">EnrollImages() / Execute()</text>
+<text x="460.0" y="224.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">opaque template cache</text>
+<text x="460.0" y="293.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">kisaDll.cpp</text>
+<text x="460.0" y="318.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">KisaDllAlgorithm</text>
+<text x="460.0" y="336.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">process pool / deadlines</text>
+<text x="460.0" y="354.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Cancel() / ResetCancel()</text>
+<text x="150.0" y="293.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">report.cpp</text>
+<text x="150.0" y="318.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CalculateMetrics()</text>
+<text x="150.0" y="336.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">WriteGraphs() / Save()</text>
+<text x="150.0" y="354.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">selected report items</text>
+<text x="780.0" y="293.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">worker.cpp</text>
+<text x="780.0" y="318.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FingerprintWorker.exe</text>
+<text x="780.0" y="336.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">LoadLibraryExW()</text>
+<text x="780.0" y="354.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">isolated KISA calls</text>
+<text x="780.0" y="453.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">BioApi.cpp</text>
+<text x="780.0" y="478.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FingerprintAlgorithm.dll</text>
+<text x="780.0" y="496.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">three public KISA exports</text>
+<text x="780.0" y="514.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">lazy Core forwarding</text>
+<text x="780.0" y="633.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">core.cpp</text>
+<text x="780.0" y="658.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FingerprintAlgorithmCore.dll</text>
+<text x="780.0" y="676.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CoreEnroll() / CoreAttempt()</text>
+<text x="780.0" y="694.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CoreCompare()</text>
+<text x="780.0" y="712.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">private bundle / minimum score</text>
+<text x="780.0" y="798.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">encoder.cpp</text>
+<text x="780.0" y="823.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FingerprintEncoder</text>
+<text x="780.0" y="841.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Preprocess() / CreateTemplate()</text>
+<text x="780.0" y="859.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Compare()</text>
+<text x="780.0" y="877.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">LibTorch + Qt Core</text>
+<text x="150.0" y="463.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Evaluation outputs</text>
+<text x="150.0" y="488.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CSV + opaque templates</text>
+<text x="150.0" y="506.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">HTML / Word-compatible RTF</text>
+<text x="150.0" y="524.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">separate vector SVG graphs</text>
+<text x="150.0" y="542.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">original pair order</text>
+<text x="150.0" y="798.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">train.cpp</text>
+<text x="150.0" y="823.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FingerprintTrain</text>
+<text x="150.0" y="841.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">independent fine-tuning</text>
+<text x="150.0" y="859.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">training / native validation</text>
+<text x="150.0" y="877.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">exports final archives</text>
+<text x="460.0" y="798.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Four .bin archives</text>
+<text x="460.0" y="823.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">fvc2000_db3.bin</text>
+<text x="460.0" y="841.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">fvc2002_db3.bin</text>
+<text x="460.0" y="859.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">fvc2004_db1.bin / combined.bin</text>
+<text x="460.0" y="877.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">beside algorithm DLLs</text>
+<text x="300" y="173" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">requests</text>
+<text x="169" y="407" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">save</text>
+<text x="620" y="291" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">request</text>
+<text x="620" y="351" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">reply</text>
+<text x="809" y="407" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">cdecl</text>
+<text x="800" y="752" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">encode / compare</text>
+<text x="535" y="652" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">load once</text>
+<text x="300" y="823" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">export</text>
+<text x="40" y="585" font-family="Arial" font-size="14" font-weight="400" text-anchor="start" fill="#111111">Startup: Git LFS -&gt; fallback train -&gt; package -&gt; GUI.</text>
+<text x="40" y="612" font-family="Arial" font-size="14" font-weight="400" text-anchor="start" fill="#111111">Evaluator: original gray8 + opaque template bytes.</text>
+<text x="40" y="638" font-family="Arial" font-size="14" font-weight="400" text-anchor="start" fill="#111111">Windows runtime; DLLs and weights share one folder.</text>
 </svg>

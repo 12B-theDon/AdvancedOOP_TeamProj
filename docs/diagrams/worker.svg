@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="230.6489mm" viewBox="0 0 940 730" role="img"><title>Windows worker · IPC and crash isolation</title><desc>Current project implementation; editable vector source. Generated from verified source paths and selected direct includes.</desc><rect width="940" height="730" fill="white"/>
+<line x1="250" y1="64" x2="690" y2="64" stroke="#73818d"/>
+<g data-node="options" data-source="src/Engine/kisaDll.h"><rect x="20" y="110" width="260" height="92" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="20" y="110" width="260" height="32.5" fill="#21834d"/></g>
+<g data-node="protocol" data-source="src/Worker/Protocol.h"><rect x="340" y="110" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="340" y="110" width="260" height="32.5" fill="#73818d"/></g>
+<g data-node="abi" data-source="src/Public/BioApi.h"><rect x="660" y="110" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="660" y="110" width="260" height="32.5" fill="#73818d"/></g>
+<g data-node="host" data-source="src/Engine/kisaDll.cpp"><rect x="20" y="300" width="260" height="110" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="20" y="300" width="260" height="32.5" fill="#21834d"/></g>
+<g data-node="worker" data-source="src/Worker/worker.cpp"><rect x="340" y="300" width="260" height="110" fill="#fff1e2" stroke="#c96818" stroke-width="2"/><rect x="340" y="300" width="260" height="32.5" fill="#c96818"/></g>
+<g data-node="dll" data-source=""><rect x="660" y="300" width="260" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="300" width="260" height="32.5" fill="#2864b4"/></g>
+<g data-node="errors" data-source=""><rect x="20" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="20" y="550" width="260" height="32.5" fill="#73818d"/></g>
+<g data-node="lifecycle" data-source=""><rect x="340" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="340" y="550" width="260" height="32.5" fill="#73818d"/></g>
+<g data-node="buffers" data-source=""><rect x="660" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="660" y="550" width="260" height="32.5" fill="#73818d"/></g>
+<g data-from="host" data-to="options" data-relation="include"><polyline points="150.0,300 150.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="150.0,202 153.3,210.0 146.7,210.0" fill="#81909b"/></g>
+<g data-from="worker" data-to="protocol" data-relation="include"><polyline points="470.0,300 470.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="470.0,202 473.3,210.0 466.7,210.0" fill="#81909b"/></g>
+<g data-from="host" data-to="worker" data-relation="flow"><polyline points="280,339.0 340,339.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="340,339.0 332.0,342.3 332.0,335.7" fill="#4f5b65"/></g>
+<g data-from="worker" data-to="host" data-relation="flow"><polyline points="340,371.0 280,371.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="280,371.0 288.0,367.7 288.0,374.3" fill="#4f5b65"/></g>
+<g data-from="worker" data-to="dll" data-relation="flow"><polyline points="600,339.0 660,339.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="660,339.0 652.0,342.3 652.0,335.7" fill="#4f5b65"/></g>
+<g data-from="dll" data-to="worker" data-relation="flow"><polyline points="660,371.0 600,371.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="600,371.0 608.0,367.7 608.0,374.3" fill="#4f5b65"/></g>
+<g data-from="host" data-to="errors" data-relation="flow"><polyline points="150.0,410 150.0,550" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="150.0,550 146.7,542.0 153.3,542.0" fill="#4f5b65"/></g>
+<g data-from="worker" data-to="lifecycle" data-relation="flow"><polyline points="470.0,410 470.0,550" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="470.0,550 466.7,542.0 473.3,542.0" fill="#4f5b65"/></g>
+<text x="470" y="43" font-family="Arial" font-size="30" font-weight="700" text-anchor="middle" fill="#111111">Windows worker · IPC and crash isolation</text>
+<text x="150.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">kisaDll.h</text>
+<text x="150.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">DllOptions / KisaDllAlgorithm</text>
+<text x="150.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">configurable workers and deadlines</text>
+<text x="150.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Cancel() / ResetCancel()</text>
+<text x="470.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Protocol.h</text>
+<text x="470.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">version 2 / little-endian Windows</text>
+<text x="470.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Request: operation + byte lengths</text>
+<text x="470.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Response: result / error / duration</text>
+<text x="790.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">BioApi.h</text>
+<text x="790.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">cdecl / C linkage / success 1 or 0</text>
+<text x="790.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">KISA_Enroll() / KISA_Attempt()</text>
+<text x="790.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">KISA_Compare()</text>
+<text x="150.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">kisaDll.cpp</text>
+<text x="150.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">State::Call() / Start() / Stop()</text>
+<text x="150.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">owns pipe / process / job handles</text>
+<text x="150.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">overlapped writes / read polling</text>
+<text x="150.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">deadline or Stop terminates worker</text>
+<text x="470.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">worker.cpp</text>
+<text x="470.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">LoadLibraryExW() / GetProcAddress()</text>
+<text x="470.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Read() → Invoke() → Write()</text>
+<text x="470.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">SEH / output guards / ABI checks</text>
+<text x="470.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">dedicated IPC; DLL stdout isolated</text>
+<text x="790.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Selected algorithm DLL</text>
+<text x="790.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">KISA_Enroll(iType, gray8, ...)</text>
+<text x="790.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">KISA_Attempt(iType, gray8, ...)</text>
+<text x="790.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">KISA_Compare(enroll, attempt, ...)</text>
+<text x="790.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">templates remain opaque to host</text>
+<text x="150.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Failure categories</text>
+<text x="150.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FAIL · DLL error code / message</text>
+<text x="150.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">TIMEOUT · CRASH · MISMATCH</text>
+<text x="150.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CANCELLED · stopped run discarded</text>
+<text x="470.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Worker lifecycle</text>
+<text x="470.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">job kills worker on handle close</text>
+<text x="470.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">fault → fresh process on next call</text>
+<text x="470.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">first call allows ≥120 seconds</text>
+<text x="790.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Buffer contract</text>
+<text x="790.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">template length &gt;0 and &lt;1,000,000</text>
+<text x="790.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">error message: 256 bytes</text>
+<text x="790.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">save and replay actual byte lengths</text>
+<text x="310" y="332" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">request</text>
+<text x="310" y="388" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">reply</text>
+<text x="630" y="332" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">cdecl</text>
+<text x="630" y="388" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">outputs</text>
+<text x="183" y="500" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">record</text>
+<text x="525" y="500" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">fault / next call</text>
+<text x="470" y="710" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">Solid: calls / data flow     Dashed: selected direct #include links</text>
+</svg>

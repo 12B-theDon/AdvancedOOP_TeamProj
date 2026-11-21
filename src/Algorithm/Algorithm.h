@@ -1,17 +1,12 @@
 #pragma once
 
+#include "../Public/Image.h"
 #include <string>
 #include <vector>
 
 namespace algorithm {
 
-// Tightly packed grayscale image before preprocessing.
-struct AlgorithmImage {
-    int width = 0; // [px]
-    int height = 0; // [px]
-    std::vector<unsigned char> pixels; // [gray8] Row-major pixels.
-    std::string database_id; // Source DB, independent of the selected model; empty if unknown.
-};
+using AlgorithmImage = fingerprint::Image;
 
 // Encoder input after deterministic preprocessing.
 struct PreparedImage {
@@ -30,7 +25,7 @@ struct AlgorithmModelInfo {
     std::vector<std::string> labels;
 };
 
-// Engine-facing contract; false returns an error message.
+// Native encoder/training contract; false returns an error message.
 class Algorithm {
 public:
     virtual ~Algorithm() = default;

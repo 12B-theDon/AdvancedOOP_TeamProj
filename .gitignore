@@ -5,19 +5,25 @@
 /.vscode/
 CMakeUserPresets.json
 
-# Generated data, all fine-tuned/experimental weights, caches and validation outputs.
-# Retain local result records as needed; only the README and pretrained exceptions below are versioned.
+# Generated data, experimental weights, caches and validation outputs.
 /data/augmented/
 /model/
 /models/*
 !/models/readme.md
 *.partial
 
-# Include only the pretrained encoder needed for team fine-tuning.
+# Include the pretrained encoder and the four distributed production models.
 !/models/pretrained/
 /models/pretrained/*
 !/models/pretrained/deepprint.bin
 !/models/pretrained/deepprint.json
+!/models/trained_result/
+/models/trained_result/*
+!/models/trained_result/fvc2000_db3.bin
+!/models/trained_result/fvc2002_db3.bin
+!/models/trained_result/fvc2004_db1.bin
+!/models/trained_result/combined.bin
+!/models/trained_result/weights.json
 
 # External source contents belong to the registered Git submodule.
 # Only its pinned Git entry is tracked by this repository.
@@ -33,11 +39,11 @@ __pycache__/
 # Local drawing rules; keep generated figures and the model conversion tool versioned.
 /tools/readme.md
 
-# Local raw GUI verification outputs; keep the explanatory README.
-/docs/GUI_flows/captures/*
-!/docs/GUI_flows/captures/readme.md
-
 # Local reference paper and diagram PDF exports.
 /Deepprint.pdf
 /output/pdf/deepprint_blocks.pdf
 /output/pdf/deepprint_finetuning.pdf
+
+# Deployment packages and generated focused-test outputs.
+/dist/
+/tests/output/

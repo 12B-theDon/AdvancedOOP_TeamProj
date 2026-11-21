@@ -1,0 +1,17 @@
+[
+    {
+        "database": "FVC2000_DB3_B",
+        "embedding_sha256": "2619bf10758a3c08a47fe79729c6504d01b6522d6e63916cc175c489dcdfff95",
+        "preprocessing_sha256": "6d28654428b707bf012f07e105599f45fd1a41cf777db503fc79c253f0244921"
+    },
+    {
+        "database": "FVC2002_DB3_B",
+        "embedding_sha256": "94db51d238ca835c556b8ad56412924dda976b7b08d90abc75f4dd0f52cc88a4",
+        "preprocessing_sha256": "7ddb3d15a91eb6f8cd681421dd210a91f5c5750815e026c4803e98ea32020378"
+    },
+    {
+        "database": "FVC2004_DB1_B",
+        "embedding_sha256": "db6db97091e9cda4ef1d63718ed4cacd5e4eedcc44f057081b04f678470c5967",
+        "preprocessing_sha256": "a8a5375e3de1f1e074b5250ebcce2cf5dcdd72090318871fb45eec9ea5f124f7"
+    }
+]

@@ -1,94 +1,66 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="154.1872mm" viewBox="0 0 940 488" role="img">
-<title>GUI — High-level data flow</title>
-<desc>All files use compact rectangular cards with colored filename headers. Solid arrows carry requests and data; dashed arrows show verified source includes.</desc>
-<rect width="940" height="488" fill="white"/>
-<line data-role="title-rule" x1="443.332" y1="47" x2="496.668" y2="47" stroke="#7c4db5" stroke-width="1" opacity="0.7"/>
-<g data-from="GUI.cpp" data-to="GUI.h" data-relation="include"><polyline points="470.000,283.360 470.000,234.160" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/>
-<polygon points="470.0,234.16 473.3,242.16 466.7,242.16" fill="#81909b"/></g>
-<g data-from="GUI.h" data-to="guiConfig.h" data-relation="include"><polyline points="470.000,160.160 470.000,131.000" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/>
-<polygon points="470.0,131.0 473.3,139.0 466.7,139.0" fill="#81909b"/></g>
-<g data-from="GUI.h" data-to="Engine.h" data-relation="include"><polyline points="545.477,197.160 717.500,197.160" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/>
-<polygon points="717.5,197.16 709.5,200.46 709.5,193.85999999999999" fill="#81909b"/></g>
-<g data-from="GUI.cpp" data-to="report.h" data-relation="include"><polyline points="373.750,283.360 373.750,197.160 222.469,197.160" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/>
-<polygon points="222.46875,197.16 230.46875,193.85999999999999 230.46875,200.46" fill="#81909b"/></g>
-<g data-from="report.cpp" data-to="report.h" data-relation="include"><polyline points="140.000,283.360 140.000,234.160" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/>
-<polygon points="140.0,234.16 143.3,242.16 136.7,242.16" fill="#81909b"/></g>
-<g data-from="Engine.cpp" data-to="Engine.h" data-relation="include"><polyline points="800.000,283.360 800.000,225.160" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/>
-<polygon points="800.0,225.16 803.3,233.16 796.7,233.16" fill="#81909b"/></g>
-<g data-from="GUI.cpp" data-to="report.cpp" data-relation="flow"><polyline points="350.000,301.000 230.000,301.000" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="230.0,301.0 238.0,297.7 238.0,304.3" fill="#4f5b65"/></g>
-<g data-from="report.cpp" data-to="GUI.cpp" data-relation="flow"><polyline points="230.000,339.720 350.000,339.720" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="350.0,339.72 342.0,343.02000000000004 342.0,336.42" fill="#4f5b65"/></g>
-<g data-from="GUI.cpp" data-to="Engine.cpp" data-relation="flow"><polyline points="590.000,301.000 710.000,301.000" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="710.0,301.0 702.0,304.3 702.0,297.7" fill="#4f5b65"/></g>
-<g data-from="Engine.cpp" data-to="GUI.cpp" data-relation="flow"><polyline points="710.000,339.720 590.000,339.720" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="590.0,339.72 598.0,336.42 598.0,343.02000000000004" fill="#4f5b65"/></g>
-<g data-from="main.cpp" data-to="GUI.cpp" data-relation="flow"><polyline points="470.000,406.760 470.000,357.360" fill="none" stroke="#4f5b65" stroke-width="2"/>
-<polygon points="470.0,357.36 473.3,365.36 466.7,365.36" fill="#4f5b65"/></g>
-<g data-file="guiConfig.h" data-node="file" data-part="GUI" data-source="src/GUI/guiConfig.h">
-<rect x="395.0" y="75.0" width="150" height="56" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/>
-<rect data-role="filename-header" x="395.0" y="75.0" width="150" height="32.5" fill="#7c4db5"/>
-<text x="470.000" y="98.500" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">guiConfig.h</text>
-<text x="470.000" y="123.500" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">MetricNames</text>
-</g>
-<g data-file="report.h" data-node="file" data-part="GUI" data-source="src/GUI/report.h">
-<rect x="57.53125" y="160.16" width="164.9375" height="74" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/>
-<rect data-role="filename-header" x="57.53125" y="160.16" width="164.9375" height="32.5" fill="#7c4db5"/>
-<text x="140.000" y="183.660" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">report.h</text>
-<text x="140.000" y="208.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Save()</text>
-<text x="140.000" y="226.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">selected (report metrics)</text>
-</g>
-<g data-file="GUI.h" data-node="file" data-part="GUI" data-source="src/GUI/GUI.h">
-<rect x="394.5234375" y="160.16" width="150.953125" height="74" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/>
-<rect data-role="filename-header" x="394.5234375" y="160.16" width="150.953125" height="32.5" fill="#7c4db5"/>
-<text x="470.000" y="183.660" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">GUI.h</text>
-<text x="470.000" y="208.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">images_</text>
-<text x="470.000" y="226.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">enrollmentTemplates_</text>
-</g>
-<g data-file="Engine.h" data-node="file" data-part="Engine" data-source="src/Engine/Engine.h">
-<rect x="717.5" y="169.16" width="165" height="56" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/>
-<rect data-role="filename-header" x="717.5" y="169.16" width="165" height="32.5" fill="#21834d"/>
-<text x="800.000" y="192.660" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Engine.h</text>
-<text x="800.000" y="217.660" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">models_</text>
-</g>
-<g data-file="report.cpp" data-node="file" data-part="GUI" data-source="src/GUI/report.cpp">
-<rect x="50.0" y="283.36" width="180" height="74" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/>
-<rect data-role="filename-header" x="50.0" y="283.36" width="180" height="32.5" fill="#7c4db5"/>
-<text x="140.000" y="306.860" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">report.cpp</text>
-<text x="140.000" y="331.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CalculateMetrics()</text>
-<text x="140.000" y="349.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Save()</text>
-</g>
-<g data-file="GUI.cpp" data-node="file" data-part="GUI" data-source="src/GUI/GUI.cpp">
-<rect x="350.0" y="283.36" width="240" height="74" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/>
-<rect data-role="filename-header" x="350.0" y="283.36" width="240" height="32.5" fill="#7c4db5"/>
-<text x="470.000" y="306.860" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">GUI.cpp</text>
-<text x="470.000" y="331.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CreateEnrollmentTemplates()</text>
-<text x="470.000" y="349.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">RunSelectedComparisons()</text>
-</g>
-<g data-file="Engine.cpp" data-node="file" data-part="Engine" data-source="src/Engine/Engine.cpp">
-<rect x="710.0" y="283.36" width="180" height="74" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/>
-<rect data-role="filename-header" x="710.0" y="283.36" width="180" height="32.5" fill="#21834d"/>
-<text x="800.000" y="306.860" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Engine.cpp</text>
-<text x="800.000" y="331.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Enroll()</text>
-<text x="800.000" y="349.860" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Execute()</text>
-</g>
-<g data-file="main.cpp" data-node="file" data-part="Entry" data-source="src/main.cpp">
-<rect x="405.0" y="406.76" width="130" height="56" fill="#fff1e2" stroke="#c96818" stroke-width="2"/>
-<rect data-role="filename-header" x="405.0" y="406.76" width="130" height="32.5" fill="#c96818"/>
-<text x="470.000" y="430.260" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">main.cpp</text>
-<text x="470.000" y="455.260" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">main()</text>
-</g>
-<text x="470.000" y="34.000" font-family="Arial" font-size="30" font-weight="700" text-anchor="middle" fill="#111111">GUI</text>
-<text data-role="edge-label" data-placement="right" data-from="GUI.cpp" data-to="GUI.h" data-segment="470.00000,283.36000 470.00000,234.16000" x="476.000" y="262.960" font-family="Arial" font-size="12" font-weight="400" text-anchor="start" fill="#52606d">include</text>
-<text data-role="edge-label" data-placement="right" data-from="GUI.h" data-to="guiConfig.h" data-segment="470.00000,160.16000 470.00000,131.00000" x="476.000" y="149.780" font-family="Arial" font-size="12" font-weight="400" text-anchor="start" fill="#52606d">include</text>
-<text data-role="edge-label" data-placement="above" data-from="GUI.h" data-to="Engine.h" data-segment="545.47656,197.16000 717.50000,197.16000" x="631.488" y="191.160" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">include</text>
-<text data-role="edge-label" data-placement="above" data-from="GUI.cpp" data-to="report.h" data-segment="373.75000,197.16000 222.46875,197.16000" x="298.109" y="191.160" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">include</text>
-<text data-role="edge-label" data-placement="right" data-from="report.cpp" data-to="report.h" data-segment="140.00000,283.36000 140.00000,234.16000" x="146.000" y="262.960" font-family="Arial" font-size="12" font-weight="400" text-anchor="start" fill="#52606d">include</text>
-<text data-role="edge-label" data-placement="right" data-from="Engine.cpp" data-to="Engine.h" data-segment="800.00000,283.36000 800.00000,225.16000" x="806.000" y="258.460" font-family="Arial" font-size="12" font-weight="400" text-anchor="start" fill="#52606d">include</text>
-<text data-role="edge-label" data-placement="above" data-from="GUI.cpp" data-to="report.cpp" data-segment="350.00000,301.00000 230.00000,301.00000" x="290.000" y="281.000" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">results +</text>
-<text data-role="edge-label" data-placement="above" data-from="GUI.cpp" data-to="report.cpp" data-segment="350.00000,301.00000 230.00000,301.00000" x="290.000" y="295.000" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">metric choices</text>
-<text data-role="edge-label" data-placement="above" data-from="report.cpp" data-to="GUI.cpp" data-segment="230.00000,339.72000 350.00000,339.72000" x="290.000" y="333.720" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">metric values</text>
-<text data-role="edge-label" data-placement="above" data-from="GUI.cpp" data-to="Engine.cpp" data-segment="590.00000,301.00000 710.00000,301.00000" x="650.000" y="295.000" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">images + pairs</text>
-<text data-role="edge-label" data-placement="above" data-from="Engine.cpp" data-to="GUI.cpp" data-segment="710.00000,339.72000 590.00000,339.72000" x="650.000" y="333.720" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">comparison scores</text>
-<text data-role="edge-label" data-placement="right" data-from="main.cpp" data-to="GUI.cpp" data-segment="470.00000,406.76000 470.00000,357.36000" x="476.000" y="386.260" font-family="Arial" font-size="12" font-weight="400" text-anchor="start" fill="#52606d">encoder instance</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="224.3298mm" viewBox="0 0 940 710" role="img"><title>GUI · ownership, background work and reports</title><desc>Current project implementation; editable vector source. Generated from verified source paths and selected direct includes.</desc><rect width="940" height="710" fill="white"/>
+<line x1="250" y1="64" x2="690" y2="64" stroke="#73818d"/>
+<g data-node="reporth" data-source="src/GUI/report.h"><rect x="20" y="110" width="260" height="92" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/><rect x="20" y="110" width="260" height="32.5" fill="#7c4db5"/></g>
+<g data-node="guih" data-source="src/GUI/GUI.h"><rect x="340" y="110" width="260" height="92" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/><rect x="340" y="110" width="260" height="32.5" fill="#7c4db5"/></g>
+<g data-node="config" data-source="src/GUI/guiConfig.h"><rect x="660" y="110" width="260" height="92" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/><rect x="660" y="110" width="260" height="32.5" fill="#7c4db5"/></g>
+<g data-node="report" data-source="src/GUI/report.cpp"><rect x="20" y="300" width="260" height="110" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/><rect x="20" y="300" width="260" height="32.5" fill="#7c4db5"/></g>
+<g data-node="gui" data-source="src/GUI/GUI.cpp"><rect x="340" y="300" width="260" height="110" fill="#f1e8fc" stroke="#7c4db5" stroke-width="2"/><rect x="340" y="300" width="260" height="32.5" fill="#7c4db5"/></g>
+<g data-node="engine" data-source="src/Engine/Engine.h"><rect x="660" y="300" width="260" height="110" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="660" y="300" width="260" height="32.5" fill="#21834d"/></g>
+<g data-node="outputs" data-source=""><rect x="20" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="20" y="550" width="260" height="32.5" fill="#73818d"/></g>
+<g data-node="main" data-source="src/main.cpp;src/GUI/startup.cpp;src/GUI/startup.h;tools/setup_windows.ps1"><rect x="340" y="550" width="260" height="92" fill="#fff1e2" stroke="#c96818" stroke-width="2"/><rect x="340" y="550" width="260" height="32.5" fill="#c96818"/></g>
+<g data-node="backend" data-source="src/Engine/kisaDll.h"><rect x="660" y="550" width="260" height="92" fill="#e8f6ec" stroke="#21834d" stroke-width="2"/><rect x="660" y="550" width="260" height="32.5" fill="#21834d"/></g>
+<g data-from="report" data-to="reporth" data-relation="include"><polyline points="150.0,300 150.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="150.0,202 153.3,210.0 146.7,210.0" fill="#81909b"/></g>
+<g data-from="gui" data-to="guih" data-relation="include"><polyline points="470.0,300 470.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="470.0,202 473.3,210.0 466.7,210.0" fill="#81909b"/></g>
+<g data-from="guih" data-to="config" data-relation="include"><polyline points="600,156.0 660,156.0" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="660,156.0 652.0,159.3 652.0,152.7" fill="#81909b"/></g>
+<g data-from="gui" data-to="report" data-relation="flow"><polyline points="340,339.0 280,339.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="280,339.0 288.0,335.7 288.0,342.3" fill="#4f5b65"/></g>
+<g data-from="report" data-to="gui" data-relation="flow"><polyline points="280,371.0 340,371.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="340,371.0 332.0,374.3 332.0,367.7" fill="#4f5b65"/></g>
+<g data-from="gui" data-to="engine" data-relation="flow"><polyline points="600,355.0 660,355.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="660,355.0 652.0,358.3 652.0,351.7" fill="#4f5b65"/></g>
+<g data-from="report" data-to="outputs" data-relation="flow"><polyline points="150.0,410 150.0,550" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="150.0,550 146.7,542.0 153.3,542.0" fill="#4f5b65"/></g>
+<g data-from="main" data-to="gui" data-relation="flow"><polyline points="470.0,550 470.0,410" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="470.0,410 473.3,418.0 466.7,418.0" fill="#4f5b65"/></g>
+<text x="470" y="43" font-family="Arial" font-size="30" font-weight="700" text-anchor="middle" fill="#111111">GUI · ownership, background work and reports</text>
+<text x="150.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">report.h</text>
+<text x="150.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CalculateMetrics()</text>
+<text x="150.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">GraphFiles() / WriteGraphs()</text>
+<text x="150.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Save()</text>
+<text x="470.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">GUI.h</text>
+<text x="470.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Window / seven-page QWizard</text>
+<text x="470.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">owns Engine + KisaDllAlgorithm</text>
+<text x="470.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">cached templates and results</text>
+<text x="790.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">guiConfig.h</text>
+<text x="790.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">page titles / controls</text>
+<text x="790.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">report metric choices</text>
+<text x="790.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">threshold display / colors</text>
+<text x="150.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">report.cpp</text>
+<text x="150.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">assignment metrics / failure counts</text>
+<text x="150.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">EER midpoint estimate + bounds</text>
+<text x="150.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">selected HTML / editable RTF</text>
+<text x="150.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">separate SVG graph exports</text>
+<text x="470.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">GUI.cpp</text>
+<text x="470.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">RunWithProgress() / Stop</text>
+<text x="470.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">ApplyThreshold() / Snapshot()</text>
+<text x="470.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">AlgorithmUnchanged()</text>
+<text x="470.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">SaveResults()</text>
+<text x="790.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Engine.h</text>
+<text x="790.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">PlanComparisons()</text>
+<text x="790.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">EnrollImages() / Execute()</text>
+<text x="790.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Cancel() / progress counters</text>
+<text x="790.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">borrowed algorithm interface</text>
+<text x="150.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Report outputs</text>
+<text x="150.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">HTML / Word-compatible RTF</text>
+<text x="150.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">SVG graphs / all raw CSV</text>
+<text x="150.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">selected metrics in reports</text>
+<text x="470.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">main.cpp / startup</text>
+<text x="470.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">QApplication / startup.cpp</text>
+<text x="470.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Windows: prepare missing bundle</text>
+<text x="470.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">then gui::Window</text>
+<text x="790.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">kisaDll.h</text>
+<text x="790.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">algorithm_ owned by Window</text>
+<text x="790.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">replacement clears cached results</text>
+<text x="790.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">selected DLL + bundle signature</text>
+<text x="310" y="332" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">snapshot</text>
+<text x="310" y="388" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">metrics</text>
+<text x="630" y="343" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">calls</text>
+<text x="181" y="495" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">save</text>
+<text x="505" y="495" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">construct</text>
+<text x="470" y="690" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">Solid: calls / data flow     Dashed: selected direct #include links</text>
 </svg>

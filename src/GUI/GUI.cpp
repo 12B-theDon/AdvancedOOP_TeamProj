@@ -29,14 +29,15 @@
 #include <QVariant>
 #include <QVBoxLayout>
 #include <limits>
+#include <QCryptographicHash>
+#include <QEventLoop>
+#include <QProgressDialog>
+#include <QTimer>
+#include <future>
+#include <chrono>
+#include <utility>
 
 namespace gui {
-
-static const QStringList ModelIds = [] {
-    QStringList ids;
-    for (const std::string& id : engine::ModelIds) ids.append(QString::fromStdString(id));
-    return ids;
-}();
 
 // QWizard enables Next only when the current step is ready.
 class WorkflowPage : public QWizardPage {
@@ -172,6 +173,7 @@ void Window::resizeEvent(QResizeEvent* event) {
 }
 
 void Window::done(int result) {
+    if (busy_) return;
     const QMessageBox::StandardButton answer = QMessageBox::question(this, ExitTitle, ExitQuestion,
                                               QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
     if (answer == QMessageBox::Yes)
@@ -220,7 +222,16 @@ QWizardPage* Window::DatabasePage() {
         layout->addWidget(button);
         connect(button, &QPushButton::clicked, this, [this, name, button] {
             selectedDatabase_ = button;
-            LoadDatabase(QDir(QCoreApplication::applicationDirPath()).filePath(QString::fromUtf8(engine::ImagesFolder) + "/" + name), name);
+            const QString relative = QString::fromUtf8(engine::ImagesFolder) + "/" + name;
+            const QString app = QCoreApplication::applicationDirPath();
+            const QStringList roots = {QDir::currentPath(), app, QDir(app).filePath(".."), QDir(app).filePath("../..")};
+            QString folder;
+            for (const QString& root : roots) {
+                const QString candidate = QDir(root).filePath(relative);
+                if (QDir(candidate).exists()) { folder = candidate; break; }
+            }
+            if (folder.isEmpty()) folder = QFileDialog::getExistingDirectory(this, "Locate " + name);
+            if (!folder.isEmpty()) LoadDatabase(folder, name);
         });
     }
     QPushButton* external = new QPushButton(ExternalDatabase);
@@ -288,12 +299,12 @@ QWizardPage* Window::TemplatePage() {
     WorkflowPage* page = new WorkflowPage(this);
     page->setTitle(PageTitles[2]);
     QVBoxLayout* layout = new QVBoxLayout(page);
-    weightPath_ = new QLineEdit;
-    weightPath_->setObjectName("weightsFolder");
-    weightPath_->setReadOnly(true);
-    weightPath_->setPlaceholderText("Select the output folder from FingerprintTrain...");
+    dllPath_ = new QLineEdit;
+    dllPath_->setObjectName("algorithmDll");
+    dllPath_->setReadOnly(true);
+    dllPath_->setPlaceholderText("Select K-NBTC algorithm DLL...");
     QPushButton* browse = new QPushButton(BrowseWeights);
-    browse->setObjectName("browseWeights");
+    browse->setObjectName("browseAlgorithm");
     createTemplates_ = new QPushButton(CreateTemplates);
     createTemplates_->setObjectName("createTemplates");
     createTemplates_->setEnabled(false);
@@ -304,31 +315,32 @@ QWizardPage* Window::TemplatePage() {
     templateTable_->setObjectName("enrollmentTemplates");
     inferenceInfo_ = new QLabel(ModelHint);
     inferenceInfo_->setWordWrap(true);
-    calibrationInfo_ = new QLabel("Select trained models to obtain a minimum-score threshold.");
+    calibrationInfo_ = new QLabel("Threshold starts at 0.5; adjust in Results for the selected DLL.");
     calibrationInfo_->setObjectName("calibrationInfo");
     calibrationInfo_->setWordWrap(true);
-    layout->addWidget(weightPath_);
+    layout->addWidget(dllPath_);
     layout->addWidget(browse);
-    QHBoxLayout* modelOptions = new QHBoxLayout;
-    modelChoices_.resize(ModelIds.size());
-    for (int index = 0; index < ModelIds.size(); ++index) {
-        modelChoices_[index] = new QCheckBox(ModelIds[index]);
-        modelChoices_[index]->setObjectName("model_" + ModelIds[index]);
-        modelOptions->addWidget(modelChoices_[index]);
-        connect(modelChoices_[index], &QCheckBox::toggled, this, [this] {
-            if (!changingModels_) ReloadModels();
-        });
-    }
-    layout->addLayout(modelOptions);
+    workerCount_ = new QSpinBox;
+    workerCount_->setObjectName("workerCount"); workerCount_->setRange(1, engine::MaxConcurrency);
+    workerCount_->setValue(engine::DefaultConcurrency);
+    timeout_ = new QSpinBox;
+    timeout_->setObjectName("callTimeoutMs"); timeout_->setRange(1, 3600000);
+    timeout_->setValue(engine::DefaultTimeoutMs); timeout_->setSuffix(" ms");
+    QHBoxLayout* options = new QHBoxLayout;
+    options->addWidget(new QLabel("Parallel workers:")); options->addWidget(workerCount_);
+    options->addWidget(new QLabel("Timeout per call:")); options->addWidget(timeout_);
+    layout->addLayout(options);
+    connect(workerCount_, QOverload<int>::of(&QSpinBox::valueChanged), this, [this] { ReloadModels(); });
+    connect(timeout_, QOverload<int>::of(&QSpinBox::valueChanged), this, [this] { ReloadModels(); });
     layout->addWidget(modelTable_);
     layout->addWidget(createTemplates_);
     layout->addWidget(templateTable_);
     layout->addWidget(inferenceInfo_);
     layout->addWidget(calibrationInfo_);
     connect(browse, &QPushButton::clicked, this, [this] {
-        const QString path = QFileDialog::getExistingDirectory(this, WeightsFolderDialog);
+        const QString path = QFileDialog::getOpenFileName(this, WeightsFolderDialog, QString(), "Windows DLL (*.dll)");
         if (!path.isEmpty()) {
-            weightPath_->setText(path);
+            dllPath_->setText(path);
             ReloadModels();
         }
     });
@@ -546,6 +558,7 @@ QWizardPage* Window::ResultsPage() {
 }
 
 void Window::LoadDatabase(const QString& folder, const QString& database_id) {
+    if (busy_) return;
     // Unknown names can enroll, but do not provide comparison labels.
     imageList_->clear();
     images_.clear();
@@ -602,15 +615,6 @@ void Window::LoadDatabase(const QString& folder, const QString& database_id) {
         preview_->setText("No readable TIFF images. Check the folder and Qt TIFF image plugin.");
         UpdateEnrollment();
     }
-    changingModels_ = true;
-    const std::vector<engine::ModelState> recommended = engine::Engine::SelectModels(databaseId_.toStdString(), databaseId_.isEmpty(), "");
-    for (int index = 0; index < ModelIds.size(); ++index) {
-        bool selected = false;
-        for (const engine::ModelState& model : recommended)
-            if (model.model_id == ModelIds[index].toStdString()) selected = true;
-        modelChoices_[index]->setChecked(selected);
-    }
-    changingModels_ = false;
     ReloadModels();
 }
 
@@ -626,11 +630,6 @@ void Window::ShowImage(int row) {
         preview_->setPixmap(QPixmap::fromImage(image).scaled(preview_->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-void Window::SetAlgorithm(algorithm::Algorithm* backend) {
-    algorithm_ = backend;
-    ReloadModels();
-}
-
 void Window::ClearTemplates() {
     enrollmentTemplates_.clear();
     enrollmentTemplates_.resize(images_.size());
@@ -641,67 +640,126 @@ void Window::ClearTemplates() {
         if (model.loaded) loaded = true;
     createTemplates_->setEnabled(loaded && !imageList_->selectedItems().isEmpty());
     comparisonsExecuted_ = false;
+    genuine_.results.clear(); impostor_.results.clear();
+    for (ComparisonControls* controls : {&genuine_, &impostor_}) {
+        if (controls->table) controls->table->setRowCount(0);
+        if (controls->resultInfo) controls->resultInfo->clear();
+    }
 }
 
+static QString DllHash(const QString& path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) return QString();
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    if (!hash.addData(&file)) return QString();
+    // A deployment manifest also identifies auxiliary files/weights as a bundle.
+    const QDir folder = QFileInfo(path).dir();
+    QFile manifest(folder.filePath("SHA256SUMS.txt"));
+    if (manifest.open(QIODevice::ReadOnly)) {
+        const QByteArray contents = manifest.readAll(); hash.addData(contents);
+        for (const QByteArray& line : contents.split('\n')) {
+            if (line.isEmpty()) continue;
+            if (line.size() < 67 || line.mid(64, 2) != "  ") return QString();
+            const QString name = QString::fromUtf8(line.mid(66));
+            const QString resolved = QDir::cleanPath(folder.absoluteFilePath(name));
+            if (!resolved.startsWith(folder.absolutePath() + '/')) return QString();
+            QFile auxiliary(resolved);
+            if (!auxiliary.open(QIODevice::ReadOnly)) return QString();
+            QCryptographicHash auxiliaryHash(QCryptographicHash::Sha256);
+            if (!auxiliaryHash.addData(&auxiliary)) return QString();
+            hash.addData(name.toUtf8()); hash.addData(auxiliaryHash.result());
+        }
+    }
+    return QString::fromLatin1(hash.result().toHex());
+}
+bool Window::AlgorithmUnchanged() {
+    if (dllHash_.isEmpty() || dllHash_ != DllHash(dllPath_->text())) {
+        ReloadModels();
+        inferenceInfo_->setText("Algorithm changed; generate new enrollment templates.");
+        return false;
+    }
+    return true;
+}
 void Window::ReloadModels() {
-    std::vector<std::string> ids;
-    for (int index = 0; index < ModelIds.size(); ++index)
-        if (!weightPath_->text().isEmpty() && modelChoices_[index]->isChecked()) ids.push_back(ModelIds[index].toStdString());
-    engine_.LoadSelectedModels(ids, weightPath_->text().toStdString(), algorithm_);
+    if (busy_) return;
+    engine_.Configure(nullptr, "");
+    algorithm_.reset();
+    dllHash_ = DllHash(dllPath_->text());
     modelTable_->setRowCount(0);
-    int loaded = 0;
-    for (const engine::ModelState& model : engine_.Models()) {
-        if (model.loaded) ++loaded;
-        AddRow(modelTable_, {QString::fromStdString(model.model_id),
-                            QFileInfo(QString::fromStdString(model.weight_file)).fileName(),
-                            model.loaded ? QString::number(model.info.output_size) : QString(),
-                            model.loaded ? "Ready" : QString::fromStdString(model.error)});
+    if (!dllHash_.isEmpty()) {
+        engine::DllOptions options;
+        options.workers = workerCount_->value(); options.timeout_ms = timeout_->value();
+        const QString worker = QDir(QCoreApplication::applicationDirPath()).filePath("FingerprintWorker.exe");
+        algorithm_.reset(new engine::KisaDllAlgorithm(dllPath_->text().toStdString(), worker.toStdString(), options));
+        engine_.SetConcurrency(options.workers);
+        engine_.Configure(algorithm_.get(), dllPath_->text().toStdString());
+        AddRow(modelTable_, {"K-NBTC DLL", QFileInfo(dllPath_->text()).fileName(), "On first call"});
     }
-    inferenceInfo_->setText(QString("Models ready: %1 / %2. ").arg(loaded).arg(engine_.Models().size())
-        + ModelHint);
-    ClearTemplates();
-    UpdateEnrollment();
-    const engine::ThresholdRecommendation recommendation = engine_.RecommendedThreshold(databaseId_.toStdString());
-    QString calibration;
-    if (recommendation.available) {
-        genuine_.threshold->setValue(recommendation.threshold);
-        impostor_.threshold->setValue(recommendation.threshold);
-        calibration = QString("Suggested threshold: %1. Based on the minimum matching-DB/combined score; adjustable in Results.")
-            .arg(recommendation.threshold, 0, 'f', ThresholdPrecision);
-        if (recommendation.external_fallback)
-            calibration += " This value has not been checked for external images.";
-        if (!recommendation.target_met)
-            calibration += " These models did not meet the validation target.";
-    } else {
-        genuine_.threshold->setValue(engine::GenuineThreshold);
-        impostor_.threshold->setValue(engine::ImpostorThreshold);
-        calibration = QString("No matching minimum-score calibration. %1 Adjust thresholds manually in Results.").arg(QString::fromStdString(recommendation.note));
-    }
-    if (calibrationInfo_) calibrationInfo_->setText(calibration);
-    if (resultCalibrationInfo_) resultCalibrationInfo_->setText(calibration);
+    genuine_.threshold->setValue(engine::GenuineThreshold);
+    impostor_.threshold->setValue(engine::ImpostorThreshold);
+    const QString hint = "Threshold starts at 0.5; adjust it in Results for this DLL.";
+    calibrationInfo_->setText(hint); resultCalibrationInfo_->setText(hint);
+    inferenceInfo_->setText(ModelHint);
+    ClearTemplates(); UpdateEnrollment();
+}
+bool Window::RunWithProgress(const QString& title, const std::function<void()>& work) {
+    engine_.ResetCancel();
+    busy_ = true;
+    std::vector<std::pair<QWidget*, bool>> disabled;
+    for (int id : pageIds()) disabled.push_back({page(id), page(id)->isEnabled()});
+    for (QWizard::WizardButton which : {QWizard::BackButton, QWizard::NextButton, QWizard::CancelButton, QWizard::FinishButton})
+        disabled.push_back({button(which), button(which)->isEnabled()});
+    for (const std::pair<QWidget*, bool>& item : disabled) item.first->setEnabled(false);
+    QProgressDialog progress(title, "Stop", 0, 0, this);
+    progress.setWindowModality(Qt::ApplicationModal); progress.setMinimumDuration(0);
+    progress.setAutoClose(false); progress.setAutoReset(false);
+    QEventLoop loop;
+    QTimer timer;
+    std::future<void> task = std::async(std::launch::async, work);
+    const QMetaObject::Connection stopConnection = connect(&progress, &QProgressDialog::canceled, this, [this] { engine_.Cancel(); });
+    connect(&timer, &QTimer::timeout, &loop, [this, title, &progress, &task, &loop] {
+        const int total = engine_.ProgressTotal();
+        if (total > 0) {
+            progress.setRange(0, total); progress.setValue(engine_.ProgressDone());
+            progress.setLabelText(title + QString("\n%1 / %2 completed").arg(engine_.ProgressDone()).arg(total));
+        }
+        if (task.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) loop.quit();
+    });
+    timer.start(50); progress.show(); loop.exec(); timer.stop(); disconnect(stopConnection); progress.close();
+    try { task.get(); }
+    catch (const std::exception& e) { engine_.Cancel(); QMessageBox::warning(this, "Execution failed", QString::fromUtf8(e.what())); }
+    busy_ = false;
+    for (const std::pair<QWidget*, bool>& item : disabled) item.first->setEnabled(item.second);
+    return !engine_.Cancelled();
 }
 
 void Window::CreateEnrollmentTemplates() {
+    if (busy_ || !AlgorithmUnchanged()) return;
     ClearTemplates();
+    std::vector<int> selected;
+    for (const QListWidgetItem* item : imageList_->selectedItems()) selected.push_back(imageList_->row(item));
+    std::vector<engine::EnrollmentTemplates> results;
+    const bool completed = RunWithProgress("Generating enrollment templates", [this, &selected, &results] {
+        results = engine_.EnrollImages(images_, selected);
+    });
+    if (!completed) { ClearTemplates(); inferenceInfo_->setText("Stopped; generated templates discarded."); UpdateEnrollment(); return; }
+    enrollmentTemplates_ = std::move(results);
     int successful = 0;
-    for (const QListWidgetItem* item : imageList_->selectedItems()) {
-        const int index = imageList_->row(item);
-        enrollmentTemplates_[index] = engine_.Enroll(engine::Engine::ReadImage(images_[index].path, images_[index].database_id));
+    for (int index : selected) {
         for (const engine::ModelTemplate& model : enrollmentTemplates_[index].models) {
-            AddRow(templateTable_, {item->text(), QString::fromStdString(model.model_id),
-                                   model.success ? "OK" : "Failed", QString::number(model.dimensions), QString::number(model.data.size()),
-                                   QString::fromStdString(model.error)});
+            AddRow(templateTable_, {QString::fromStdString(images_[index].name), QString::fromStdString(model.model_id),
+                model.success ? "OK" : "ERR", QString::number(model.data.size()), QString::fromStdString(model.error)});
             if (model.success) ++successful;
         }
-        if (enrollmentTemplates_[index].success) templatesReady_ = true;
+        // A completed enrollment phase can proceed even if every enrollment fails:
+        // the report must still show FTE and the predefined failed comparisons.
+        if (enrollmentTemplates_[index].executed) templatesReady_ = true;
     }
-    inferenceInfo_->setText(QString("Successful model-specific enrollment templates: %1.").arg(successful));
+    inferenceInfo_->setText(QString("Successful enrollment templates: %1 / %2.").arg(successful).arg(selected.size()));
     UpdateEnrollment();
 }
 
-void Window::RunComparisons(ComparisonControls& controls) {
-    if (!templatesReady_ || !controls.valid) return;
-    controls.results = engine_.Execute(controls.pairs, images_, enrollmentTemplates_);
+void Window::DisplayComparisons(ComparisonControls& controls) {
     for (int row = 0; row < int(controls.results.size()); ++row) {
         const engine::SimilarityResult& result = controls.results[row];
         for (int model = 0; model < int(result.model_scores.size()); ++model) {
@@ -711,10 +769,10 @@ void Window::RunComparisons(ComparisonControls& controls) {
         }
         controls.table->item(row, controls.table->columnCount() - 1)->setText(QString::number(result.time_ms, 'f', TimePrecision));
         controls.table->item(row, 3)->setToolTip(result.success
-            ? QString("Minimum successful same-DB/combined score: %1 (%2). Same rule for Genuine and Impostor.")
+            ? QString("DLL similarity: %1 (%2).")
                 .arg(result.score, 0, 'g', engine::CsvPrecision)
                 .arg(QString::fromStdString(result.model_id))
-            : "No successful decision model. Select the matching-DB or combined model; unknown DBs use combined only.");
+            : "No valid score; see the error tooltip.");
     }
     controls.table->resizeRowsToContents();
     ApplyThreshold(controls);
@@ -722,10 +780,6 @@ void Window::RunComparisons(ComparisonControls& controls) {
 
 void Window::ApplyThreshold(ComparisonControls& controls) {
     const bool genuine = &controls == &genuine_;
-    const std::string database = databaseId_.toStdString();
-    bool knownDatabase = false;
-    for (const std::string& db : engine::DatabaseIds)
-        if (database == db || database + "_B" == db) knownDatabase = true;
     int correct = 0, incorrect = 0, errors = 0;
     for (int row = 0; row < int(controls.results.size()); ++row) {
         const engine::SimilarityResult& result = controls.results[row];
@@ -738,9 +792,7 @@ void Window::ApplyThreshold(ComparisonControls& controls) {
         controls.table->item(row, 3)->setBackground(QColor(DecisionColor(decision)));
         for (int model = 0; model < int(result.model_scores.size()); ++model) {
             const engine::ModelScore& score = result.model_scores[model];
-            const bool otherDatabase = knownDatabase && !engine::Engine::IsDecisionModel(score.model_id, database);
             QTableWidgetItem* cell = controls.table->item(row, 4 + model);
-            if (otherDatabase) cell->setForeground(QColor(OtherDatabaseScoreColor));
             QString modelDecision = "ERR";
             if (score.success) {
                 const bool accepted = score.score >= controls.threshold->value();
@@ -751,7 +803,6 @@ void Window::ApplyThreshold(ComparisonControls& controls) {
             QString detail = score.success ? QString::number(score.score, 'g', engine::CsvPrecision)
                 : QString::fromStdString(score.stage + ": " + score.error);
             detail += QString("\n%1 at threshold %2.").arg(modelDecision).arg(controls.threshold->value(), 0, 'f', ThresholdPrecision);
-            if (otherDatabase) detail += "\nModel trained on another DB (shown in gray).";
             cell->setToolTip(detail);
         }
         if (!result.success) ++errors;
@@ -965,12 +1016,26 @@ void Window::UpdateWorkflow() {
 }
 
 void Window::RunSelectedComparisons() {
-    if (currentId() != 5 || !runComparisons_->isEnabled()) return;
+    if (busy_ || currentId() != 5 || !runComparisons_->isEnabled() || !AlgorithmUnchanged()) return;
     runComparisons_->setEnabled(false);
-    for (bool genuine : {true, false})
-        if (ComparisonSelected(genuine)) RunComparisons(genuine ? genuine_ : impostor_);
-    comparisonsExecuted_ = true;
-    executionInfo_->setText(ExecutionComplete);
+    genuine_.results.clear(); impostor_.results.clear(); comparisonsExecuted_ = false;
+    std::vector<engine::ComparisonPair> pairs;
+    if (ComparisonSelected(true)) pairs = genuine_.pairs;
+    const std::size_t genuineCount = pairs.size();
+    if (ComparisonSelected(false)) pairs.insert(pairs.end(), impostor_.pairs.begin(), impostor_.pairs.end());
+    std::vector<engine::SimilarityResult> results;
+    const bool completed = RunWithProgress("Evaluating comparisons", [this, &pairs, &results] {
+        results = engine_.Execute(pairs, images_, enrollmentTemplates_);
+    });
+    if (!completed) {
+        genuine_.results.clear(); impostor_.results.clear();
+        UpdateEnrollment(); executionInfo_->setText("Stopped; all results from this execution were discarded.");
+        return;
+    }
+    genuine_.results.assign(results.begin(), results.begin() + genuineCount);
+    impostor_.results.assign(results.begin() + genuineCount, results.end());
+    DisplayComparisons(genuine_); DisplayComparisons(impostor_);
+    comparisonsExecuted_ = true; executionInfo_->setText(ExecutionComplete);
     UpdateWorkflow();
     resultTabs_->setCurrentWidget(ComparisonSelected(true) ? genuine_.resultPanel : impostor_.resultPanel);
     next();
@@ -985,26 +1050,19 @@ std::vector<bool> Window::SelectedMetrics() const {
 engine::EvaluationRun Window::Snapshot() const {
     engine::EvaluationRun run;
     run.database = databasePath_.toStdString();
-    run.weights_folder = weightPath_->text().toStdString();
+    run.algorithm_path = dllPath_->text().toStdString();
     run.models = engine_.Models();
     run.genuine_threshold = genuine_.threshold->value();
     run.impostor_threshold = impostor_.threshold->value();
-    QString settings = "database=" + databasePath_ + "\nweights_folder=" + weightPath_->text() + "\n";
-    settings += "timeout_ms=" + QString::number(engine::TimeoutMs) + "\n"
-        + "concurrency=" + QString::number(engine::Concurrency) + "\n";
+    QString settings = "database=" + databasePath_ + "\nalgorithm_path=" + dllPath_->text() + "\n";
+    settings += "timeout_ms=" + QString::number(timeout_->value()) + "\n"
+        + "concurrency=" + QString::number(workerCount_->value()) + "\n";
     QStringList selected;
     for (int row = 0; row < metrics_->rowCount(); ++row)
         if (!metrics_->isRowHidden(row)) selected.append(MetricNames[row]);
     settings += "comparison_type=" + comparisonType_->currentText() + "\n";
-    settings += "template_format=fingerprint-probability-template-v2\nencoder_embedding_dim=512\ntemplate_output_dim=30\n"
-        "template_values=softmax ID probabilities; serialized bytes include model identity and labels\n"
-        "decision_models=selected matching-DB model and combined; unknown DB uses combined only\n"
-        "genuine_aggregation=minimum successful decision-model score\n"
-        "impostor_aggregation=minimum successful decision-model score\n"
-        "other_db_models=reference scores only; cell colors use the current comparison-type threshold\n";
-    const engine::ThresholdRecommendation recommendation = engine_.RecommendedThreshold(databaseId_.toStdString());
-    settings += "calibration_note=" + QString::fromStdString(recommendation.note) + "\n";
-    if (recommendation.available) settings += "validation_recommended_threshold=" + QString::number(recommendation.threshold, 'g', 17) + "\n";
+    settings += "template_format=opaque bytes; lengths retained\nalgorithm_signature=" + dllHash_ + "\n";
+    settings += "score_aggregation=selected DLL responsibility\nmatching_time=KISA_Compare only\n";
     settings += "report_metrics=" + selected.join("; ") + "\n";
     for (const QListWidgetItem* item : imageList_->selectedItems()) {
         const int index = imageList_->row(item);
@@ -1070,7 +1128,7 @@ void Window::UpdateMetrics() {
 }
 
 bool Window::SaveResults(const QString& folder) {
-    if (!comparisonsExecuted_) return false;
+    if (busy_ || !comparisonsExecuted_ || !AlgorithmUnchanged()) return false;
     QDir destination(folder);
     int number = 1;
     while (destination.exists(QString("run_%1").arg(number))) ++number;

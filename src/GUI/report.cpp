@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <array>
 
 namespace gui {
 
@@ -62,24 +63,42 @@ static QString EerBounds(const ScoreGroups& groups, bool successfulOnly, const s
         Rates(groups, threshold, threshold, successfulOnly, fmr, fnmr);
         if (std::abs(fmr - fnmr) <= engine::MetricTolerance) return Value(100 * fmr);
         if (previous && previousFmr > previousFnmr && fmr < fnmr) {
-            const double low = previousFnmr > fmr ? previousFnmr : fmr;
-            const double high = previousFmr < fnmr ? previousFmr : fnmr;
-            return Value(100 * low) + " - " + Value(100 * high);
+            // Assignment p.8: choose the bracketing threshold with the smaller
+            // midpoint, then report its bounds and their estimated midpoint.
+            const bool first = previousFnmr + previousFmr <= fmr + fnmr;
+            const double low = first ? previousFnmr : fmr;
+            const double high = first ? previousFmr : fnmr;
+            return Value(50 * (low + high)) + " [" + Value(100 * low) + " - " + Value(100 * high) + "]";
         }
         previousFmr = fmr; previousFnmr = fnmr; previous = true;
     }
     return "N/A (no crossing)";
 }
 
+static int FailureIndex(const std::string& error) {
+    const char* tags[] = {"FAIL", "TIMEOUT", "CRASH", "MISMATCH", "CANCELLED"};
+    for (int i = 0; i < 5; ++i) if (error.find(std::string("[") + tags[i] + "]") != std::string::npos) return i;
+    return 0;
+}
+static QString FailureCounts(const std::array<int, 5>& counts) {
+    return QString(" (FAIL=%1, TIMEOUT=%2, CRASH=%3, MISMATCH=%4, CANCELLED=%5)")
+        .arg(counts[0]).arg(counts[1]).arg(counts[2]).arg(counts[3]).arg(counts[4]);
+}
+
 QStringList CalculateMetrics(const engine::EvaluationRun& run) {
     QStringList values;
     for (int index = 0; index < MetricNames.size(); ++index) values.append("N/A (not run)");
     int enrolled = 0, failed = 0, templates = 0;
+    std::array<int, 5> enrollmentFailures = {};
     double enrollmentTime = 0, templateSize = 0, maximumSize = 0;
     for (const engine::EnrollmentRecord& record : run.enrollments) {
         if (!record.result.executed) continue;
         ++enrolled;
-        if (!record.result.success) ++failed;
+        if (!record.result.success) {
+            ++failed;
+            const std::string error = record.result.models.empty() ? "" : record.result.models[0].error;
+            ++enrollmentFailures[FailureIndex(error)];
+        }
         enrollmentTime += record.result.time_ms;
         for (const engine::ModelTemplate& item : record.result.models) {
             if (!item.success) continue;
@@ -89,23 +108,32 @@ QStringList CalculateMetrics(const engine::EvaluationRun& run) {
         }
     }
     if (enrolled > 0) values[11] = Value(enrollmentTime / enrolled);
-    if (enrolled > 0 && enrolled == int(run.enrollments.size())) values[0] = Value(100.0 * failed / enrolled);
+    if (enrolled > 0 && enrolled == int(run.enrollments.size())) values[0] = Value(100.0 * failed / enrolled) + FailureCounts(enrollmentFailures);
     if (templates > 0) { values[15] = Value(templateSize / templates); values[16] = Value(maximumSize); }
     const ScoreGroups groups = CollectScores(run);
     double times[2] = {};
-    int executed[2] = {};
+    int compared[2] = {}, attempted[2] = {}, rejected[2] = {};
+    std::array<int, 5> matchingFailures[2] = {};
     for (const engine::ComparisonRecord& record : run.comparisons) {
         if (!record.executed) continue;
         const int group = record.genuine ? 0 : 1;
-        times[group] += record.result.time_ms;
-        ++executed[group];
+        if (record.result.enrollment_failed) continue;
+        ++attempted[group];
+        if (!record.result.success) {
+            ++rejected[group];
+            const std::string error = record.result.model_scores.empty() ? "" : record.result.model_scores[0].error;
+            ++matchingFailures[group][FailureIndex(error)];
+        }
+        if (record.result.compare_executed) {
+            times[group] += record.result.time_ms; ++compared[group];
+        }
     }
     for (int group = 0; group < 2; ++group) {
-        if (executed[group] > 0) values[13 + group] = Value(times[group] / executed[group]);
-        if (groups.complete[group] && groups.total[group] > 0)
-            values[1 + group] = Value(100.0 * (groups.total[group] - groups.values[group].size()) / groups.total[group]);
+        if (compared[group] > 0) values[13 + group] = Value(times[group] / compared[group]);
+        if (groups.complete[group] && attempted[group] > 0)
+            values[1 + group] = Value(100.0 * rejected[group] / attempted[group]) + FailureCounts(matchingFailures[group]);
     }
-    if (executed[0] + executed[1] > 0) values[12] = Value((times[0] + times[1]) / (executed[0] + executed[1]));
+    if (compared[0] + compared[1] > 0) values[12] = Value((times[0] + times[1]) / (compared[0] + compared[1]));
     double fmr, fnmr;
     Rates(groups, run.genuine_threshold, run.impostor_threshold, false, fmr, fnmr);
     if (groups.complete[1] && groups.total[1] > 0) values[3] = Value(100 * fmr);
@@ -283,6 +311,17 @@ bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& sele
 }
 
 
+static QString RtfText(const QString& text) {
+    QString result;
+    for (QChar c : text) {
+        if (c == '\\' || c == '{' || c == '}') result += '\\';
+        if (c == '\n') result += "\\par ";
+        else if (c.unicode() > 127) result += "\\u" + QString::number(static_cast<short>(c.unicode())) + '?';
+        else result += c;
+    }
+    return result;
+}
+
 bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, const QString& folder) {
     const QStringList values = CalculateMetrics(run);
     QString csv = "metric,value\n";
@@ -296,16 +335,16 @@ bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, c
     for (const engine::ComparisonRecord& item : run.comparisons) if (item.executed) executed = true;
     html += executed ? "<p>Status: Results available.</p>" : "<p>Status: Not run. No comparisons were executed.</p>";
     html += "<h2>Evaluation setup</h2>"
-        "<p>Each enrolled image is saved as a template. Higher scores mean more similar fingerprints. Final scores use the minimum successful matching-DB/combined similarity, identically for Genuine and Impostor. Scores are not match probabilities.</p>"
+        "<p>Each enrolled image is saved as a template. Higher scores mean more similar fingerprints. The selected DLL supplies the similarity; its templates are opaque. Scores are not match probabilities.</p>"
         "<details><summary>Run settings</summary><pre>" + QString::fromStdString(run.settings).toHtmlEscaped() + "</pre></details>"
         "<p>Genuine (same finger): score &gt;= threshold = PASS, below = MISS (false rejection). "
         "Impostor (different fingers): score &lt; threshold = REJ (correct rejection), otherwise = FA (false acceptance). "
         "Genuine threshold: " + Value(run.genuine_threshold) + "; Impostor threshold: " + Value(run.impostor_threshold)
         + ". ERR means inference failed without a score.</p>"
-        "<table><tr><th>Model ID</th><th>Weight file</th><th>Load status</th></tr>";
+        "<table><tr><th>Algorithm</th><th>DLL file</th><th>Status</th></tr>";
     for (const engine::ModelState& model : run.models)
         html += "<tr><td>" + QString::fromStdString(model.model_id).toHtmlEscaped() + "</td><td>"
-            + QString::fromStdString(model.weight_file).toHtmlEscaped() + "</td><td>"
+            + QString::fromStdString(model.dll_file).toHtmlEscaped() + "</td><td>"
             + (model.loaded ? QString("Ready") : QString::fromStdString(model.error).toHtmlEscaped()) + "</td></tr>";
     html += "</table><h2>Performance metrics</h2><table><tr><th>Metric</th><th>Value</th></tr>";
     int count = 0;
@@ -321,7 +360,7 @@ bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, c
     if ((selected.size() > 3 && selected[3]) || (selected.size() > 4 && selected[4]) || DerivedMetricSelected(selected))
         html += "<p>FMR uses the Impostor threshold; FNMR uses the Genuine threshold. "
               "FMR/FNMR use planned-pair denominators; failed genuine attempts count as nonmatches. "
-              "EER shows observed-threshold bounds; EER* uses successful pairs only. "
+              "REJ excludes pairs blocked by enrollment failure. Matching time measures KISA_Compare only; attempt generation is separate in model_scores.csv. EER shows the assignment midpoint estimate and bounds; EER* uses successful pairs only. "
               "EER and curves sweep a common threshold independently of the entered thresholds.</p>";
     const QStringList files = GraphFiles(selected);
     if (!files.isEmpty()) html += "<h2>Graphs</h2>";
@@ -334,9 +373,20 @@ bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, c
         "<a href=\"settings.txt\">Run settings</a> | <a href=\"models.csv\">Selected models</a> | "
         "<a href=\"model_scores.csv\">Per-model scores and failures</a></p>"
         "<p>Only selected metrics appear in this report. CSV files keep all metrics and raw results. Self-image comparisons are excluded.</p></body></html>";
+    // RTF is directly editable in Word and needs no Office automation/runtime.
+    // Graphs are exported separately as vector SVGs beside both reports.
+    QString word = "{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Arial;}}\\f0\\fs24 "
+        "\\b Fingerprint performance report\\b0\\par ";
+    word += RtfText(QString::fromStdString(run.settings)) + "\\par ";
+    for (int row = 0; row < MetricNames.size(); ++row)
+        if (row < static_cast<int>(selected.size()) && selected[row])
+            word += RtfText(MetricNames[row] + ": " + values[row]) + "\\par ";
+    for (const QString& file : files) word += RtfText("Vector graph: " + file) + "\\par ";
+    word += "}";
     const QDir destination(folder);
     return WriteReportFile(destination.filePath("metrics.csv"), csv)
-        && WriteReportFile(destination.filePath("report.html"), html) && WriteGraphs(run, selected, folder);
+        && WriteReportFile(destination.filePath("report.html"), html)
+        && WriteReportFile(destination.filePath("report.rtf"), word) && WriteGraphs(run, selected, folder);
 }
 
 } // namespace gui

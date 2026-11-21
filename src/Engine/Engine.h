@@ -2,7 +2,9 @@
 
 #include <string>
 #include <vector>
-#include "../Algorithm/Algorithm.h"
+#include "Algorithm.h"
+#include <atomic>
+#include <functional>
 #include "engineConfig.h"
 
 namespace engine {
@@ -34,32 +36,21 @@ struct ComparisonOptions {
     std::vector<ComparisonPair> csv_pairs;
 };
 
-// Model loading outcome.
 struct ModelState {
     std::string model_id;
-    std::string weight_file;
+    std::string dll_file; // Selected DLL path.
     bool loaded = false;
     std::string error;
-    algorithm::AlgorithmModelInfo info;
-};
-
-struct ThresholdRecommendation {
-    bool available = false;
-    double threshold = GenuineThreshold;
-    bool target_met = false;
-    bool external_fallback = false;
-    std::string note;
 };
 
 // One image template for one model.
 struct ModelTemplate {
     std::string model_id;
     bool success = false;
-    std::vector<unsigned char> data; // [bytes] Serialized feature vector.
+    std::vector<unsigned char> data; // [bytes] Opaque DLL output; preserve actual length.
     double time_ms = 0; // [ms] Preprocessing + encoding.
     std::string stage;
     std::string error;
-    int dimensions = 0;
 };
 
 // All model templates from one enrollment image.
@@ -76,16 +67,20 @@ struct ModelScore {
     std::string model_id;
     bool success = false;
     double score = 0; // [0,1] Normalized similarity; higher is closer.
-    double time_ms = 0; // [ms] Attempt encoding + comparison.
+    double time_ms = 0; // [ms] Compare call only.
+    double attempt_time_ms = 0; // [ms] Cached attempt generation, reported separately.
     std::string stage;
     std::string error;
 };
 
-// Lowest successful matching-DB/combined score, with every model outcome retained.
+// Outcome from the selected DLL, independent of its scoring implementation.
 struct SimilarityResult {
     bool success = false;
     double score = 0; // [0,1] Normalized similarity.
-    double time_ms = 0; // [ms] Total comparison time.
+    double time_ms = 0; // [ms] Compare call only.
+    double attempt_time_ms = 0;
+    bool enrollment_failed = false;
+    bool compare_executed = false;
     std::string model_id;
     std::vector<ModelScore> model_scores;
 };
@@ -109,7 +104,7 @@ struct ComparisonRecord {
 // UI-independent snapshot used by raw export and reporting.
 struct EvaluationRun {
     std::string database;
-    std::string weights_folder;
+    std::string algorithm_path;
     std::string settings;
     std::vector<ModelState> models;
     std::vector<EnrollmentRecord> enrollments;
@@ -128,18 +123,18 @@ public:
                                 const std::vector<int>& enrollments, bool genuine,
                                 const ComparisonOptions& options,
                                 std::vector<ComparisonPair>& pairs, std::string& error);
-    static std::vector<ModelState> SelectModels(const std::string& database_id, bool external,
-                                                const std::string& weights_folder);
-    // The caller owns the backend and keeps it alive while Engine uses it.
-    bool LoadSelectedModels(const std::vector<std::string>& model_ids, const std::string& weights_folder,
-                            algorithm::Algorithm* backend);
+    // Caller owns backend; reconfiguration invalidates every prior template.
+    void Configure(Algorithm* backend, const std::string& dll_path);
     const std::vector<ModelState>& Models() const { return models_; }
-    static bool IsDecisionModel(const std::string& model_id, const std::string& database_id);
-    static void SelectDecisionScore(SimilarityResult& result, const std::string& database_id);
-    ThresholdRecommendation RecommendedThreshold(const std::string& database_id) const;
-    EnrollmentTemplates Enroll(const algorithm::AlgorithmImage& image);
-    SimilarityResult Compare(const EnrollmentTemplates& enrollment, const algorithm::AlgorithmImage& attempt);
-    static algorithm::AlgorithmImage ReadImage(const std::string& path, const std::string& database_id = "");
+    void SetConcurrency(int count);
+    void Cancel();
+    void ResetCancel();
+    bool Cancelled() const { return cancelled_.load(); }
+    int ProgressDone() const { return progress_done_.load(); }
+    int ProgressTotal() const { return progress_total_.load(); }
+    EnrollmentTemplates Enroll(const fingerprint::Image& image);
+    std::vector<EnrollmentTemplates> EnrollImages(const std::vector<ImageInfo>& images, const std::vector<int>& selected);
+    static fingerprint::Image ReadImage(const std::string& path, const std::string& database_id = "");
     std::vector<SimilarityResult> Execute(const std::vector<ComparisonPair>& pairs,
                                          const std::vector<ImageInfo>& images,
                                          const std::vector<EnrollmentTemplates>& templates);
@@ -149,11 +144,16 @@ public:
     static bool SaveRawResults(const EvaluationRun& run, const std::string& folder);
 
 private:
-    algorithm::Algorithm* backend_ = nullptr; // Borrowed; never deleted by Engine.
+    Algorithm* backend_ = nullptr; // Borrowed; caller keeps it alive through execution.
     std::vector<ModelState> models_;
     int revision_ = 0;
-    std::string weights_folder_;
-    ModelTemplate MakeTemplate(const ModelState& model, const algorithm::AlgorithmImage& image);
+    int concurrency_ = DefaultConcurrency;
+    std::atomic<bool> cancelled_{false};
+    std::atomic<int> progress_done_{0};
+    std::atomic<int> progress_total_{0};
+    void ParallelFor(int count, const std::function<void(int)>& action);
+    ModelTemplate MakeTemplate(const fingerprint::Image& image, bool enrollment);
+    SimilarityResult ComparePrepared(const EnrollmentTemplates& enrollment, const ModelTemplate& attempt);
 };
 
 } // namespace engine

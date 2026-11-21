@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="224.3298mm" viewBox="0 0 940 710" role="img"><title>Training · augmentation, fine-tuning and validation</title><desc>Current project implementation; editable vector source. Generated from verified source paths and selected direct includes.</desc><rect width="940" height="710" fill="white"/>
+<line x1="250" y1="64" x2="690" y2="64" stroke="#73818d"/>
+<g data-node="augmentcfg" data-source="src/Training/augmentConfig.h"><rect x="20" y="110" width="260" height="92" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="20" y="110" width="260" height="32.5" fill="#2864b4"/></g>
+<g data-node="traincfg" data-source="src/Training/trainConfig.h"><rect x="340" y="110" width="260" height="92" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="340" y="110" width="260" height="32.5" fill="#2864b4"/></g>
+<g data-node="evalcfg" data-source="src/Training/evaluationConfig.h"><rect x="660" y="110" width="260" height="92" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="110" width="260" height="32.5" fill="#2864b4"/></g>
+<g data-node="augment" data-source="src/Training/augment.cpp"><rect x="20" y="300" width="260" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="20" y="300" width="260" height="32.5" fill="#2864b4"/></g>
+<g data-node="train" data-source="src/Training/train.cpp"><rect x="340" y="300" width="260" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="340" y="300" width="260" height="32.5" fill="#2864b4"/></g>
+<g data-node="validation" data-source="src/Training/validation.cpp;src/Training/ValidationEngine.cpp;src/Training/ValidationEngine.h"><rect x="660" y="300" width="260" height="110" fill="#eaf1ff" stroke="#2864b4" stroke-width="2"/><rect x="660" y="300" width="260" height="32.5" fill="#2864b4"/></g>
+<g data-node="augmented" data-source=""><rect x="20" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="20" y="550" width="260" height="32.5" fill="#73818d"/></g>
+<g data-node="weights" data-source=""><rect x="340" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="340" y="550" width="260" height="32.5" fill="#73818d"/></g>
+<g data-node="validationout" data-source=""><rect x="660" y="550" width="260" height="92" fill="#f4f6f8" stroke="#73818d" stroke-width="2"/><rect x="660" y="550" width="260" height="32.5" fill="#73818d"/></g>
+<g data-from="augment" data-to="augmentcfg" data-relation="include"><polyline points="150.0,300 150.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="150.0,202 153.3,210.0 146.7,210.0" fill="#81909b"/></g>
+<g data-from="train" data-to="traincfg" data-relation="include"><polyline points="470.0,300 470.0,202" fill="none" stroke="#81909b" stroke-width="2" stroke-dasharray="5 6"/><polygon points="470.0,202 473.3,210.0 466.7,210.0" fill="#81909b"/></g>
+<g data-from="train" data-to="augment" data-relation="flow"><polyline points="340,339.0 280,339.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="280,339.0 288.0,335.7 288.0,342.3" fill="#4f5b65"/></g>
+<g data-from="augment" data-to="train" data-relation="flow"><polyline points="280,371.0 340,371.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="340,371.0 332.0,374.3 332.0,367.7" fill="#4f5b65"/></g>
+<g data-from="train" data-to="validation" data-relation="flow"><polyline points="600,355.0 660,355.0" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="660,355.0 652.0,358.3 652.0,351.7" fill="#4f5b65"/></g>
+<g data-from="augment" data-to="augmented" data-relation="flow"><polyline points="150.0,410 150.0,550" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="150.0,550 146.7,542.0 153.3,542.0" fill="#4f5b65"/></g>
+<g data-from="train" data-to="weights" data-relation="flow"><polyline points="470.0,410 470.0,550" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="470.0,550 466.7,542.0 473.3,542.0" fill="#4f5b65"/></g>
+<g data-from="validation" data-to="validationout" data-relation="flow"><polyline points="790.0,410 790.0,550" fill="none" stroke="#4f5b65" stroke-width="2"/><polygon points="790.0,550 786.7,542.0 793.3,542.0" fill="#4f5b65"/></g>
+<text x="470" y="43" font-family="Arial" font-size="30" font-weight="700" text-anchor="middle" fill="#111111">Training · augmentation, fine-tuning and validation</text>
+<text x="150.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">augmentConfig.h</text>
+<text x="150.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">12 copies per original / seed 42</text>
+<text x="150.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">FVC2004 crop before augmentation</text>
+<text x="150.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">rotation / scale / noise / brightness</text>
+<text x="470.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">trainConfig.h</text>
+<text x="470.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Adam / learning rate 0.0001</text>
+<text x="470.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">batch 32 / 40 epochs / seed 42</text>
+<text x="470.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">two projections + cosine classifier</text>
+<text x="790.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">evaluationConfig.h</text>
+<text x="790.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">four independent model IDs</text>
+<text x="790.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">validation FAR target 1%</text>
+<text x="790.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">calibration precision 4 decimals</text>
+<text x="150.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">augment.cpp</text>
+<text x="150.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">PrepareAugmentations()</text>
+<text x="150.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">original files remain unchanged</text>
+<text x="150.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">split original captures first</text>
+<text x="150.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">training 1–6 / validation 7–8</text>
+<text x="470.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">train.cpp</text>
+<text x="470.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">PrepareTrainingData()</text>
+<text x="470.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">verified frozen-feature cache</text>
+<text x="470.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">RunTraining()</text>
+<text x="470.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">independent pretrained initialization</text>
+<text x="790.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">validation.cpp</text>
+<text x="790.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">EvaluateTrainingRun()</text>
+<text x="790.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">ValidationEngine native audit</text>
+<text x="790.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">frozen weights / buffers check</text>
+<text x="790.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">calibration + validation scores</text>
+<text x="150.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">data/augmented</text>
+<text x="150.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">offline training copies</text>
+<text x="150.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">manifest / source SHA-256</text>
+<text x="150.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">validation uses originals only</text>
+<text x="470.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Four saved models</text>
+<text x="470.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">per-DB models + combined</text>
+<text x="470.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">retained Softmax30 classifier</text>
+<text x="470.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">final-epoch TorchScript .bin files</text>
+<text x="790.0" y="573.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Validation outputs</text>
+<text x="790.0" y="598.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">validation CSV / HTML / JSON</text>
+<text x="790.0" y="616.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">native / frozen-backbone audit</text>
+<text x="790.0" y="634.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">calibration remains training output</text>
+<text x="310" y="332" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">prepare</text>
+<text x="310" y="388" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">samples</text>
+<text x="630" y="343" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">verify</text>
+<text x="180" y="500" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">write</text>
+<text x="500" y="500" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">export</text>
+<text x="821" y="500" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">write</text>
+<text x="470" y="690" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">Solid: calls / data flow     Dashed: selected direct #include links</text>
+</svg>

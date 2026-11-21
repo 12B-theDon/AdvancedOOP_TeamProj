@@ -16,7 +16,7 @@ from torch.nn import functional as F
 
 ROOT = Path(__file__).resolve().parents[1]
 def setting(header, name):
-    text = (ROOT / "src/Algorithm" / header).read_text()
+    text = (ROOT / ("src/Training" if header == "trainConfig.h" else "src/Algorithm") / header).read_text()
     value = re.search(r"\b" + name + r"\s*=\s*([^;]+);", text).group(1).strip()
     return json.loads(value)
 

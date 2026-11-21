@@ -1,106 +1,91 @@
 # Fingerprint Evaluator
 
-지문 이미지를 등록하고 다른 촬영본과 비교해 유사도·처리 시간·인식 성능을 확인하는 C++ 프로젝트입니다. DeepPrint 기반 모델을 Partial Fine-tuning하고, 학습한 Cosine Classifier의 30차원 Softmax 출력을 템플릿으로 사용합니다.
+DeepPrint 기반 지문 알고리즘을 학습하고, K-NBTC 규격 DLL의 유사도·처리 시간·인식 성능을 평가하는 C++17 프로젝트입니다.
 
-## 1. Build / Run
+## 1. Install
 
-C++17, Git·Git LFS, CMake 3.21 이상, Qt Widgets·TIFF 플러그인, OS·CPU에 맞는 LibTorch가 필요합니다. 아래는 **터미널 예시**입니다. Linux/macOS에서 Qt·LibTorch 설치 위치에 맞게 `/path/to/qt`와 `/path/to/libtorch`를 바꿉니다. [Windows / Visual Studio](docs/repository_preparation.md#2-windows--visual-studio) · [터미널 상세 설정](docs/repository_preparation.md#3-macos--linux)
+Windows x64의 **PowerShell**에서 아래 순서대로 실행합니다. Git이 없다면 `winget install --exact --id Git.Git`으로 설치한 뒤 PowerShell을 다시 엽니다.
 
-**1.1. 의존성 설치 — 없는 항목만 설치**
-
-macOS(Homebrew):
-
-```sh
-brew install git git-lfs cmake qt@5
-```
-
-Windows(PowerShell / WinGet):
+**저장소 복제**
 
 ```powershell
-winget install --exact --id Git.Git
-winget install --exact --id GitHub.GitLFS
-winget install --exact --id Kitware.CMake
-winget install --exact --id Microsoft.VisualStudio.2022.Community --override "--wait --passive --add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended"
+cd $env:USERPROFILE
+git clone --recurse-submodules https://github.com/12B-theDon/AdvancedOOP_TeamProj.git FinalProject
+cd FinalProject
 ```
 
-위 명령 외에 **LibTorch CPU ZIP**을 준비하고, Windows에서는 **Qt MSVC 2022 64-bit·TIFF 플러그인**도 설치합니다. Homebrew·WinGet 준비, Qt 설치와 LibTorch 다운로드·압축 해제는 [Windows 설치](docs/repository_preparation.md#21-의존성-설치) · [macOS 설치](docs/repository_preparation.md#31-의존성-설치)를 따릅니다. 설치가 끝나면 새 터미널을 엽니다.
+**자동 설치·빌드·배포 준비**
 
-**1.2. Clone**
+복제한 폴더에서 아래 블록을 실행합니다. [설치 스크립트](tools/setup_windows.ps1)가 도구·Qt·LibTorch 설치, Git LFS 가중치 다운로드, 빌드와 패키징까지 수행합니다. 학습된 모델 4개를 받으면 로컬 학습은 생략하며, 다운로드 후에도 모델이 없을 때만 자동 학습합니다. 설치 중 Windows 권한 요청이 표시되면 승인합니다.
 
-```sh
-git lfs install
-git clone --recurse-submodules https://github.com/12B-theDon/AdvancedOOP_TeamProj.git
-cd AdvancedOOP_TeamProj
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\tools\setup_windows.ps1
 ```
 
-**1.3. Build**
+이미 준비된 도구와 라이브러리는 재사용합니다. 세부 옵션·수동 빌드는 [빌드 안내](docs/build.md)를 참고합니다.
 
-```sh
-cmake -S . -B build -DCMAKE_PREFIX_PATH="/path/to/qt;/path/to/libtorch" -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target FingerprintTrain FingerprintGUI --parallel 2
+## 2. GUI
+
+설치가 완료되면 프로젝트 루트에서 아래 명령을 실행하거나, `dist/FingerprintEvaluator/FingerprintGUI.exe`를 더블클릭합니다.
+
+```powershell
+.\dist\FingerprintEvaluator\FingerprintGUI.exe
 ```
 
-**1.4. Train → GUI**
+소스 저장소 안에서 GUI를 실행했는데 자사 DLL·학습 모델이 빠져 있으면 자동으로 준비 프로그램을 실행합니다. **LFS 다운로드 → 없는 경우에만 학습 → 패키징 → GUI 재실행** 순서로 복구합니다. 완성된 배포본은 학습 없이 바로 열립니다. 다른 PC로 옮길 때는 `dist/FingerprintAlgorithm/`과 `dist/FingerprintEvaluator/`를 함께 복사합니다.
 
-```sh
-./build/FingerprintTrain data/original models/pretrained/deepprint.bin models/run_01
-./build/FingerprintGUI
-```
+GUI에서 **DB → 등록 이미지 → DLL·옵션·템플릿 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 `dist/FingerprintAlgorithm/FingerprintAlgorithm.dll`을 선택합니다. Results에서는 임계값(초기 0.5)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장할 수 있습니다.
 
-Clone에는 **학습 초기 파일**만 포함됩니다. 기본 학습은 40 Epoch이며, 학습이 끝나면 GUI의 Step 3에서 **Select weights folder...**로 출력 폴더 `models/run_01`을 선택합니다. 이미 학습한 호환 모델이 있다면 그 폴더를 선택하고 학습을 생략할 수 있습니다. 재학습에는 새 출력 폴더명을 사용합니다. [학습·검증 옵션](src/Algorithm/readme.md#conversion--offline-run) · [모델 준비와 보관](models/readme.md)
+[학습 옵션](src/Training/readme.md) · [GUI·지표](src/GUI/readme.md) · [검증 상태](docs/verification.md)
 
-macOS arm64에서 빌드·학습·추론과 GUI 데모 녹화를 수행했으며, 자동 GUI 검증은 Qt offscreen으로 진행했습니다. Windows/Linux 실행은 아직 검증하지 않았습니다.
+## 3. Project structure
 
-## 2. Architecture
+파란색 링크는 **`dist/`에서 실제로 교체·배포할 파일과 폴더**입니다. 클릭하면 관련 설명을 확인할 수 있습니다.
 
-Algorithm은 전처리·학습·특징 추출, Engine은 모델 실행·비교, GUI는 사용자 입력·결과 표시·리포트를 담당합니다.
+<pre>
+FinalProject/
+├─ src/
+│  ├─ main.cpp       # GUI 실행 진입점
+│  ├─ Public/        # 공개 KISA 함수 선언, FVC 매핑, 이미지 자료형
+│  ├─ Algorithm/     # 모델 로딩·전처리·템플릿 생성·유사도 계산
+│  ├─ Training/      # 데이터 증강·학습·학습 결과 검증
+│  ├─ Kisa/          # 공개 DLL wrapper와 알고리즘 Core DLL
+│  ├─ Engine/        # 비교 계획·템플릿 캐시·병렬 평가·원시 결과 저장
+│  ├─ Worker/        # Windows DLL 실행 프로세스와 IPC 규약
+│  └─ GUI/           # 단계별 화면·결과 표시·지표·보고서
+├─ data/
+│  ├─ original/      # 보존 대상 원본 FVC 데이터
+│  └─ augmented/     # 학습용 증강 이미지(자동 생성)
+├─ models/
+│  ├─ pretrained/     # 학습 초기화용 DeepPrint 가중치
+│  └─ trained_result/ # Git LFS로 배포하는 학습 모델 4개·검증 manifest
+├─ docs/             # 빌드·검증·출처 문서, 구조도, 보존 기준
+├─ cmake/            # 알고리즘·평가 프로그램 배포 폴더 생성
+├─ tests/            # 보존·추론·평가·ABI·worker·패키징 검사
+├─ tools/            # 설치·빌드·체크포인트 변환·SHA 검증·구조도 도구
+│  └─ setup_windows.ps1  # 도구 설치·모델 다운로드·필요 시 학습·패키징
+├─ third_party/      # DeepPrint 외부 소스·라이선스·수정 patch
+├─ 프로젝트 관련 자료-20261029/  # K-NBTC 안내서·DLL 예제·DB 압축본
+├─ build*/           # 빌드 결과(자동 생성)
+├─ dist/             # 패키징 시 생성, 의존성·라이선스를 포함해 폴더 단위로 배포
+│  ├─ <a href="docs/build.md#package">FingerprintAlgorithm/</a>
+│  │  ├─ <a href="src/Kisa/readme.md">FingerprintAlgorithm.dll</a>      # GUI에서 선택할 공개 DLL
+│  │  ├─ <a href="src/Kisa/readme.md">FingerprintAlgorithmCore.dll</a>  # 이 프로젝트 알고리즘의 구현 DLL
+│  │  ├─ <a href="models/readme.md">fvc2000_db3.bin</a>
+│  │  ├─ <a href="models/readme.md">fvc2002_db3.bin</a>
+│  │  ├─ <a href="models/readme.md">fvc2004_db1.bin</a>
+│  │  └─ <a href="models/readme.md">combined.bin</a>
+│  └─ <a href="docs/build.md#package">FingerprintEvaluator/</a>
+│     ├─ <a href="src/GUI/readme.md">FingerprintGUI.exe</a>           # 평가 GUI
+│     └─ <a href="src/Worker/readme.md">FingerprintWorker.exe</a>        # DLL 호출용 프로세스
+└─ CMakeLists.txt    # 빌드 대상·의존성·테스트·패키징 명령 정의
+</pre>
 
-[![Project overview](docs/diagrams/overview.png)](docs/diagrams/overview.svg)
+외부 DLL은 GUI Step 3에서 선택합니다. 이 프로젝트의 알고리즘을 배포할 때는 `FingerprintAlgorithm/` 전체를 함께 배포합니다. DLL·모델을 교체한 뒤에는 GUI를 다시 실행하고 템플릿을 재생성합니다.
 
-### 2.1. Algorithm
+주요 설정은 각 모듈의 `*Config.h`에 있습니다. `encoderConfig.h`는 전처리·모델 차원, `trainConfig.h`·`augmentConfig.h`는 학습·증강, `evaluationConfig.h`는 학습 검증, `engineConfig.h`·`guiConfig.h`는 평가·화면 기본값을 정의합니다. 파일별 설명은 [소스 안내](src/readme.md)에서 확인할 수 있습니다.
 
-Backbone을 고정하고 Texture·Minutia Projection과 Cosine Classifier를 학습합니다. 등록·비교 이미지에서 각각 생성한 30차원 템플릿을 코사인 유사도로 비교합니다. [구조·전처리·학습·실험 결과](src/Algorithm/readme.md)
+![평가 GUI·Engine·Worker·알고리즘 DLL과 학습 모듈의 전체 연결 구조](docs/diagrams/overview.png)
 
-[![Algorithm](docs/diagrams/algorithm.png)](docs/diagrams/algorithm.svg)
-
-**모델 구조와 학습 범위**
-
-[![DeepPrint 모델 구조와 Partial Fine-tuning 범위](docs/diagrams/deepprint_finetuning.png)](docs/diagrams/deepprint_finetuning.svg)
-
-**Inception·Reduction 블록 내부 구조**
-
-[![Inception과 Reduction 블록 내부 구조](docs/diagrams/deepprint_blocks.png)](docs/diagrams/deepprint_blocks.svg)
-
-### 2.2. Engine
-
-비교할 이미지쌍을 구성하고 선택한 모델을 실행합니다. 모델별 템플릿·점수·시간·오류를 모아 저장합니다. Genuine·Impostor 모두 같은 DB·통합 모델의 최솟값으로 판정하고, 다른 DB 모델의 점수는 참고용으로 표시합니다. [자료형·비교 규칙·파일 형식·확장](src/Engine/readme.md)
-
-[![Engine](docs/diagrams/engine.png)](docs/diagrams/engine.svg)
-
-### 2.3. GUI Flow / Report
-
-**1. DB 선택 → 2. 이미지 등록 → 3. 템플릿 생성 → 4. 비교 종류 → 5. 비교 규칙 → 6. 실행 → 7. 결과 확인** 순서로 사용합니다. 결과 화면에서 Genuine·Impostor 판정 기준을 각각 조절하고 지표·CSV·HTML 리포트를 저장합니다. [화면별 사용법·지표·리포트](src/GUI/readme.md)
-
-[![GUI and report](docs/diagrams/gui.png)](docs/diagrams/gui.svg)
-
-![GUI demo](demo.gif)
-
-위 GIF는 **40 Epoch로 학습한 Cosine Classifier·30차원 Template 모델**의 등록·비교 흐름입니다. [리포트 예시](Report_example/report.html)는 40 Epoch 모델 4개로 Genuine 28쌍·Impostor 288쌍을 비교한 저장 기록입니다. 같은 DB·통합 모델의 최솟값과 임계값 0.5133을 사용합니다. 단계별 화면은 [전체 흐름](docs/GUI_flows/00_overview.png) · [한 장 등록](docs/GUI_flows/01_single_enrollment.png) · [여러 장 등록](docs/GUI_flows/02_multiple_enrollment.png) · [외부 DB](docs/GUI_flows/03_external_db.png)에서 확인할 수 있습니다.
-
-점수는 동일 지문일 확률이 아닙니다. 성능 수치는 학습에 등장한 손가락의 다른 촬영본 평가이며, 독립 Test나 미학습 손가락 성능과 구분합니다. [평가 결과와 한계](src/Algorithm/readme.md#final-production-run--calibration)
-
-## 3. Libraries / Headers
-
-| 라이브러리 | 대표 헤더 | 용도 |
-|---|---|---|
-| Qt Core | `QDir`, `QFile`, `QJsonDocument` | 파일·경로·메타데이터 |
-| Qt Gui | `QImage`, `QPainter` | TIFF 입출력·증강·이미지 표시 |
-| Qt Widgets | `QWizard`, `QTableWidget`, `QFileDialog` | 단계별 GUI·표·입력 |
-| LibTorch / ATen | `torch/script.h`, `torch/torch.h`, `ATen/core/Tensor.h` | 모델 저장·실행·Tensor 연산·학습 |
-| C++ 표준 라이브러리 | `vector`, `string`, `cmath`, `chrono` | 컨테이너·문자열·수학·시간 측정 |
-
-증강·학습·추론은 C++로 실행합니다. Python은 공개 원본 체크포인트를 직접 변환할 때만 필요합니다. 실제 빌드 의존성은 [CMakeLists.txt](CMakeLists.txt)를 참고합니다.
-
-## 4. License / Submodule
-
-[DeepPrint 논문](https://arxiv.org/abs/1909.09901)과 [공개 재구현](https://github.com/tim-rohwedder/fixed-length-fingerprint-extractors)을 기반으로 합니다. 소스 출처·수정 사항은 [NOTICE](third_party/deepprint.NOTICE.txt), 구성 요소별 라이선스와 배포 범위는 [저장소 안내](docs/repository_preparation.md#4-license--submodule)에 정리했습니다. 공개 체크포인트의 별도 라이선스는 확인되지 않았습니다.
+[구조도·모듈 안내](docs/diagrams/readme.md) · [출처·라이선스](docs/THIRD_PARTY.md)

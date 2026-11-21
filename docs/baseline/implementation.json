@@ -1,0 +1,15 @@
+{
+  "commit": "ccfe7b5d482fb6c5b7311d1a93abe5a7a280a65d",
+  "sources": {
+    "src/Algorithm/train.cpp": "aea1790e7ddc7b5fa830e4309b9b5912f9a90ae9f1d935505b39ff28f7a8dc34",
+    "src/Algorithm/trainConfig.h": "b3ef0e0a38a100c83e457da28f96a0cf5b350715d015f024bf657e5555680179",
+    "src/Algorithm/augment.cpp": "7012698007694de928b701e27bf0f8c59c5f8b031c8ca21e7d811ac9db23440c",
+    "src/Algorithm/augmentConfig.h": "a000cea4c890692a8edbd19c82cf712b94bd410b5e7b168cc225c37b8d61ee2d",
+    "src/Algorithm/encoder.cpp": "b6620a6baf0bf46827197e97064d38763257ac4351f1d96454e262cc1584ba34",
+    "src/Algorithm/encoderConfig.h": "a12f7134e31891c6e3f72d0976d568f56daff79d5da4efebb5e540b2e4c2e9d5",
+    "tools/prepare_deepprint.py": "af3b3ec5d1b5927fb16057e582b749b7e4dab4d7676fccd7ac9c6f943eefaf5e"
+  },
+  "weights": {
+    "models/pretrained/deepprint.bin": "5b9cfcb321dc52a3d26aa29833aedcb8f719890dfb719ffa7f616bff7080987c"
+  }
+}

@@ -1,5 +1,8 @@
 #include "Engine.h"
 #include <random>
+#include <thread>
+#include <algorithm>
+#include <exception>
 #include <chrono>
 #include <cmath>
 #include <QDir>
@@ -134,227 +137,139 @@ bool Engine::PlanComparisons(const std::vector<ImageInfo>& images,
     return true;
 }
 
-std::vector<ModelState> Engine::SelectModels(const std::string& database_id, bool external,
-                                            const std::string& weights_folder) {
-    std::string folder = weights_folder;
-    if (!folder.empty() && folder.back() != '/' && folder.back() != '\\')
-        folder += '/';
-    std::vector<ModelState> selected;
-    for (int index = 0; index < int(ModelIds.size()); ++index) {
-        if (external || (index < 3 && (database_id == DatabaseIds[index] || database_id + "_B" == DatabaseIds[index])))
-            selected.push_back({ModelIds[index], folder + ModelIds[index] + WeightExtension, false, ""});
-    }
-    return selected;
-}
-
-bool Engine::LoadSelectedModels(const std::vector<std::string>& ids, const std::string& weights_folder,
-                                algorithm::Algorithm* backend) {
+void Engine::Configure(Algorithm* backend, const std::string& path) {
     backend_ = backend;
-    weights_folder_ = weights_folder;
     ++revision_;
     models_.clear();
-    std::string folder = weights_folder;
-    if (!folder.empty() && folder.back() != '/' && folder.back() != '\\') folder += '/';
-    for (const std::string& id : ids) {
-        bool duplicate = false;
-        for (const ModelState& model : models_) if (model.model_id == id) duplicate = true;
-        if (duplicate) continue;
-        bool known = false;
-        for (const std::string& candidate : ModelIds) if (id == candidate) known = true;
-        if (known)
-            models_.push_back({id, folder + id + WeightExtension, false, ""});
-        else models_.push_back({id, "", false, "Unknown model ID."});
-    }
-    bool anyLoaded = false;
-    std::string labelOrder;
-    for (ModelState& model : models_) {
-        if (!model.error.empty()) continue;
-        if (!backend_)
-            model.error = "Algorithm backend is not configured.";
-        else {
-            model.loaded = backend_->LoadModel(model.model_id, model.weight_file, model.error);
-            if (model.loaded)
-                model.loaded = backend_->GetModelInfo(model.model_id, model.info, model.error);
-            if (model.loaded) {
-                if (labelOrder.empty()) labelOrder = model.info.label_order_sha256;
-                else if (labelOrder != model.info.label_order_sha256) {
-                    model.loaded = false;
-                    model.error = "Selected models have different ID label orders.";
-                }
+    if (backend_) models_.push_back({DllModelId, path, true, ""});
+    ResetCancel();
+}
+void Engine::SetConcurrency(int count) { concurrency_ = std::clamp(count, 1, MaxConcurrency); }
+void Engine::Cancel() {
+    cancelled_.store(true);
+    if (backend_) backend_->Cancel();
+}
+void Engine::ResetCancel() {
+    cancelled_.store(false);
+    if (backend_) backend_->ResetCancel();
+}
+void Engine::ParallelFor(int count, const std::function<void(int)>& action) {
+    std::atomic<int> next{0};
+    std::vector<std::thread> threads;
+    const int workers = std::min(count, concurrency_);
+    for (int worker = 0; worker < workers; ++worker) {
+        threads.emplace_back([this, count, &next, &action] {
+            while (!Cancelled()) {
+                const int index = next.fetch_add(1);
+                if (index >= count) break;
+                action(index);
+                progress_done_.fetch_add(1);
             }
-            if (!model.loaded && model.error.empty())
-                model.error = "Model loading failed.";
-            if (model.loaded)
-                model.error.clear();
-        }
-        if (model.loaded)
-            anyLoaded = true;
+        });
     }
-    return anyLoaded;
+    for (std::thread& thread : threads) thread.join();
 }
-
-bool Engine::IsDecisionModel(const std::string& model_id, const std::string& database_id) {
-    if (model_id == "combined") return true;
-    for (int db = 0; db < int(DatabaseIds.size()); ++db)
-        if (database_id == DatabaseIds[db] || database_id + "_B" == DatabaseIds[db])
-            return model_id == ModelIds[db];
-    return false;
-}
-
-void Engine::SelectDecisionScore(SimilarityResult& result, const std::string& database_id) {
-    result.success = false;
-    result.score = 0;
-    result.model_id.clear();
-    for (const ModelScore& score : result.model_scores) {
-        if (!score.success || !IsDecisionModel(score.model_id, database_id)) continue;
-        if (!result.success || score.score < result.score) {
-            result.success = true;
-            result.score = score.score;
-            result.model_id = score.model_id;
-        }
-    }
-}
-
-ThresholdRecommendation Engine::RecommendedThreshold(const std::string& database_id) const {
-    ThresholdRecommendation result;
-    QFile file(QDir(QString::fromStdString(weights_folder_)).filePath(CalibrationFile));
-    if (!file.open(QIODevice::ReadOnly)) { result.note = "No matching calibration; adjust thresholds manually."; return result; }
-    const QJsonObject calibration = QJsonDocument::fromJson(file.readAll()).object();
-    if (calibration.value("format").toString() != CalibrationFormat
-        || calibration.value("aggregation").toString() != ScoreAggregation
-        || calibration.value("score_type").toString() != ScoreType
-        || calibration.value("template_format").toString() != "fingerprint-probability-template-v2"
-        || std::abs(calibration.value("target_far").toDouble(-1) - TargetFar) > MetricTolerance
-        || calibration.value("threshold_decimals").toInt() != ThresholdPrecision) {
-        result.note = "Minimum-score calibration required. Run FingerprintTrain with --verify-only to regenerate it."; return result;
-    }
-    int mask = 0;
-    for (const ModelState& model : models_) if (model.loaded && IsDecisionModel(model.model_id, database_id)) {
-        if (calibration.value("weights").toObject().value(QString::fromStdString(model.model_id)).toString().toStdString() != model.info.weight_sha256
-            || calibration.value("label_order_sha256").toString().toStdString() != model.info.label_order_sha256) {
-            result.note = "Weights/labels changed; recalibrate before using a validation cutoff."; return result;
-        }
-        for (int m = 0; m < int(ModelIds.size()); ++m)
-            if (model.model_id == ModelIds[m]) mask |= 1 << m;
-    }
-    if (!mask) { result.note = "Select the matching-DB or combined model to obtain a cutoff."; return result; }
-    QString requested = "*";
-    for (const std::string& db : DatabaseIds)
-        if (db == database_id || db == database_id + "_B") requested = QString::fromStdString(db);
-    const bool known = requested != "*";
-    for (const QJsonValue& value : calibration.value("entries").toArray()) {
-        const QJsonObject entry = value.toObject();
-        if (entry.value("model_mask").toInt() != mask || entry.value("database").toString() != requested) continue;
-        const double cutoff = entry.value("threshold").toDouble(-1);
-        if (!(cutoff >= 0.5 && cutoff <= 1)) continue;
-        result.available = true; result.threshold = cutoff; result.target_met = entry.value("target_met").toBool();
-        result.external_fallback = !known;
-        result.note = known ? "Known-ID validation cutoff for the minimum matching-DB/combined score; not an independent-test guarantee."
-                            : "Conservative known-DB fallback; external DB performance is not validated.";
-        if (!result.target_met) result.note += " FAR target is not met at the supported threshold precision; reconsider selected models.";
-        return result;
-    }
-    result.note = "No calibration for this model selection; adjust thresholds manually.";
-    return result;
-}
-
-ModelTemplate Engine::MakeTemplate(const ModelState& model, const algorithm::AlgorithmImage& image) {
+ModelTemplate Engine::MakeTemplate(const fingerprint::Image& image, bool enrollment) {
     ModelTemplate result;
+    result.model_id = DllModelId;
+    result.stage = enrollment ? "enroll" : "attempt";
     const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-    result.model_id = model.model_id;
-    result.dimensions = model.info.output_size;
-    if (!model.loaded || !backend_) {
-        result.stage = "load";
-        result.error = model.error;
-    } else if (image.width <= 0 || image.height <= 0
-               || image.pixels.size() != std::size_t(image.width) * image.height) {
-        result.stage = "input";
-        result.error = "Expected tightly packed 8-bit grayscale pixels.";
-    } else {
-        algorithm::PreparedImage prepared;
-        result.stage = "preprocess";
-        if (!backend_->Preprocess(model.model_id, image, prepared, result.error)
-            || prepared.width <= 0 || prepared.height <= 0 || prepared.values.empty()) {
-            if (result.error.empty()) result.error = "Preprocessing failed.";
-        } else {
-            result.stage = "template";
-            if (!backend_->CreateTemplate(model.model_id, prepared, result.data, result.error) || result.data.empty()) {
-                result.data.clear();
-                if (result.error.empty()) result.error = "Template generation failed.";
-            } else {
-                result.success = true;
-                result.stage.clear();
-                result.error.clear();
-            }
+    if (!backend_) result.error = "[FAIL] No selected algorithm.";
+    else if (Cancelled()) result.error = "[CANCELLED] Stopped.";
+    else if (image.width <= 0 || image.height <= 0 || image.pixels.size() != std::size_t(image.width) * image.height)
+        result.error = "[FAIL] Expected tightly packed gray8 image.";
+    else {
+        try { result.success = backend_->Extract(image, enrollment, result.data, result.error); }
+        catch (const std::exception& e) { result.error = std::string("[FAIL] Backend exception: ") + e.what(); }
+        if (result.success && (result.data.empty() || result.data.size() >= kisa::TemplateCapacity)) {
+            result.success = false; result.error = "[MISMATCH] Template length outside ABI limits.";
         }
+        if (!result.success) result.data.clear();
+        else { result.stage.clear(); result.error.clear(); }
     }
     result.time_ms = ElapsedMs(start);
     return result;
 }
-
-EnrollmentTemplates Engine::Enroll(const algorithm::AlgorithmImage& image) {
+EnrollmentTemplates Engine::Enroll(const fingerprint::Image& image) {
     EnrollmentTemplates result;
-    const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-    result.executed = true;
-    result.revision = revision_;
-    for (const ModelState& model : models_) {
-        result.models.push_back(MakeTemplate(model, image));
-        if (result.models.back().success)
-            result.success = true;
-    }
-    result.time_ms = ElapsedMs(start);
+    result.executed = true; result.revision = revision_;
+    result.models.push_back(MakeTemplate(image, true));
+    result.success = result.models[0].success; result.time_ms = result.models[0].time_ms;
     return result;
 }
-
-SimilarityResult Engine::Compare(const EnrollmentTemplates& enrollment, const algorithm::AlgorithmImage& attempt) {
+std::vector<EnrollmentTemplates> Engine::EnrollImages(const std::vector<ImageInfo>& images, const std::vector<int>& selected) {
+    std::vector<EnrollmentTemplates> results(images.size());
+    progress_done_.store(0); progress_total_.store(static_cast<int>(selected.size()));
+    // Deduplicate selections before parallel writes into the indexed output.
+    std::vector<int> unique;
+    for (int index : selected) {
+        if (index >= 0 && index < static_cast<int>(images.size())
+            && std::find(unique.begin(), unique.end(), index) == unique.end()) unique.push_back(index);
+    }
+    progress_total_.store(static_cast<int>(unique.size()));
+    ParallelFor(static_cast<int>(unique.size()), [this, &images, &unique, &results](int position) {
+        const int index = unique[position];
+        results[index] = Enroll(ReadImage(images[index].path, images[index].database_id));
+    });
+    if (Cancelled()) results.clear();
+    return results;
+}
+SimilarityResult Engine::ComparePrepared(const EnrollmentTemplates& enrollment, const ModelTemplate& attempt) {
     SimilarityResult result;
-    const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-    for (const ModelState& model : models_) {
-        const std::chrono::steady_clock::time_point modelStart = std::chrono::steady_clock::now();
-        ModelScore score;
-        score.model_id = model.model_id;
-        const ModelTemplate* enrolled = nullptr;
-        for (const ModelTemplate& item : enrollment.models) {
-            if (item.model_id == model.model_id)
-                enrolled = &item;
+    ModelScore score; score.model_id = DllModelId; score.attempt_time_ms = attempt.time_ms;
+    result.attempt_time_ms = attempt.time_ms;
+    if (enrollment.revision != revision_ || !enrollment.success || enrollment.models.empty()) {
+        result.enrollment_failed = true; score.stage = "enrollment";
+        score.error = enrollment.revision != revision_ ? "[MISMATCH] Algorithm changed; regenerate templates."
+            : !enrollment.models.empty() ? enrollment.models[0].error : "[FAIL] Enrollment unavailable.";
+    } else if (!attempt.success) { score.stage = "attempt"; score.error = attempt.error; }
+    else if (Cancelled()) { score.stage = "compare"; score.error = "[CANCELLED] Stopped."; }
+    else {
+        score.stage = "compare"; result.compare_executed = true;
+        const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+        score.time_ms = -1;
+        try { score.success = backend_->Compare(enrollment.models[0].data, attempt.data, score.score, score.error, &score.time_ms); }
+        catch (const std::exception& e) { score.error = std::string("[FAIL] Backend exception: ") + e.what(); }
+        if (score.time_ms < 0) score.time_ms = ElapsedMs(start);
+        if (score.success && (!std::isfinite(score.score) || score.score < 0 || score.score > 1)) {
+            score.success = false; score.error = "[MISMATCH] Score outside [0,1].";
         }
-        if (enrollment.revision != revision_) {
-            score.stage = "enrollment";
-            score.error = "Models changed; create enrollment templates again.";
-        } else if (!enrolled || !enrolled->success) {
-            score.stage = enrolled ? enrolled->stage : "enrollment";
-            score.error = enrolled ? enrolled->error : "Enrollment template is missing.";
-        } else {
-            // Enrollment and attempt both use this exact model-specific path.
-            const ModelTemplate attempted = MakeTemplate(model, attempt);
-            if (!attempted.success) {
-                score.stage = attempted.stage;
-                score.error = attempted.error;
-            } else {
-                score.stage = "compare";
-                score.success = backend_->Compare(model.model_id, enrolled->data, attempted.data, score.score, score.error);
-                if (score.success && !(score.score >= 0.0 && score.score <= 1.0)) {
-                    score.success = false;
-                    score.error = "Model returned a score outside [0, 1].";
-                }
-                if (score.success) {
-                    score.stage.clear();
-                    score.error.clear();
-                } else if (score.error.empty())
-                    score.error = "Comparison failed.";
-            }
-        }
-        score.time_ms = ElapsedMs(modelStart);
-        result.model_scores.push_back(score);
+        if (score.success) { score.stage.clear(); score.error.clear(); }
     }
-    SelectDecisionScore(result, attempt.database_id);
-    result.time_ms = ElapsedMs(start);
+    result.success = score.success; result.score = score.score; result.time_ms = score.time_ms;
+    result.model_id = DllModelId; result.model_scores.push_back(score);
     return result;
 }
-
-algorithm::AlgorithmImage Engine::ReadImage(const std::string& path, const std::string& database_id) {
+std::vector<SimilarityResult> Engine::Execute(const std::vector<ComparisonPair>& pairs,
+    const std::vector<ImageInfo>& images, const std::vector<EnrollmentTemplates>& templates) {
+    std::vector<int> attempts;
+    for (const ComparisonPair& pair : pairs) {
+        if (pair.enrollment < 0 || pair.enrollment >= static_cast<int>(templates.size()) || !templates[pair.enrollment].success) continue;
+        if (pair.attempt >= 0 && pair.attempt < static_cast<int>(images.size())
+            && std::find(attempts.begin(), attempts.end(), pair.attempt) == attempts.end()) attempts.push_back(pair.attempt);
+    }
+    std::vector<ModelTemplate> cache(images.size());
+    std::vector<SimilarityResult> results(pairs.size());
+    progress_done_.store(0); progress_total_.store(static_cast<int>(attempts.size() + pairs.size()));
+    ParallelFor(static_cast<int>(attempts.size()), [this, &attempts, &images, &cache](int position) {
+        const int index = attempts[position];
+        cache[index] = MakeTemplate(ReadImage(images[index].path, images[index].database_id), false);
+    });
+    ParallelFor(static_cast<int>(pairs.size()), [this, &pairs, &images, &templates, &cache, &results](int index) {
+        const ComparisonPair& pair = pairs[index];
+        if (pair.enrollment < 0 || pair.attempt < 0 || pair.enrollment >= static_cast<int>(templates.size())
+            || pair.enrollment >= static_cast<int>(images.size()) || pair.attempt >= static_cast<int>(images.size())
+            || SameImage(images, pair.enrollment, pair.attempt)) {
+            ModelScore score; score.model_id = DllModelId; score.stage = "input";
+            score.error = "[FAIL] Invalid pair or identical image."; results[index].model_scores.push_back(score);
+        } else results[index] = ComparePrepared(templates[pair.enrollment], cache[pair.attempt]);
+    });
+    if (Cancelled()) results.clear();
+    return results;
+}
+fingerprint::Image Engine::ReadImage(const std::string& path, const std::string& database_id) {
     const QImage image = QImage(QString::fromStdString(path)).convertToFormat(QImage::Format_Grayscale8);
-    algorithm::AlgorithmImage result;
+    fingerprint::Image result;
     // Explicit GUI/training context wins; known parent names also support CLI callers.
     const std::string source = database_id.empty() ? QFileInfo(QString::fromStdString(path)).dir().dirName().toStdString() : database_id;
     for (const std::string& known : DatabaseIds)
@@ -366,37 +281,6 @@ algorithm::AlgorithmImage Engine::ReadImage(const std::string& path, const std::
         for (int x = 0; x < image.width(); ++x)
             result.pixels[std::size_t(y) * image.width() + x] = image.constScanLine(y)[x];
     return result;
-}
-
-std::vector<SimilarityResult> Engine::Execute(const std::vector<ComparisonPair>& pairs,
-                                             const std::vector<ImageInfo>& images,
-                                             const std::vector<EnrollmentTemplates>& templates) {
-    std::vector<SimilarityResult> results;
-    for (const ComparisonPair& pair : pairs) {
-        const bool unsupported = TimeoutMs != 0 || Concurrency != 1;
-        const bool invalid = pair.enrollment < 0 || pair.attempt < 0 || pair.enrollment >= int(templates.size())
-            || pair.enrollment >= int(images.size()) || pair.attempt >= int(images.size())
-            || SameImage(images, pair.enrollment, pair.attempt);
-        if (unsupported || invalid) {
-            SimilarityResult result;
-            for (const ModelState& model : models_) {
-                ModelScore failure;
-                failure.model_id = model.model_id;
-                failure.stage = unsupported ? "execution" : "input";
-                failure.error = unsupported ? "This runner supports timeout=0 and concurrency=1." : "Invalid comparison pair or identical image.";
-                result.model_scores.push_back(failure);
-            }
-            results.push_back(result);
-        } else {
-            const algorithm::AlgorithmImage attempt = ReadImage(images[pair.attempt].path, images[pair.attempt].database_id);
-            SimilarityResult result = Compare(templates[pair.enrollment], attempt);
-            // Keep explicit unknown-DB selection separate from inferred preprocessing geometry.
-            if (attempt.database_id != images[pair.attempt].database_id)
-                SelectDecisionScore(result, images[pair.attempt].database_id);
-            results.push_back(result);
-        }
-    }
-    return results;
 }
 
 const char* Engine::ClassifyComparison(bool genuine, const SimilarityResult& result, double threshold) {
@@ -422,14 +306,11 @@ static bool WriteText(const QString& path, const QString& text) {
 
 bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder) {
     const QDir destination(QString::fromStdString(folder));
-    QString models = "model_id,weight_file,status,error,format,output_dim,weight_sha256,label_order_sha256,preprocessing\n";
+    QString models = "algorithm_id,dll_file,status,error\n";
     for (const ModelState& model : run.models)
-        models += Csv(QString::fromStdString(model.model_id)) + ',' + Csv(QString::fromStdString(model.weight_file))
-            + ',' + Csv(model.loaded ? "Ready" : "Failed") + ',' + Csv(QString::fromStdString(model.error))
-            + ',' + Csv(QString::fromStdString(model.info.format)) + ',' + QString::number(model.info.output_size)
-            + ',' + Csv(QString::fromStdString(model.info.weight_sha256)) + ',' + Csv(QString::fromStdString(model.info.label_order_sha256))
-            + ',' + Csv(QString::fromStdString(model.info.preprocessing)) + '\n';
-    QString enrollments = "image,model_id,status,template_bytes,template_file,stage,error,time_ms,output_dim\n";
+        models += Csv(QString::fromStdString(model.model_id)) + ',' + Csv(QString::fromStdString(model.dll_file))
+            + ',' + Csv(model.loaded ? "Ready" : "Failed") + ',' + Csv(QString::fromStdString(model.error)) + '\n';
+    QString enrollments = "image,model_id,status,template_bytes,template_file,stage,error,time_ms\n";
     for (const EnrollmentRecord& record : run.enrollments) {
         for (const ModelState& model : run.models) {
             const ModelTemplate* value = nullptr;
@@ -449,12 +330,11 @@ bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder)
                 + (value && value->success ? QString::number(value->data.size()) : QString()) + ',' + Csv(path) + ','
                 + Csv(value ? QString::fromStdString(value->stage) : QString()) + ','
                 + Csv(value ? QString::fromStdString(value->error) : QString()) + ','
-                + (record.result.executed && value ? QString::number(value->time_ms, 'g', CsvPrecision) : QString())
-                + ',' + (value ? QString::number(value->dimensions) : QString()) + '\n';
+                + (record.result.executed && value ? QString::number(value->time_ms, 'g', CsvPrecision) : QString()) + '\n';
         }
     }
     QString comparisons = "type,enrollment,attempt,status,score,time_ms,model_id,model_scores,index,threshold,result\n";
-    QString scores = "type,enrollment,attempt,model_id,status,score,stage,error,time_ms\n";
+    QString scores = "type,enrollment,attempt,model_id,status,score,stage,error,time_ms,attempt_time_ms\n";
     int indices[2] = {};
     for (const ComparisonRecord& record : run.comparisons) {
         const int index = ++indices[record.genuine ? 0 : 1];
@@ -473,7 +353,8 @@ bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder)
             scores += common + ',' + Csv(QString::fromStdString(model.model_id)) + ',' + Csv(status) + ',' + number + ','
                 + Csv(value ? QString::fromStdString(value->stage) : QString()) + ','
                 + Csv(value ? QString::fromStdString(value->error) : QString()) + ','
-                + (record.executed && value ? QString::number(value->time_ms, 'g', CsvPrecision) : QString()) + '\n';
+                + (record.executed && value ? QString::number(value->time_ms, 'g', CsvPrecision) : QString()) + ','
+                + (record.executed && value ? QString::number(value->attempt_time_ms, 'g', CsvPrecision) : QString()) + '\n';
         }
         comparisons += common + ',' + Csv(!record.executed ? "Not run" : record.result.success ? "OK" : "Failed") + ','
             + (record.executed && record.result.success ? QString::number(record.result.score, 'g', CsvPrecision) : QString()) + ','
@@ -487,13 +368,10 @@ bool Engine::SaveRawResults(const EvaluationRun& run, const std::string& folder)
         && WriteText(destination.filePath("comparisons.csv"), comparisons)
         && WriteText(destination.filePath("model_scores.csv"), scores)
         && WriteText(destination.filePath("settings.txt"),
-                     "score_type=" + QString::fromUtf8(ScoreType)
-                     + "\nscore_range=[0.5,1]\nscore_formula=(cosine(probability30,probability30)+1)/2\n"
-                       "template_format=fingerprint-probability-template-v2\noutput_dim=30\npayload_bytes=120\n"
-                       "template_file_extension=.fpt\nserialized_template_includes_weight_and_label_metadata=true\n"
-                     + "genuine_threshold=" + QString::number(run.genuine_threshold, 'g', CsvPrecision) + "\n"
+                     "score_type=selected DLL similarity\nscore_range=[0,1]\ntemplate_format=opaque bytes\n"
+                     "template_length=actual bytes returned by selected DLL\n"
+                     "genuine_threshold=" + QString::number(run.genuine_threshold, 'g', CsvPrecision) + "\n"
                      + "impostor_threshold=" + QString::number(run.impostor_threshold, 'g', CsvPrecision) + "\n"
-                     + "aggregation=" + QString::fromUtf8(ScoreAggregation) + "\n"
                      + "decision_rule=Genuine: score >= threshold -> PASS, below -> MISS; "
                        "Impostor: score >= threshold -> FA, below -> REJ; inference failure -> ERR\n"
                      + QString::fromStdString(run.settings));

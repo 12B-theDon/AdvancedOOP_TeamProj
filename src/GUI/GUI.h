@@ -4,6 +4,9 @@
 #include <QString>
 #include <vector>
 #include "Engine.h"
+#include "kisaDll.h"
+#include <functional>
+#include <memory>
 #include "guiConfig.h"
 
 class QLabel;
@@ -30,8 +33,6 @@ public:
     void LoadDatabase(const QString& folder, const QString& database_id = QString());
     // Create a new run folder; retain all raw results.
     bool SaveResults(const QString& folder);
-    // Borrow the backend; caller owns its lifetime.
-    void SetAlgorithm(algorithm::Algorithm* backend);
 
 protected:
     void resizeEvent(QResizeEvent* event) override;
@@ -60,16 +61,20 @@ private:
     // Current DB, backend and enrollment cache.
     std::vector<engine::ImageInfo> images_;
     engine::Engine engine_;
-    algorithm::Algorithm* algorithm_ = nullptr;
+    std::unique_ptr<engine::KisaDllAlgorithm> algorithm_;
+    QSpinBox* workerCount_ = nullptr;
+    QSpinBox* timeout_ = nullptr;
+    QString dllHash_;
+    bool busy_ = false;
+    bool RunWithProgress(const QString& title, const std::function<void()>& work);
+    bool AlgorithmUnchanged();
     std::vector<engine::EnrollmentTemplates> enrollmentTemplates_;
     bool templatesReady_ = false;
     QString databasePath_;
     QString databaseId_;
     QPushButton* selectedDatabase_ = nullptr;
     // Qt parents own widgets; these pointers only refer to them.
-    QLineEdit* weightPath_ = nullptr;
-    std::vector<QCheckBox*> modelChoices_;
-    bool changingModels_ = false;
+    QLineEdit* dllPath_ = nullptr;
     QTableWidget* modelTable_ = nullptr;
     QTableWidget* templateTable_ = nullptr;
     QPushButton* createTemplates_ = nullptr;
@@ -114,7 +119,7 @@ private:
     void ReloadModels();
     void ClearTemplates();
     void CreateEnrollmentTemplates();
-    void RunComparisons(ComparisonControls& controls);
+    void DisplayComparisons(ComparisonControls& controls);
     void ApplyThreshold(ComparisonControls& controls); // Classify cached best scores.
 };
 

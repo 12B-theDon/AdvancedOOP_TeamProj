@@ -2,4 +2,14 @@
 *.patch -whitespace
 # Pretrained encoder exceeds the regular GitHub file size limit.
 models/pretrained/deepprint.bin filter=lfs diff=lfs merge=lfs -text
+models/trained_result/*.bin filter=lfs diff=lfs merge=lfs -text
 demo.gif filter=lfs diff=lfs merge=lfs -text
+# Keep C++/tool source hashes stable across Windows and Unix checkouts.
+*.h text eol=lf
+*.cpp text eol=lf
+*.py text eol=lf
+*.ps1 text eol=lf
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+# Original dataset bytes must never undergo newline conversion.
+data/original/** -text

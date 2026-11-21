@@ -19,7 +19,7 @@ inline constexpr int MetricColumns = 3;
 inline constexpr int MaxRandomCount = 1000000; // [pairs/enrollment]
 inline constexpr int ScorePrecision = 6; // [decimal places] GUI only; raw CSV keeps full precision.
 inline constexpr int TimePrecision = 3; // [decimal places]
-inline constexpr int ThresholdPrecision = engine::ThresholdPrecision; // [decimal places]
+inline constexpr int ThresholdPrecision = 4; // [decimal places]
 inline constexpr double ThresholdMinimum = 0.0; // [normalized score]
 inline constexpr double ThresholdMaximum = 1.0; // [normalized score]
 inline constexpr double ThresholdStep = 0.01; // [normalized score]
@@ -62,15 +62,15 @@ inline constexpr const char* Cancel = "Cancel";
 inline constexpr const char* Close = "Close";
 inline constexpr const char* SelectDatabaseHint = "Click a DB to select it.";
 inline constexpr const char* ExternalDatabase = "Load external DB...";
-inline constexpr const char* ExternalDatabaseInfo = "External DB: load TIFF files from a folder. Image sizes may vary.";
+inline constexpr const char* ExternalDatabaseInfo = "External DB: load TIFFs with one of the three mapped FVC resolutions.";
 inline constexpr const char* ExternalFolderDialog = "Select an external DB folder";
 inline constexpr const char* ImagePrompt = "Select an image.";
 inline constexpr const char* EnrollmentInitial = "Enrolled images: 0";
 inline constexpr const char* EnrollmentHint = "Each selected image will produce a separate enrollment template.";
-inline constexpr const char* BrowseWeights = "Select weights folder...";
-inline constexpr const char* WeightsFolderDialog = "Select model weights folder";
+inline constexpr const char* BrowseWeights = "Select K-NBTC algorithm DLL...";
+inline constexpr const char* WeightsFolderDialog = "Select K-NBTC algorithm DLL";
 inline constexpr const char* CreateTemplates = "Create enrollment templates";
-inline constexpr const char* ModelHint = "Select your trained weights folder, choose models and create enrollment templates.";
+inline constexpr const char* ModelHint = "Select a compatible DLL and create templates. Windows evaluation; first call per worker allows at least 120 seconds. Workers each load a separate algorithm instance.";
 inline constexpr const char* GenuineHint = "Compare each enrollment with other images of the same finger.";
 inline constexpr const char* ImpostorHint = "Compare each enrollment with images of other fingers.";
 inline constexpr const char* RuleLabel = "Comparison selection:";
@@ -92,12 +92,12 @@ inline constexpr const char* NoComparisonType = "Select a comparison type.";
 inline constexpr const char* NoComparisonPairs = "No eligible pairs. Change the rule or enrollment images.";
 inline constexpr const char* ResultsHint = "Select a tab to view comparison results or metrics.";
 inline constexpr const char* ThresholdLabel = "Similarity threshold (0-1):";
-inline constexpr const char* GenuineThresholdHint = "Same finger: minimum matching-DB/combined score >= threshold = PASS; otherwise MISS.";
-inline constexpr const char* ImpostorThresholdHint = "Different fingers: minimum matching-DB/combined score < threshold = REJ; otherwise FA.";
-inline constexpr const char* ScoreHint = "Each cell uses its own score and the current threshold; other-DB text is gray. Result uses the minimum matching-DB/combined score for both comparison types. Other models are reference only.";
+inline constexpr const char* GenuineThresholdHint = "Same finger: DLL score >= threshold = PASS; otherwise MISS.";
+inline constexpr const char* ImpostorThresholdHint = "Different fingers: DLL score < threshold = REJ; otherwise FA.";
+inline constexpr const char* ScoreHint = "DLL similarities use the current threshold. Errors retain their failure category and DLL error message.";
 inline constexpr const char* PairDialog = "Load comparison pairs";
 inline constexpr const char* PairFilter = "CSV files (*.csv)";
-inline constexpr const char* SaveAll = "Save all (CSV + HTML)";
+inline constexpr const char* SaveAll = "Save all (CSV + HTML + Word)";
 inline constexpr const char* OutputFolderDialog = "Select an output folder";
 inline constexpr const char* SavedTitle = "Saved";
 inline constexpr const char* SavedMessage = "All results were saved in a new run folder.";
@@ -115,8 +115,8 @@ inline const QStringList Resolutions = {"448 × 478 px", "300 × 300 px", "640 �
 inline const QStringList EnrollmentModes = {"Single enrollment", "Multiple enrollment (Ctrl / Shift to select)"};
 inline const QStringList ComparisonRules = {"All eligible images", "One image per finger (first capture)", "Selected capture numbers",
     "Random images per enrollment", "Comparison pairs from CSV"};
-inline const QStringList ModelHeaders = {"Model ID", "Weight file", "Vector size", "Load status"};
-inline const QStringList TemplateHeaders = {"Enrollment image", "Model ID", "Status", "Vector size", "Size (bytes)", "Error"};
+inline const QStringList ModelHeaders = {"Algorithm", "DLL file", "Initialization"};
+inline const QStringList TemplateHeaders = {"Enrollment image", "Algorithm", "Status", "Size (bytes)", "Error"};
 inline const QStringList ComparisonHeaders = {"#", "Enrollment", "Comparison", "Result", "Time (ms)"};
 inline const QStringList MetricHeaders = {"Metric", "Value"};
 inline const QStringList MetricNames = {"FTE (%)", "REJ genuine (%)", "REJ impostor (%)", "FMR (%)", "FNMR (%)",
