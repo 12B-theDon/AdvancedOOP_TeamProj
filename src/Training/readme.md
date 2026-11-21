@@ -2,6 +2,8 @@
 
 모델 입출력은 Algorithm의 `LoadArchive()`·`SaveArchive()`를 공유하며 Windows 한글·공백 경로를 처리합니다. 학습 계산·seed·epoch·optimizer·전처리 설정은 유지합니다.
 
+현재 Gaussian noise는 **적용 확률 70%·σ=[1,80]**입니다. 노이즈 상한 10개 수준을 비교하고, 원본 EER 유지 조건과 선택 후 확인 평가를 거쳐 모델 4개를 갱신했습니다. 회전·배율·밝기·crop·원본당 증강 12개와 학습 설정은 유지합니다. [비교 분석·그래프](../../docs/experiments/noise_augmentation.md)에 후보별·모델별 결과와 추가 seed 검증을 기록했습니다.
+
 - `augment.cpp`: 원본에서 `data/augmented`를 생성합니다.
 - `train.cpp`: 검증된 feature cache로 두 projection과 cosine classifier를 학습합니다.
 - `validation.cpp`·`ValidationEngine`: 저장 모델, 고정 parameter·buffer, native 점수와 calibration을 검증합니다.

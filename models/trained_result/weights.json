@@ -3,20 +3,43 @@
   "torch_version": "2.15.0",
   "files": {
     "fvc2000_db3.bin": {
-      "bytes": 266571389,
-      "sha256": "519708f33ef01170d7836c74a32bb93e50091d5c92dc69c1a97834b3b92579ce"
+      "bytes": 266543269,
+      "sha256": "1b9aa8ae95bb766f45976ec3720998ba74a0839eaa9ba1fa9d41689ae0487b65"
     },
     "fvc2002_db3.bin": {
-      "bytes": 266571389,
-      "sha256": "c39504dafd2faf251c52f7a7caf86ae3d9c9cb6625771e232d2ac0c44baf190d"
+      "bytes": 266543269,
+      "sha256": "fbd6bcde95221b5b0b36ee2c6419d5d85f98379b3455b3c05bfa3059ab24e9c6"
     },
     "fvc2004_db1.bin": {
-      "bytes": 266571389,
-      "sha256": "b49a3bbd35dd073f71656051ed7e423012bf30cb164d65ce20bbde391a097403"
+      "bytes": 266543269,
+      "sha256": "95f3bad4332f477b42d6b6e5667e06566263bc805e03cc84bb1e547f983b2919"
     },
     "combined.bin": {
-      "bytes": 266587596,
-      "sha256": "459ca533b40fcc710f91663dd1ce322a745f6b5b634ed00d198ff717a38cb4fd"
+      "bytes": 266570213,
+      "sha256": "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12"
+    }
+  },
+  "training_augmentation": {
+    "noise": "additive Gaussian, gray8 units",
+    "noise_probability": 0.7,
+    "noise_std_min": 1,
+    "noise_std_max": 80,
+    "copies_per_original": 12,
+    "augmentation_seed": 42,
+    "training_seed": 42,
+    "epochs": 40
+  },
+  "experiment": {
+    "report": "docs/experiments/noise_augmentation.md",
+    "selection_capture": 7,
+    "confirmation_capture": 8,
+    "source_commit_before_experiment": "2a54d1e3fb328d332f1c588d9d324c20d053d64f",
+    "selection_rule": "User priority: preserve original clean performance. Eligible only if mean clean capture-7 deployed EER is no worse than baseline (numerical tolerance 1e-12). Among eligible candidates minimize mean deployed EER equally weighted over DB and noise sigma0/5/10/20, averaging 3 fixed nonzero-noise realizations. Tie by clean EER then smaller training noise max. Capture8 never selects the level. Also preserve capture7 clean deployed EER separately for each DB.",
+    "production_decision": {
+      "study_choice_noise_std_max": 80,
+      "noise_std_max": 80,
+      "confirmation_clean_eer_preserved_per_database": true,
+      "reason": "User prioritizes original performance: adopt the locked candidate only if capture8 clean EER is also non-worse in every DB. Otherwise retain the fixed original baseline; never select another level using capture8."
     }
   }
 }

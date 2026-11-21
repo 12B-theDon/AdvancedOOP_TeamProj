@@ -1,0 +1,1356 @@
+{
+  "protocol": {
+    "candidate_noise_std_max": [
+      5,
+      10,
+      15,
+      20,
+      30,
+      40,
+      60,
+      80,
+      120,
+      160
+    ],
+    "noise_std_min": 1,
+    "noise_probability": 0.7,
+    "copies_per_original": 12,
+    "train_captures": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "selection_capture": 7,
+    "confirmation_capture": 8,
+    "probe_noise_sigma": [
+      0,
+      5,
+      10,
+      20
+    ],
+    "probe_noise_seeds": [
+      20261121,
+      20261122,
+      20261123
+    ],
+    "selection_rule": "User priority: preserve original clean performance. Eligible only if mean clean capture-7 deployed EER is no worse than baseline (numerical tolerance 1e-12). Among eligible candidates minimize mean deployed EER equally weighted over DB and noise sigma0/5/10/20, averaging 3 fixed nonzero-noise realizations. Tie by clean EER then smaller training noise max. Capture8 never selects the level. Also preserve capture7 clean deployed EER separately for each DB.",
+    "epochs": 40,
+    "train_seed": 42,
+    "current_weights": {
+      "format": "fingerprint-production-weights-v1",
+      "torch_version": "2.15.0",
+      "files": {
+        "fvc2000_db3.bin": {
+          "bytes": 266571389,
+          "sha256": "519708f33ef01170d7836c74a32bb93e50091d5c92dc69c1a97834b3b92579ce"
+        },
+        "fvc2002_db3.bin": {
+          "bytes": 266571389,
+          "sha256": "c39504dafd2faf251c52f7a7caf86ae3d9c9cb6625771e232d2ac0c44baf190d"
+        },
+        "fvc2004_db1.bin": {
+          "bytes": 266571389,
+          "sha256": "b49a3bbd35dd073f71656051ed7e423012bf30cb164d65ce20bbde391a097403"
+        },
+        "combined.bin": {
+          "bytes": 266587596,
+          "sha256": "459ca533b40fcc710f91663dd1ce322a745f6b5b634ed00d198ff717a38cb4fd"
+        }
+      }
+    },
+    "source_sha256": {
+      "src/.DS_Store": "e250c64eb19ac1b0e68156d1fd738843c3ea7971adb823973b9e7383cffa38fa",
+      "src/readme.md": "9648469c52dc3b01d9aa0105ce514f97703371cee3627d2cba5e3431032432cc",
+      "src/main.cpp": "ba434c0b4acc01286a93140fd2b8d955bb7462d00f0863a6d062dab5640761d0",
+      "src/Training/train.h": "fa0aa3601bdf4b1b24268e5874ab19574be09a2cb4a87eb060ecd4419610f891",
+      "src/Training/validation.cpp": "6b8703f9be94ee3a06de079d9385afeb6b8e7f26d775e6aafe8aaa13f192cfb9",
+      "src/Training/ValidationEngine.h": "c1845893d04aecdfcead0aadfa1a1d0d206bcd4942572446f97d351e01bcd607",
+      "src/Training/augment.cpp": "4e86d1330412954cd1a4a18fd3f1a195b9efee495fe28f6bb3b77e14b2ce3614",
+      "src/Training/evaluationConfig.h": "57100d4d8592cb87b90ffe9dc2f13f987681184fa362b5c36c3f5ef8ddba0d22",
+      "src/Training/readme.md": "5f6b2acaa84fad3e2dd0451258c71d02a176277d3f230f141054d7d835143f2c",
+      "src/Training/ValidationEngine.cpp": "377b4ee7740e83c099c184075e36e61d4972e750b1a6b917569fd3c4904e0040",
+      "src/Training/train.cpp": "6f5cbfd932097fe089f77b12799d2c9f7516ab1ae87b894dc57a57916f17e9ae",
+      "src/Training/augmentConfig.h": "a000cea4c890692a8edbd19c82cf712b94bd410b5e7b168cc225c37b8d61ee2d",
+      "src/Training/augment.h": "f642c2a6b089d75b2a92a0b75d4073a4e6ee849f9516975364e889f1dd08f657",
+      "src/Training/trainConfig.h": "b3ef0e0a38a100c83e457da28f96a0cf5b350715d015f024bf657e5555680179",
+      "src/Kisa/BioApi.cpp": "8ab63925f3dedf13fc6b1bad3a222262ef55113b2ba85bebc5049726b7bb36eb",
+      "src/Kisa/core.cpp": "33304717e854c34029ec93b13b3491c7713c6ec19bebc4ee03dd037f008a2b47",
+      "src/Kisa/readme.md": "c44057935b41f6fa1b2e90e9659ade37dda30286ef66675b9c35821c65f19c6c",
+      "src/Kisa/FingerprintAlgorithm.def": "c87769f8df2a004bcf1537b1df86d0aa381d030782e4c0d61008f6be9571c850",
+      "src/Kisa/README.txt": "0f11b1dcfc79380bc6e49adea845d593567530d5fd7eb1de1bdb0815d686c377",
+      "src/Algorithm/archive.h": "bec28c63fd6fd524c19a479211d708d6564c4483d6dfeea9af411fb328597631",
+      "src/Algorithm/encoderConfig.h": "a12f7134e31891c6e3f72d0976d568f56daff79d5da4efebb5e540b2e4c2e9d5",
+      "src/Algorithm/Algorithm.h": "8cd464d4aa3857c271104b67324b613cce0e10de55e1d0e8b9169087233f2661",
+      "src/Algorithm/readme.md": "da501ddaf25ad7f843994db3d36b87f8b3aae03070e2ef38b28f09ec7ebad6d0",
+      "src/Algorithm/encoder.h": "9eb80e1ee3695eadc26e124fe50c6c0557f985c7fd68a2dbde0c7bf07e7e0b70",
+      "src/Algorithm/encoder.cpp": "6326790707f07e7b6b77742d15362eedc888c4347680eceb26a89a6fee109d51",
+      "src/Algorithm/archive.cpp": "e18ee1b6bbeb1c20fad4decc9e107f9f1371785d814a395bbdb46b2d9a2f9a65",
+      "src/Public/FvcSpec.h": "e64b0ab9f0d8fffe4020b6c6366f8cc8e990b5f3a8b080bc8e2db539570916ca",
+      "src/Public/readme.md": "2c16cc12d1e8edfc95659072dcf9fe10970bbfb0773af6767d30890f26cfabb1",
+      "src/Public/BioApi.h": "61a124d2566aaf8bf47b5e40b6312a741dac3ce580687301a76da85a4388e647",
+      "src/Public/Image.h": "4bf39ba8e7ada5f4a349311c7ffa220630c6900d283998b8d7f5c32aa427e747",
+      "src/GUI/report.cpp": "51d3e722476b03778747fa880fedf4a31a1b9e6a64f5b96f67769a01bf506d17",
+      "src/GUI/startup.cpp": "8635153527780eedb1264a58147c6b473cdf24f199ecda04022fa80c4e454e64",
+      "src/GUI/startup.h": "b480da6f6998ecd77f0c2af0a490e054d7c39d305c1929f8fbf69d3cbafbf0af",
+      "src/GUI/guiConfig.h": "8bc05f3bc3b5016c63e7ded1d228203966b7707d116d3b900fbb19ccf71caece",
+      "src/GUI/readme.md": "2865cf7c029a5985dbad5f87ee5883727a15e0158ccf6bb6d557c63b79d7f720",
+      "src/GUI/GUI.h": "af523e9de01246072b3cb5ea92944c9b1212c9eaafb0c537441a5bf3a5f7bb29",
+      "src/GUI/GUI.cpp": "8a5d8cf86683703d25ac698c1f23f6e778c542ad2bc000d443b7759ba8564a11",
+      "src/GUI/report.h": "045f07dfc9be1122c24ccfe309f3b7110a9f4f7270a2732d9d5aacf3b5db1550",
+      "src/GUI/README.txt": "7840b5dbabc34985f6e63800a3d1f1a859d95701555e95295b3f91f050969a3e",
+      "src/Worker/Protocol.h": "ab7ac9d8ec00a5a2c46104fb851fd9ebda3c22d6d64a69a234b51cc301eba452",
+      "src/Worker/worker.cpp": "97030c5bc2d73bf0b8d5d7d5bb281f095e7d57d27da3d4d923f8bf1210e97138",
+      "src/Worker/readme.md": "a3b070438e310f2b4b01697b7fa186fa0e87bea50fe17cf893920f3ae109916a",
+      "src/Engine/Engine.h": "3385812e29db447ce4d7350de16db6a67693bd3aea9f4965917f4988cad14d7c",
+      "src/Engine/Algorithm.h": "54c9d144eee1c9651b5f8d8d7feb8184883a0e01fe46b8fc8c611888163fecda",
+      "src/Engine/readme.md": "aabfa5525d25107ff615a6a093f17a0efbba5a3a341779cdb88a370577e3fa97",
+      "src/Engine/kisaDll.h": "a5c93b29661defd7169ebc00acff6994b7f0e53384657b566f254829917715d1",
+      "src/Engine/engineConfig.h": "84ab01d7707408b109f62b74b4c639b69e36f79bf0a7a2da5e96c40b91403bee",
+      "src/Engine/Engine.cpp": "b1f513a152302c44793d9aa03addc4a86e1a195de6b0498125766016728013d2",
+      "src/Engine/kisaDll.cpp": "b7d5d7608a879c1d9c457790be3e42adb53cb7639af51f8efe901f4aaef1f7e7",
+      "src/Engine/ExportControl.h": "3fe0ad6c21e8a143f7a65237eaf71b63628fbb36a1097116123d7cdbef7a80d2"
+    },
+    "clean_eer_guard_percentage_points": 0.0,
+    "baseline_augmentation_check": {
+      "input_config_and_sources_equal": true,
+      "all_2880_nonprovenance_fields_equal": true,
+      "only_difference": "1920 reused_from provenance paths omitted in fresh generator; image SHA256 and all geometric/brightness/noise fields match"
+    },
+    "postselection_paired_train_seeds": [
+      43,
+      44
+    ],
+    "replicate_policy": "After locking the choice using train seed 42, compare baseline and selected settings at matched train seeds 43 and 44, without changing the locked level. Production uses train seed 42.",
+    "feature_cache_optimization": {
+      "baseline_full_features_exact_to_previous_cache": true,
+      "regrouped_native_batch4_parity": {
+        "tested_samples": 32,
+        "native_batch_size": 4,
+        "max_difference": 0.0,
+        "exact": true
+      },
+      "policy": "Candidates 15+ reuse frozen features only when actual image SHA256 and checkpoint/preprocessing/sample metadata match baseline; changed images use the same native extractor at batch 4, padding the tail. Training optimizer/epoch/sample order unchanged."
+    },
+    "source_commit": "2a54d1e3fb328d332f1c588d9d324c20d053d64f",
+    "runtime": {
+      "platform": "macOS-27.2.1-arm64-arm-64bit-Mach-O",
+      "qt": "5.15.17",
+      "libtorch": "2.15.0 CPU",
+      "torch_threads": 4,
+      "compiler": "AppleClang 21.0.0; temporary native C++20 build; production Windows C++17/MSVC unchanged"
+    },
+    "adaptive_boundary_policy": "Before capture8 is exposed, if the best eligible level is the largest tested max40, add max60/80. If max80 still wins, add max120/160. Stop at max160 or an interior winner. All decisions use capture7 only.",
+    "experiment_dates": {
+      "started": "2026-11-21",
+      "completed_report_date": "2026-11-22",
+      "timezone": "Asia/Seoul"
+    },
+    "adaptive_extensions": [
+      {
+        "from_upper_bound": 40,
+        "added": [
+          60,
+          80
+        ],
+        "confirmation_not_evaluated": true
+      },
+      {
+        "from_upper_bound": 80,
+        "added": [
+          120,
+          160
+        ],
+        "confirmation_not_evaluated": true
+      }
+    ],
+    "selection_policy_decision": {
+      "source": "explicit user preference",
+      "decision": "원본 EER가 나빠지지 않는 후보 중 선택",
+      "decided_before_capture8_analysis": true,
+      "decided_unix": 1795274021.509745,
+      "previous_guard_pp": 1.0,
+      "selected_guard_pp": 0.0
+    },
+    "preserve_clean_eer_per_database": true,
+    "production_confirmation_gate": "After locking level on capture7, adopt only if capture8 clean deployed EER is non-worse in EACH DB than fixed original baseline. On failure retain baseline5; do not retune/select alternative levels on capture8."
+  },
+  "selection": {
+    "selected_noise_std_max": 80,
+    "eligible": [
+      5,
+      10,
+      15,
+      20,
+      60,
+      80
+    ],
+    "selection_summaries": {
+      "5": {
+        "mean_eer_pct": 1.6923868312757202,
+        "clean_eer_pct": 0.3703703703703704,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 0.0,
+            "5": 0.3703703703703704,
+            "10": 1.1111111111111112,
+            "20": 10.123456790123457
+          },
+          "FVC2004_DB1_B": {
+            "0": 1.1111111111111112,
+            "5": 1.8518518518518519,
+            "10": 2.2839506172839505,
+            "20": 3.4567901234567904
+          }
+        }
+      },
+      "10": {
+        "mean_eer_pct": 1.7181069958847737,
+        "clean_eer_pct": 0.3703703703703704,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 0.0,
+            "5": 0.7407407407407408,
+            "10": 1.1111111111111112,
+            "20": 10.061728395061728
+          },
+          "FVC2004_DB1_B": {
+            "0": 1.1111111111111112,
+            "5": 1.8518518518518519,
+            "10": 2.2839506172839505,
+            "20": 3.4567901234567904
+          }
+        }
+      },
+      "15": {
+        "mean_eer_pct": 1.527777777777778,
+        "clean_eer_pct": 0.3703703703703704,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 0.0,
+            "5": 0.7407407407407408,
+            "10": 1.1111111111111112,
+            "20": 7.469135802469136
+          },
+          "FVC2004_DB1_B": {
+            "0": 1.1111111111111112,
+            "5": 1.8518518518518519,
+            "10": 2.4074074074074074,
+            "20": 3.6419753086419755
+          }
+        }
+      },
+      "20": {
+        "mean_eer_pct": 1.2705761316872428,
+        "clean_eer_pct": 0.3703703703703704,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 1.1111111111111112,
+            "20": 4.814814814814815
+          },
+          "FVC2004_DB1_B": {
+            "0": 1.1111111111111112,
+            "5": 1.8518518518518519,
+            "10": 2.6543209876543212,
+            "20": 3.7037037037037037
+          }
+        }
+      },
+      "30": {
+        "mean_eer_pct": 1.1368312757201646,
+        "clean_eer_pct": 0.7407407407407408,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.7407407407407408,
+            "20": 1.7901234567901236
+          },
+          "FVC2004_DB1_B": {
+            "0": 2.2222222222222223,
+            "5": 1.9753086419753088,
+            "10": 2.7777777777777777,
+            "20": 4.135802469135802
+          }
+        }
+      },
+      "40": {
+        "mean_eer_pct": 1.013374485596708,
+        "clean_eer_pct": 0.7407407407407408,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2004_DB1_B": {
+            "0": 2.2222222222222223,
+            "5": 2.2839506172839505,
+            "10": 2.8395061728395063,
+            "20": 4.814814814814815
+          }
+        }
+      },
+      "60": {
+        "mean_eer_pct": 1.0185185185185186,
+        "clean_eer_pct": 0.3703703703703704,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2004_DB1_B": {
+            "0": 1.1111111111111112,
+            "5": 2.7160493827160495,
+            "10": 3.3333333333333335,
+            "20": 5.061728395061729
+          }
+        }
+      },
+      "80": {
+        "mean_eer_pct": 0.7921810699588477,
+        "clean_eer_pct": 0.3703703703703704,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2004_DB1_B": {
+            "0": 1.1111111111111112,
+            "5": 2.2839506172839505,
+            "10": 2.5925925925925926,
+            "20": 3.5185185185185186
+          }
+        }
+      },
+      "120": {
+        "mean_eer_pct": 1.352880658436214,
+        "clean_eer_pct": 1.604938271604938,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 3.7037037037037033,
+            "5": 1.1111111111111112,
+            "10": 0.7407407407407408,
+            "20": 2.4074074074074074
+          },
+          "FVC2004_DB1_B": {
+            "0": 1.1111111111111112,
+            "5": 1.4814814814814816,
+            "10": 2.037037037037037,
+            "20": 3.6419753086419755
+          }
+        }
+      },
+      "160": {
+        "mean_eer_pct": 1.9238683127572016,
+        "clean_eer_pct": 1.9753086419753085,
+        "by_database": {
+          "FVC2000_DB3_B": {
+            "0": 0.0,
+            "5": 0.0,
+            "10": 0.0,
+            "20": 0.0
+          },
+          "FVC2002_DB3_B": {
+            "0": 3.7037037037037033,
+            "5": 1.1111111111111112,
+            "10": 0.7407407407407408,
+            "20": 3.9506172839506175
+          },
+          "FVC2004_DB1_B": {
+            "0": 2.2222222222222223,
+            "5": 3.271604938271605,
+            "10": 3.5185185185185186,
+            "20": 4.567901234567901
+          }
+        }
+      }
+    },
+    "selection_rule": "User priority: preserve original clean performance. Eligible only if mean clean capture-7 deployed EER is no worse than baseline (numerical tolerance 1e-12). Among eligible candidates minimize mean deployed EER equally weighted over DB and noise sigma0/5/10/20, averaging 3 fixed nonzero-noise realizations. Tie by clean EER then smaller training noise max. Capture8 never selects the level. Also preserve capture7 clean deployed EER separately for each DB."
+  },
+  "confirmation_summaries": {
+    "5": {
+      "mean_eer_pct": 1.918724279835391,
+      "clean_eer_pct": 0.3703703703703704,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 1.1111111111111112,
+          "5": 1.8518518518518519,
+          "10": 3.7037037037037037,
+          "20": 16.358024691358025
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    },
+    "10": {
+      "mean_eer_pct": 1.7644032921810702,
+      "clean_eer_pct": 0.3703703703703704,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 1.1111111111111112,
+          "5": 1.1111111111111112,
+          "10": 2.6543209876543212,
+          "20": 16.296296296296298
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    },
+    "15": {
+      "mean_eer_pct": 1.17798353909465,
+      "clean_eer_pct": 0.0,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 0.0,
+          "5": 1.1111111111111112,
+          "10": 2.2222222222222223,
+          "20": 10.802469135802468
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    },
+    "20": {
+      "mean_eer_pct": 0.9259259259259259,
+      "clean_eer_pct": 0.0,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 0.0,
+          "5": 0.7407407407407408,
+          "10": 0.3703703703703704,
+          "20": 10.0
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    },
+    "30": {
+      "mean_eer_pct": 0.9053497942386831,
+      "clean_eer_pct": 0.3703703703703704,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 1.1111111111111112,
+          "5": 1.1111111111111112,
+          "10": 1.4814814814814816,
+          "20": 7.160493827160494
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    },
+    "40": {
+      "mean_eer_pct": 0.257201646090535,
+      "clean_eer_pct": 0.0,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 0.0,
+          "5": 0.3703703703703704,
+          "10": 0.0,
+          "20": 2.7160493827160495
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    },
+    "60": {
+      "mean_eer_pct": 0.0617283950617284,
+      "clean_eer_pct": 0.0,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.7407407407407408
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    },
+    "80": {
+      "mean_eer_pct": 0.0,
+      "clean_eer_pct": 0.0,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    },
+    "120": {
+      "mean_eer_pct": 0.2006172839506173,
+      "clean_eer_pct": 0.0,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 2.4074074074074074
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    },
+    "160": {
+      "mean_eer_pct": 0.5761316872427984,
+      "clean_eer_pct": 0.0,
+      "by_database": {
+        "FVC2000_DB3_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        },
+        "FVC2002_DB3_B": {
+          "0": 0.0,
+          "5": 0.0617283950617284,
+          "10": 0.4320987654320988,
+          "20": 6.419753086419753
+        },
+        "FVC2004_DB1_B": {
+          "0": 0.0,
+          "5": 0.0,
+          "10": 0.0,
+          "20": 0.0
+        }
+      }
+    }
+  },
+  "augmentation_audit": {
+    "5": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 3.0091938186964633,
+      "sigma_min_observed": 1.0025764595778037,
+      "sigma_max_observed": 4.99886066565165
+    },
+    "10": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 5.520686092067042,
+      "sigma_min_observed": 1.0057970340500586,
+      "sigma_max_observed": 9.997436497716212
+    },
+    "15": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 8.032178365437622,
+      "sigma_min_observed": 1.0090176085223133,
+      "sigma_max_observed": 14.996012329780774
+    },
+    "20": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 10.5436706388082,
+      "sigma_min_observed": 1.0122381829945681,
+      "sigma_max_observed": 19.994588161845336
+    },
+    "30": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 15.566655185549358,
+      "sigma_min_observed": 1.0186793319390774,
+      "sigma_max_observed": 29.99173982597446
+    },
+    "40": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 20.589639732290514,
+      "sigma_min_observed": 1.025120480883587,
+      "sigma_max_observed": 39.98889149010358
+    },
+    "60": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 30.63560882577283,
+      "sigma_min_observed": 1.038002778772606,
+      "sigma_max_observed": 59.98319481836183
+    },
+    "80": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 40.68157791925515,
+      "sigma_min_observed": 1.0508850766616251,
+      "sigma_max_observed": 79.97749814662008
+    },
+    "120": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 60.77351610621978,
+      "sigma_min_observed": 1.076649672439663,
+      "sigma_max_observed": 119.96610480313657
+    },
+    "160": {
+      "all_geometry_brightness_and_splits_identical": true,
+      "noise_free_pixels_identical": true,
+      "noisy_copies": 2038,
+      "total_copies": 2880,
+      "sigma_mean_when_applied": 80.86545429318441,
+      "sigma_min_observed": 1.1024142682177012,
+      "sigma_max_observed": 159.95471145965305
+    }
+  },
+  "baseline_reproduction": {
+    "fvc2000_db3": {
+      "max_parameter_difference": 0.0,
+      "all_buffers_exact": true,
+      "all_780_feature_probability_rows_exact": true,
+      "max_probability_difference": 0.0
+    },
+    "fvc2002_db3": {
+      "max_parameter_difference": 0.0,
+      "all_buffers_exact": true,
+      "all_780_feature_probability_rows_exact": true,
+      "max_probability_difference": 0.0
+    },
+    "fvc2004_db1": {
+      "max_parameter_difference": 0.0,
+      "all_buffers_exact": true,
+      "all_780_feature_probability_rows_exact": true,
+      "max_probability_difference": 0.0
+    },
+    "combined": {
+      "max_parameter_difference": 0.0,
+      "all_buffers_exact": true,
+      "all_780_feature_probability_rows_exact": true,
+      "max_probability_difference": 0.0
+    }
+  },
+  "capture7_clean_thresholds": {
+    "5": {
+      "FVC2000_DB3_B": 0.5135,
+      "FVC2002_DB3_B": 0.594,
+      "FVC2004_DB1_B": 0.8688
+    },
+    "10": {
+      "FVC2000_DB3_B": 0.5142,
+      "FVC2002_DB3_B": 0.6136,
+      "FVC2004_DB1_B": 0.8595
+    },
+    "15": {
+      "FVC2000_DB3_B": 0.5143,
+      "FVC2002_DB3_B": 0.6671,
+      "FVC2004_DB1_B": 0.8359
+    },
+    "20": {
+      "FVC2000_DB3_B": 0.5144,
+      "FVC2002_DB3_B": 0.6798,
+      "FVC2004_DB1_B": 0.823
+    },
+    "30": {
+      "FVC2000_DB3_B": 0.5194,
+      "FVC2002_DB3_B": 0.6841,
+      "FVC2004_DB1_B": 0.7837
+    },
+    "40": {
+      "FVC2000_DB3_B": 0.5198,
+      "FVC2002_DB3_B": 0.6379,
+      "FVC2004_DB1_B": 0.7399
+    },
+    "60": {
+      "FVC2000_DB3_B": 0.5191,
+      "FVC2002_DB3_B": 0.6239,
+      "FVC2004_DB1_B": 0.8273
+    },
+    "80": {
+      "FVC2000_DB3_B": 0.5168,
+      "FVC2002_DB3_B": 0.6768,
+      "FVC2004_DB1_B": 0.8842
+    },
+    "120": {
+      "FVC2000_DB3_B": 0.5201,
+      "FVC2002_DB3_B": 0.7082,
+      "FVC2004_DB1_B": 0.8473
+    },
+    "160": {
+      "FVC2000_DB3_B": 0.5353,
+      "FVC2002_DB3_B": 0.7011,
+      "FVC2004_DB1_B": 0.904
+    }
+  },
+  "production_decision": {
+    "study_choice_noise_std_max": 80,
+    "noise_std_max": 80,
+    "confirmation_clean_eer_preserved_per_database": true,
+    "reason": "User prioritizes original performance: adopt the locked candidate only if capture8 clean EER is also non-worse in every DB. Otherwise retain the fixed original baseline; never select another level using capture8."
+  },
+  "confirmation_bootstrap": {
+    "replicates": 1000,
+    "seed": 20261124,
+    "unit": "probe identity within each DB; fixed gallery; paired candidates and shared resamples across noise conditions",
+    "robust_eer_delta_new_minus_old_ci95_pp": [
+      -3.307998971193415,
+      0.0
+    ],
+    "clean_eer_delta_new_minus_old_ci95_pp": [
+      -1.111111111111111,
+      0.0
+    ]
+  },
+  "original_pixel_audit": {
+    "original_images": 240,
+    "duplicate_pixel_groups": []
+  },
+  "metric_implementation_checks": {
+    "perfect_eer_pct": 0,
+    "all_tied_eer_pct": 50,
+    "reversed_eer_pct": 100,
+    "independent_numpy_bootstrap_eer_parity_cases": 50,
+    "max_eer_difference_pp": 1.4210854715202004e-14
+  },
+  "candidate_receipts": {
+    "5": {
+      "noise_std_max": 5,
+      "elapsed_seconds": 455.5749430656433,
+      "weights": {
+        "fvc2000_db3": "e081792158815f5991061756ba27c38f4623a6802b60c71a3bf187659d9b64d1",
+        "fvc2002_db3": "f6c280224c265bb8d70f04e32ac09155a68b02cbeeebda9b42e259ea7ce5b593",
+        "fvc2004_db1": "4d33872d5e343544aacc3c31ace05b3e7394c4abcbffdfa5ddc82dd82d1edab8",
+        "combined": "1014fdd9e321169954f001e87d22788068d256a74d8f6c17fc683306e26fd656"
+      }
+    },
+    "10": {
+      "noise_std_max": 10,
+      "elapsed_seconds": 474.3271129131317,
+      "weights": {
+        "fvc2000_db3": "7935427420a58088d4482661d9c25f13abf71ce8ebadea284f466c85292c1207",
+        "fvc2002_db3": "fc3c8ee8810958f37f7872a3d93cc47f5b72122c5eb3a102f64f5d3162e22a7f",
+        "fvc2004_db1": "2352e8879f595cf0932c1bb7415f1de48b9cf19ee43a67bba10413227556f7be",
+        "combined": "2ea01a7dae906ecfdaa518133d391fe1a85fd4926c8199f0501d35f50df920c5"
+      }
+    },
+    "15": {
+      "noise_std_max": 15,
+      "elapsed_seconds": 366.8939321041107,
+      "weights": {
+        "fvc2000_db3": "b5e75d2086c49602456881664870cca4b9b75d5ddb0b2840e391f56715c55110",
+        "fvc2002_db3": "28313a687a330f81a2bcfb0c9093ca450dde2c8caf643603d9eb640cf9d90c01",
+        "fvc2004_db1": "094c9ad1432329d83937b3c5c4ba67c2670e107896d0fa699bd2686bfb5b07aa",
+        "combined": "c33ce98c27556278432d55244a3ca1a8235a21406b792f9108500b3a0bf99d43"
+      }
+    },
+    "20": {
+      "noise_std_max": 20,
+      "elapsed_seconds": 366.31526923179626,
+      "weights": {
+        "fvc2000_db3": "9413dd2719e1d4100a9a572ac64179b6eab35b161ae6d9f19e1571f34f71dd57",
+        "fvc2002_db3": "0a942d3213cd2a34876d73382bbd1c35d0e13f92ec08890fab9642fa5793c710",
+        "fvc2004_db1": "e5f56274eb6faf5d4106a84731e992db2ba50c665c2ad2ca9f62e37babb0274a",
+        "combined": "a84f393062f5fb06359367fa899b63d73df1db90938d7b39acb1decafecefa35"
+      }
+    },
+    "30": {
+      "noise_std_max": 30,
+      "elapsed_seconds": 363.66787791252136,
+      "weights": {
+        "fvc2000_db3": "ffbd1cdb6cd7558ef672371b7dae53bd7e3d67f8f42ca5ead348e5f7ef8ed4a9",
+        "fvc2002_db3": "5644b0dd158efcfafc885e676e0bcddf8932fb95e6056432a8d951ebedc421ee",
+        "fvc2004_db1": "be0cdc23e93d6ad7216b12426e585ab9b883fa3f2be405867e7f9ae08ba76863",
+        "combined": "52fa28916bf9e9ddd872c8827ff6a4878ea78d13332924c80d7e6a5b5dfcb3d0"
+      }
+    },
+    "40": {
+      "noise_std_max": 40,
+      "elapsed_seconds": 363.85109400749207,
+      "weights": {
+        "fvc2000_db3": "3d83cb1dcc2d5533827d89a25aa2f87de07d29c6449828161064c3d88c43f430",
+        "fvc2002_db3": "c27aaf3cf856f95c9252f5364d5951d0510dc18d19b86ed1b3306edaec0dd474",
+        "fvc2004_db1": "c7561dd45c0807adb4f232366c58f33113ed478af62dba6009f91e8c84a39964",
+        "combined": "54824325f66eaf75b4a0fa10359ffa1f26eab6446dc8f977666118801a361bec"
+      }
+    },
+    "60": {
+      "noise_std_max": 60,
+      "elapsed_seconds": 364.1808168888092,
+      "weights": {
+        "fvc2000_db3": "992a4c8191cfa4862d93060faac99cffe902dbc4efed54ac1cc68316ab5a2f9c",
+        "fvc2002_db3": "15e1b0d23ca58de444f2400d193277d5ebe1b363d8c9e7d1e2d76e14a97fa98b",
+        "fvc2004_db1": "3ef06517cfd622ab1ae24557541fa4cbbd9e13350b56534c83390b967bbfd9ca",
+        "combined": "803b31f99b6aeaa4aaee1a165c0785aae39f66aec6d81e8880368011f477abbc"
+      }
+    },
+    "80": {
+      "noise_std_max": 80,
+      "elapsed_seconds": 367.00456500053406,
+      "weights": {
+        "fvc2000_db3": "1b9aa8ae95bb766f45976ec3720998ba74a0839eaa9ba1fa9d41689ae0487b65",
+        "fvc2002_db3": "fbd6bcde95221b5b0b36ee2c6419d5d85f98379b3455b3c05bfa3059ab24e9c6",
+        "fvc2004_db1": "95f3bad4332f477b42d6b6e5667e06566263bc805e03cc84bb1e547f983b2919",
+        "combined": "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12"
+      }
+    },
+    "120": {
+      "noise_std_max": 120,
+      "elapsed_seconds": 369.3029251098633,
+      "weights": {
+        "fvc2000_db3": "2cf28d9fa3313ab5538cfcf5455e06da85e619f40697432a409d9f5d7bb118f5",
+        "fvc2002_db3": "92ebfa85a1bcce4c1c533869c579115bb59fa31469972b3541b2793451fa516c",
+        "fvc2004_db1": "024e33942cfe0866939361c070a8423db5f3879fe0c971174979db78f9e612ed",
+        "combined": "cbc4863a31d02e70cc115eff06e98d88cf8dfab525bbaec83f42f43129dc6ecb"
+      }
+    },
+    "160": {
+      "noise_std_max": 160,
+      "elapsed_seconds": 373.23590087890625,
+      "weights": {
+        "fvc2000_db3": "3a4fd985a07d5907958fbe1e9c845569494664d3ca7c977e8477d77e5367e421",
+        "fvc2002_db3": "05b6f27e434190cccbb6341c33a6677c65a86ba47bdc1db8f7751cee6fd47fd6",
+        "fvc2004_db1": "3b57ef3ca586fdc38cd4baad03ff2161f5dc6d5388a6ce90d752155be68670b0",
+        "combined": "30b518a49c256e3985e37889df8347c8ee05cce2b52265c5b47cf8840e9f6746"
+      }
+    }
+  },
+  "selected_model_validation": {
+    "selected_noise_std_max": 80,
+    "originals_pretrained_training_math_preserved": true,
+    "old_production_unchanged_until_validation": true,
+    "native_weight_verification": [
+      {
+        "classifier_retained": true,
+        "labels_sha256": "9f90d09af9ef478426d1c007e7a60fdd1b5bb3e7a215e590f824f4d8f83e97bf",
+        "model": "fvc2000_db3",
+        "native_engine_verified": true,
+        "output_dim": 30,
+        "reload_batch1_2_4": true,
+        "self_score": 1,
+        "sha256": "1b9aa8ae95bb766f45976ec3720998ba74a0839eaa9ba1fa9d41689ae0487b65",
+        "template_bytes": 1082
+      },
+      {
+        "classifier_retained": true,
+        "labels_sha256": "9f90d09af9ef478426d1c007e7a60fdd1b5bb3e7a215e590f824f4d8f83e97bf",
+        "model": "fvc2002_db3",
+        "native_engine_verified": true,
+        "output_dim": 30,
+        "reload_batch1_2_4": true,
+        "self_score": 1,
+        "sha256": "fbd6bcde95221b5b0b36ee2c6419d5d85f98379b3455b3c05bfa3059ab24e9c6",
+        "template_bytes": 1082
+      },
+      {
+        "classifier_retained": true,
+        "labels_sha256": "9f90d09af9ef478426d1c007e7a60fdd1b5bb3e7a215e590f824f4d8f83e97bf",
+        "model": "fvc2004_db1",
+        "native_engine_verified": true,
+        "output_dim": 30,
+        "reload_batch1_2_4": true,
+        "self_score": 1,
+        "sha256": "95f3bad4332f477b42d6b6e5667e06566263bc805e03cc84bb1e547f983b2919",
+        "template_bytes": 1082
+      },
+      {
+        "classifier_retained": true,
+        "labels_sha256": "9f90d09af9ef478426d1c007e7a60fdd1b5bb3e7a215e590f824f4d8f83e97bf",
+        "model": "combined",
+        "native_engine_verified": true,
+        "output_dim": 30,
+        "reload_batch1_2_4": true,
+        "self_score": 1,
+        "sha256": "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12",
+        "template_bytes": 1079
+      }
+    ],
+    "frozen_backbone_verification": [
+      {
+        "all_equal_to_pretrained": true,
+        "frozen_buffer_tensors_equal": 573,
+        "frozen_parameter_tensors_equal": 581,
+        "model": "fvc2000_db3"
+      },
+      {
+        "all_equal_to_pretrained": true,
+        "frozen_buffer_tensors_equal": 573,
+        "frozen_parameter_tensors_equal": 581,
+        "model": "fvc2002_db3"
+      },
+      {
+        "all_equal_to_pretrained": true,
+        "frozen_buffer_tensors_equal": 573,
+        "frozen_parameter_tensors_equal": 581,
+        "model": "fvc2004_db1"
+      },
+      {
+        "all_equal_to_pretrained": true,
+        "frozen_buffer_tensors_equal": 573,
+        "frozen_parameter_tensors_equal": 581,
+        "model": "combined"
+      }
+    ],
+    "native_relocated_core": {
+      "cases": 6,
+      "all_three_fvc_types": true,
+      "unicode_deployment_path": true,
+      "max_minimum_fusion_score_error": 0.0,
+      "scope": "Current C++ Core/Algorithm with test-only Windows module-path shim on macOS; not actual Windows DLL execution"
+    },
+    "weights": {
+      "fvc2000_db3.bin": {
+        "bytes": 266543269,
+        "sha256": "1b9aa8ae95bb766f45976ec3720998ba74a0839eaa9ba1fa9d41689ae0487b65"
+      },
+      "fvc2002_db3.bin": {
+        "bytes": 266543269,
+        "sha256": "fbd6bcde95221b5b0b36ee2c6419d5d85f98379b3455b3c05bfa3059ab24e9c6"
+      },
+      "fvc2004_db1.bin": {
+        "bytes": 266543269,
+        "sha256": "95f3bad4332f477b42d6b6e5667e06566263bc805e03cc84bb1e547f983b2919"
+      },
+      "combined.bin": {
+        "bytes": 266570213,
+        "sha256": "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12"
+      }
+    }
+  },
+  "paired_training_seed_repeats": {
+    "selected_level_unchanged": 80,
+    "summaries": {
+      "5_seed43": {
+        "noise_std_max": 5,
+        "train_seed": 43,
+        "selection": {
+          "mean_eer_pct": 1.4197530864197532,
+          "clean_eer_pct": 0.3703703703703704,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2002_DB3_B": {
+              "0": 0.0,
+              "5": 0.7407407407407408,
+              "10": 1.1111111111111112,
+              "20": 10.0
+            },
+            "FVC2004_DB1_B": {
+              "0": 1.1111111111111112,
+              "5": 1.1111111111111112,
+              "10": 1.4814814814814816,
+              "20": 1.4814814814814816
+            }
+          }
+        },
+        "confirmation": {
+          "mean_eer_pct": 1.6203703703703702,
+          "clean_eer_pct": 0.3703703703703704,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2002_DB3_B": {
+              "0": 1.1111111111111112,
+              "5": 2.2222222222222223,
+              "10": 3.7037037037037037,
+              "20": 12.407407407407407
+            },
+            "FVC2004_DB1_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            }
+          }
+        }
+      },
+      "80_seed43": {
+        "noise_std_max": 80,
+        "train_seed": 43,
+        "selection": {
+          "mean_eer_pct": 0.4835390946502058,
+          "clean_eer_pct": 0.3703703703703704,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2002_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2004_DB1_B": {
+              "0": 1.1111111111111112,
+              "5": 1.1111111111111112,
+              "10": 1.3580246913580247,
+              "20": 2.2222222222222223
+            }
+          }
+        },
+        "confirmation": {
+          "mean_eer_pct": 0.0,
+          "clean_eer_pct": 0.0,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2002_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2004_DB1_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            }
+          }
+        }
+      },
+      "5_seed44": {
+        "noise_std_max": 5,
+        "train_seed": 44,
+        "selection": {
+          "mean_eer_pct": 1.5637860082304527,
+          "clean_eer_pct": 0.3703703703703704,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2002_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 1.1111111111111112,
+              "20": 10.0
+            },
+            "FVC2004_DB1_B": {
+              "0": 1.1111111111111112,
+              "5": 1.8518518518518519,
+              "10": 1.4814814814814816,
+              "20": 3.2098765432098766
+            }
+          }
+        },
+        "confirmation": {
+          "mean_eer_pct": 1.7026748971193415,
+          "clean_eer_pct": 0.3703703703703704,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2002_DB3_B": {
+              "0": 1.1111111111111112,
+              "5": 1.8518518518518519,
+              "10": 3.7037037037037037,
+              "20": 13.765432098765432
+            },
+            "FVC2004_DB1_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            }
+          }
+        }
+      },
+      "80_seed44": {
+        "noise_std_max": 80,
+        "train_seed": 44,
+        "selection": {
+          "mean_eer_pct": 0.6532921810699589,
+          "clean_eer_pct": 0.3703703703703704,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2002_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2004_DB1_B": {
+              "0": 1.1111111111111112,
+              "5": 1.8518518518518519,
+              "10": 1.8518518518518519,
+              "20": 3.0246913580246915
+            }
+          }
+        },
+        "confirmation": {
+          "mean_eer_pct": 0.0308641975308642,
+          "clean_eer_pct": 0.0,
+          "by_database": {
+            "FVC2000_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            },
+            "FVC2002_DB3_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.3703703703703704
+            },
+            "FVC2004_DB1_B": {
+              "0": 0.0,
+              "5": 0.0,
+              "10": 0.0,
+              "20": 0.0
+            }
+          }
+        }
+      }
+    },
+    "receipts": [
+      {
+        "train_seed": 43,
+        "noise_std_max": 5,
+        "elapsed_seconds": 102.71408486366272,
+        "weights": {
+          "fvc2000_db3": "188ed1e920f0bbd1ec1499fa0c6feb6a03f2a08a081f8654250ccbf1c38400c5",
+          "fvc2002_db3": "e1f0c48e5a719ba0eee63308d301f7a3b74e77440a70ff5761693cfd1a1ebe09",
+          "fvc2004_db1": "825872870a30291293c565921a504870a8810fe89b966e6eae28d167fd0604c7",
+          "combined": "7e7defb0f8b21c97c5bda91480713c883dbd137cd141633f74c949915ec462a1"
+        }
+      },
+      {
+        "train_seed": 43,
+        "noise_std_max": 80,
+        "elapsed_seconds": 108.56376385688782,
+        "weights": {
+          "fvc2000_db3": "b091ecd569bda88aa6f747ec88865e499663742e6e0202a10b71d57c498ac1fd",
+          "fvc2002_db3": "5565919529af8fb0b5166ba2f10d848f2a3f790ff8d9868dab15bf98cc8658a1",
+          "fvc2004_db1": "6b3c61bfcfadb3217335bb0a0d4e230616d0b845cf8c61b7f5b43292458beb1d",
+          "combined": "b331e7f7ae273560c42e7854530d88f33124cc989167e85bb2da0e7f5aedc5f4"
+        }
+      },
+      {
+        "train_seed": 44,
+        "noise_std_max": 5,
+        "elapsed_seconds": 105.63261890411377,
+        "weights": {
+          "fvc2000_db3": "e13d8f47b261f1187089f8bcf6e2f4e33144fa7f818458aac292f98b9df2558b",
+          "fvc2002_db3": "60198279927d265d77e1a4933bcd23c724628d2c9b7466b014b532ea4dfcc0c1",
+          "fvc2004_db1": "ac6109e2b85b28b9cd82e1a1e0fcad69196adc328d2d32693aa60147548a6cfd",
+          "combined": "1318967d7389fccfcf1c11976e92486ffd7c8a87d70b90de3d85619e319719a7"
+        }
+      },
+      {
+        "train_seed": 44,
+        "noise_std_max": 80,
+        "elapsed_seconds": 103.98154520988464,
+        "weights": {
+          "fvc2000_db3": "523f3a733bb83c40227a70b5dab970761874eecedd7e4c3cf7440f708f167c04",
+          "fvc2002_db3": "0992b7d67337a3d04d64fc5ba486ad99759485caa1aeea35c873cff5f4d9a4a3",
+          "fvc2004_db1": "1a6f7be2b63758013818bf7bd19285b740324956edb059aa9e93f7c342c6a7ab",
+          "combined": "36565d75a1d5325113806e8cdb8ac7ec129bb70e894dc8f43f111e565ab4d7c1"
+        }
+      }
+    ]
+  },
+  "artifact_cleanup": {
+    "temporary_study_workspace_removed": true,
+    "experimental_sources_images_features_logs_removed": true,
+    "previous_production_generated_cache_removed": true,
+    "weight_archive": "models/noise_experiment_weights/noise_augmentation_20261121",
+    "archived_bin_files": 60
+  },
+  "metric_files": {
+    "selection_and_confirmation": {
+      "file": "noise_augmentation_metrics.csv",
+      "rows": 1800
+    },
+    "paired_training_seed_repeats": {
+      "file": "noise_augmentation_replicate_metrics.csv",
+      "rows": 720
+    }
+  }
+}
