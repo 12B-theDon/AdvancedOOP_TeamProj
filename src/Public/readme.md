@@ -1,6 +1,6 @@
 # 공개 KISA 계약
 
-`BioApi.h`는 `KISA_Enroll`, `KISA_Attempt`, `KISA_Compare` 세 함수를 선언합니다. C linkage·cdecl을 사용하며 성공은 1, 실패는 0입니다.
+`BioApi.h`는 Windows용 `KISA_Enroll`, `KISA_Attempt`, `KISA_Compare` 세 함수를 선언합니다. C linkage·cdecl을 사용하며 성공은 1, 실패는 0입니다.
 
 - 입력: header·행 padding이 없는 원본 gray8 픽셀입니다.
 - 출력: Template buffer는 1,000,000 bytes이며 실제 길이는 `0 < size < 1,000,000`입니다. 오류 코드와 256-byte 메시지를 함께 반환합니다.

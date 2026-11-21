@@ -21,29 +21,29 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 ## 환경
 
-C++17, CMake 3.21+, Qt 5.15/6 Widgets·TIFF 플러그인이 필요합니다. 알고리즘·학습은 호환되는 LibTorch CPU를 사용합니다. Windows는 MSVC와 동일한 architecture의 Qt·LibTorch를 준비하고, 빌드 디렉터리 실행 시 Qt `bin`·LibTorch `lib`를 PATH에 추가합니다. 외부 32-bit DLL은 32-bit evaluator·worker가 필요합니다.
+Windows·MSVC 전용입니다. C++17, CMake 3.21+, Qt 5.15/6 Widgets·TIFF 플러그인이 필요하며 알고리즘·학습은 호환되는 LibTorch CPU를 사용합니다. MSVC와 동일한 architecture의 Qt·LibTorch를 준비하고, 빌드 디렉터리 실행 시 Qt `bin`·LibTorch `lib`를 PATH에 추가합니다. 자동 설치는 Windows x64를 대상으로 합니다. 외부 32-bit DLL은 32-bit Evaluator·Worker를 별도로 빌드해야 합니다.
 
 알고리즘·학습을 준비할 때는 submodule과 LFS 파일을 가져옵니다. upstream 수정 적용은 [NOTICE](../third_party/deepprint.NOTICE.txt)를 따릅니다. Python 3.11+은 배포 파일의 SHA-256 검사에 사용됩니다.
 
-```sh
+```powershell
 git submodule update --init --recursive
 git lfs pull
-cmake -S . -B build -DCMAKE_PREFIX_PATH="<Qt>;<LibTorch>" -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 "-DCMAKE_PREFIX_PATH=<Qt>;<LibTorch>"
 cmake --build build --config Release --parallel 4
 ```
 
 ## 실행
 
-기본 Windows 빌드는 `build/Release/FingerprintGUI.exe`·`FingerprintTrain.exe`, 단일 구성 빌드는 `build/`의 실행파일을 사용합니다. 학습 명령·옵션은 [Training](../src/Training/readme.md)에 정리했습니다.
+Release 빌드는 `build/Release/FingerprintGUI.exe`·`FingerprintTrain.exe`를 생성합니다. 학습 명령·옵션은 [Training](../src/Training/readme.md)에 정리했습니다.
 
-GUI는 `data/original`을 작업 폴더 또는 실행파일의 상위 폴더에서 찾습니다. DB 버튼으로 경로를 지정하거나 외부 폴더를 선택할 수도 있습니다. [FVC 매핑](../src/Public/readme.md)에 맞는 원본 gray8을 사용합니다. DLL 평가는 Windows에서 실행하며, 학습·검증 도구는 macOS/Linux에서도 빌드할 수 있습니다.
+GUI는 `data/original`을 작업 폴더 또는 실행파일의 상위 폴더에서 찾습니다. DB 버튼으로 경로를 지정하거나 외부 폴더를 선택할 수도 있습니다. [FVC 매핑](../src/Public/readme.md)에 맞는 원본 gray8을 사용합니다. GUI·Worker·알고리즘 DLL·학습·검증 도구는 모두 Windows에서 실행합니다.
 
 ## Evaluator 전용 빌드
 
 외부 DLL만 평가할 때는 Qt만 준비하고 아래 옵션을 사용합니다.
 
-```sh
-cmake -S . -B build-evaluator -DCMAKE_PREFIX_PATH="<Qt>" -DFINGERPRINT_BUILD_ALGORITHM=OFF -DFINGERPRINT_BUILD_TRAINING=OFF -DCMAKE_BUILD_TYPE=Release
+```powershell
+cmake -S . -B build-evaluator -G "Visual Studio 17 2022" -A x64 "-DCMAKE_PREFIX_PATH=<Qt>" -DFINGERPRINT_BUILD_ALGORITHM=OFF -DFINGERPRINT_BUILD_TRAINING=OFF
 cmake --build build-evaluator --config Release --parallel 4
 ```
 
@@ -53,8 +53,8 @@ cmake --build build-evaluator --config Release --parallel 4
 
 Windows에서 기존 [모델 4개](../models/readme.md)가 있는 폴더를 지정합니다. 기본값은 `models/trained_result`입니다.
 
-```sh
-cmake -S . -B build -DFINGERPRINT_PACKAGE_MODELS="<학습 출력 폴더>"
+```powershell
+cmake -S . -B build "-DFINGERPRINT_PACKAGE_MODELS=<학습 출력 폴더>"
 cmake --build build --config Release --target FingerprintAlgorithmPackage
 cmake --build build --config Release --target FingerprintEvaluatorPackage
 python tools/verify_manifest.py dist/FingerprintAlgorithm

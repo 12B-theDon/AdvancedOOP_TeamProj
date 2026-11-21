@@ -6,7 +6,7 @@
 int main(int argc, char* argv[]) {
     QApplication::setAttribute(Qt::AA_DontUseNativeDialogs);
     QApplication app(argc, argv);
-#if defined(_WIN32) && defined(FINGERPRINT_AUTO_PREPARE_MODELS)
+#ifdef FINGERPRINT_AUTO_PREPARE_MODELS
     const gui::StartupPlan startup = gui::PlanStartup(QCoreApplication::applicationDirPath());
     if (startup.needs_preparation) {
         QString error;

@@ -3,9 +3,7 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QStringList>
-#ifdef _WIN32
 #include <windows.h>
-#endif
 
 namespace gui {
 namespace {
@@ -53,7 +51,6 @@ bool StartPreparation(const StartupPlan& plan, qint64 previousProcess, QString& 
                 "or run the GUI from the source checkout so missing weights can be downloaded or trained.";
         return false;
     }
-#ifdef _WIN32
     QProcess setup;
     setup.setProgram(QDir(qEnvironmentVariable("SystemRoot", "C:/Windows"))
         .filePath("System32/WindowsPowerShell/v1.0/powershell.exe"));
@@ -67,10 +64,6 @@ bool StartPreparation(const StartupPlan& plan, qint64 previousProcess, QString& 
     });
     if (setup.startDetached()) return true;
     error = "Could not start automatic model preparation: " + setup.errorString();
-#else
-    Q_UNUSED(previousProcess);
-    error = "Automatic deployment preparation requires Windows x64.";
-#endif
     return false;
 }
 } // namespace gui

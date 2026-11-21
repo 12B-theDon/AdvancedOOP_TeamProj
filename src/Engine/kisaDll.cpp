@@ -9,9 +9,7 @@
 #include <chrono>
 #include <cstring>
 #include <mutex>
-#ifdef _WIN32
 #include <windows.h>
-#endif
 
 namespace engine {
 struct KisaDllAlgorithm::State {
@@ -20,7 +18,6 @@ struct KisaDllAlgorithm::State {
     DllOptions options;
     std::atomic<bool> cancelled{false};
     std::atomic<unsigned int> next{0};
-#ifdef _WIN32
     struct Process {
         HANDLE process = nullptr;
         HANDLE input = nullptr;
@@ -180,12 +177,6 @@ struct KisaDllAlgorithm::State {
         if (!Read(process, bytes.data(), response.data_size, deadline, error)) { bytes.clear(); process.Stop(); return false; }
         score = response.score; return true;
     }
-#else
-    bool Call(ipc::Request, const std::vector<unsigned char>&, const std::vector<unsigned char>&,
-        std::vector<unsigned char>&, double&, double&, std::string& error) {
-        error = "[FAIL] DLL evaluation requires Windows; training and report tests are portable."; return false;
-    }
-#endif
 };
 KisaDllAlgorithm::KisaDllAlgorithm(const std::string& dll, const std::string& worker, const DllOptions& options) : state_(new State) {
     state_->dll = QFileInfo(QString::fromStdString(dll)).absoluteFilePath().toStdString();
@@ -194,16 +185,12 @@ KisaDllAlgorithm::KisaDllAlgorithm(const std::string& dll, const std::string& wo
     state_->options.workers = std::clamp(options.workers, 1, MaxConcurrency);
     state_->options.timeout_ms = std::max(1, options.timeout_ms);
     state_->options.startup_timeout_ms = std::max(1, options.startup_timeout_ms);
-#ifdef _WIN32
     for (int i = 0; i < state_->options.workers; ++i) state_->processes.emplace_back(new State::Process);
-#endif
 }
 KisaDllAlgorithm::~KisaDllAlgorithm() = default;
 void KisaDllAlgorithm::Cancel() { state_->cancelled.store(true); }
 void KisaDllAlgorithm::ResetCancel() {
-#ifdef _WIN32
     if (state_->cancelled.load()) for (const std::unique_ptr<State::Process>& process : state_->processes) { std::lock_guard<std::mutex> lock(process->mutex); process->Stop(); }
-#endif
     state_->cancelled.store(false);
 }
 bool KisaDllAlgorithm::Extract(const fingerprint::Image& image, bool enrollment, std::vector<unsigned char>& bytes, std::string& error) {

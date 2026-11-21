@@ -3,12 +3,11 @@
 // K-NBTC fingerprint ABI (guide pp.26–29, fingerprint IndustryAlgorithm example).
 // cdecl, C linkage, 1=success / 0=failure. Caller provides a 1,000,000-byte
 // output buffer and a 256-byte error buffer. Compare has no length parameters.
-#if defined(_WIN32)
-#define KISA_CALL __cdecl
-#else
-#define KISA_CALL
+#ifndef _WIN32
+#error "The fingerprint KISA API requires Windows."
 #endif
-#if defined(_WIN32) && defined(KISA_EXPORTS)
+#define KISA_CALL __cdecl
+#ifdef KISA_EXPORTS
 #define KISA_API extern "C" __declspec(dllexport)
 #else
 #define KISA_API extern "C"

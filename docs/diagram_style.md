@@ -19,7 +19,7 @@
 
 ## DeepPrint
 
-AppleGothic 10 pt, 연산 8 pt, 차원 6 pt. 본문 `#173452`, 보조 글자 `#52677c`. 모듈은 반경 5·선 0.8, panel은 반경 7·`#f9fbfd/#cbd6e1`입니다.
+Windows 기본 Arial 10 pt, 연산 8 pt, 차원 6 pt. 본문 `#173452`, 보조 글자 `#52677c`. 모듈은 반경 5·선 0.8, panel은 반경 7·`#f9fbfd/#cbd6e1`입니다.
 
 Conv `#edf4fd/#5186be`, Pool `#c8d3e2/#9db3cb`, Inception A `#fae3ea/#ad3e64`, B `#f3eef9/#7c4e9b`, C `#eaf6f2/#19766d`, Reduction B `#f7e9bf/#96722b`, 학습 모듈 `#fff2df/#df8b21`을 사용합니다. Frozen·trainable 표시는 벡터 눈송이·불꽃입니다.
 

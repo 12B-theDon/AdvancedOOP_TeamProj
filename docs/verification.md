@@ -1,5 +1,20 @@
 # 검증 결과 — 2026-11-21
 
+Windows·MSVC 전용 프로젝트입니다. 이번 전환에서 수행한 검사는 아래와 같으며, 실제 Windows에서의 빌드·DLL 로딩·GUI 실행은 아직 검증하지 않았습니다.
+
+| 현재 검사 | 결과 |
+|---|---|
+| 플랫폼 제한 | CMake가 Windows 외 OS와 MSVC 외 toolchain을 거부하는지 확인 |
+| Windows 코드 보존 | 전처리 결과 9개 조합에서 기존 Windows/MSVC 코드·include 선택과 일치 |
+| 공개 KISA ABI | Clang의 Windows x64·x86 target에서 함수 포인터 자료형·export 선언의 구문 검사 통과. MSVC 링크·실행 검사는 아님 |
+| 원본·학습 보존 | 원본 241개·디렉터리·가중치·설정·학습/검증 함수 본문 보존 검사 통과 |
+| 설치 스크립트 | PowerShell 구문·helper·격리 모의 실행 통과: 다운로드 우선, 학습 생략·fallback, 패키징·GUI 실행, 실패 시 중단 |
+| 패키징 검사 | manifest 누락·손상·경로 보호·가중치 누락 거부 검사 통과 |
+| 그림 | Windows Arial로 통일하고 SVG·PNG의 크기·aspect ratio 유지 |
+
+<details>
+<summary>Windows 전용 전환 이전 검증 기록</summary>
+
 macOS arm64, AppleClang 21, Qt 5.15.17, LibTorch 2.15.0 CPU에서 수행한 결과입니다.
 
 | 검사 | 결과 |
@@ -23,3 +38,5 @@ macOS arm64, AppleClang 21, Qt 5.15.17, LibTorch 2.15.0 CPU에서 수행한 결�
 2026-11-21 기존 설정(각 40 epochs·seed 42)으로 모델 4개를 새로 학습했습니다. `models/trained_result`의 네 `.bin`은 총 1,066,301,763 bytes이며 `weights.json`에 SHA-256을 기록했습니다. 네 모델 모두 batch 1·2·4 재로딩, native self-score=1, 고정 Backbone·버퍼 보존 검사를 통과했습니다. native 비교 24개를 검증했고 cache/native 점수의 최대 차이는 약 6.18×10⁻⁷입니다.
 
 리팩터링 전 production 모델 4개는 없었으므로 과거 모델과의 점수 회귀는 확인할 수 없습니다. 이번 파일은 사용자가 요청한 신규 학습 결과이며, 리팩터링 전 보존 기준을 대체하지 않습니다. 최종 Windows 패키지 생성과 GUI 자동 준비의 실제 Windows 실행은 미검증 상태입니다.
+
+</details>

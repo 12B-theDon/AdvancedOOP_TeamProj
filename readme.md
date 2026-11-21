@@ -1,6 +1,6 @@
 # Fingerprint Evaluator
 
-DeepPrint 기반 지문 알고리즘을 학습하고, K-NBTC 규격 DLL의 유사도·처리 시간·인식 성능을 평가하는 C++17 프로젝트입니다.
+DeepPrint 기반 지문 알고리즘을 학습하고, K-NBTC 규격 DLL의 유사도·처리 시간·인식 성능을 평가하는 Windows·MSVC 전용 C++17 프로젝트입니다.
 
 ## 1. Install
 
@@ -86,6 +86,5 @@ FinalProject/
 | LibTorch·ATen | `<torch/torch.h>`, `<torch/script.h>`, `<ATen/core/Tensor.h>` | 학습·inference·Tensor |
 | C++ Standard Library | `<vector>`, `<thread>`, `<future>`, `<mutex>`, `<random>` | 자료구조·병렬·동기화·sampling |
 | Windows API | `<windows.h>` | DLL·Process·IPC |
-| POSIX Dynamic Linking | `<dlfcn.h>` | 모듈 경로(macOS·Linux) |
 
 [구조도·모듈 안내](docs/diagrams/readme.md) · [출처·라이선스](docs/THIRD_PARTY.md)

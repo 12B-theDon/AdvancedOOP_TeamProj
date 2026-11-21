@@ -31,16 +31,12 @@ bool Write(HANDLE pipe, const void* input, DWORD size) {
 // Keep SEH in a function without C++ objects requiring stack unwinding.
 bool Invoke(kisa::ExtractFunction extract, kisa::CompareFunction compare, const ipc::Request* request,
     unsigned char* first, unsigned char* second, unsigned char* output, int* size, ipc::Response* response) {
-#ifdef _MSC_VER
     __try {
-#endif
         if (request->operation == ipc::Operation::Compare)
             response->result = compare(first, second, &response->score, &response->error_code, response->message);
         else response->result = extract(static_cast<int>(request->type), first, output, size, &response->error_code, response->message);
         return true;
-#ifdef _MSC_VER
     } __except (EXCEPTION_EXECUTE_HANDLER) { return false; }
-#endif
 }
 }
 int wmain(int argc, wchar_t** argv) {

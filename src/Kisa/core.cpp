@@ -10,13 +10,8 @@
 #include <cstring>
 #include <mutex>
 #include <stdexcept>
-#ifdef _WIN32
 #include <windows.h>
 #define CORE_API extern "C" __declspec(dllexport)
-#else
-#include <dlfcn.h>
-#define CORE_API extern "C" __attribute__((visibility("default")))
-#endif
 
 namespace {
 constexpr quint32 Magic = 0x4b465031;
@@ -35,7 +30,6 @@ int Failure(kisa::Error kind, const std::string& text, int* code, char* message)
     return 0;
 }
 QString ModuleFolder() {
-#ifdef _WIN32
     HMODULE module = nullptr;
     if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
         reinterpret_cast<LPCWSTR>(&ModuleFolder), &module)) throw std::runtime_error("Cannot locate Core DLL.");
@@ -43,11 +37,6 @@ QString ModuleFolder() {
     const DWORD length = GetModuleFileNameW(module, path, 32768);
     if (length == 0 || length >= 32768) throw std::runtime_error("Invalid Core DLL path.");
     return QFileInfo(QString::fromWCharArray(path, static_cast<int>(length))).absolutePath();
-#else
-    Dl_info info = {};
-    if (!dladdr(reinterpret_cast<void*>(&ModuleFolder), &info)) throw std::runtime_error("Cannot locate algorithm library.");
-    return QFileInfo(QString::fromUtf8(info.dli_fname)).absolutePath();
-#endif
 }
 struct State {
     algorithm::FingerprintEncoder encoder;
