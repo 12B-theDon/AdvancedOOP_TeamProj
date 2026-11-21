@@ -64,7 +64,7 @@ FinalProject/
 ├─ tools/            # Windows 설치·빌드·패키징·배포 파일 검사
 │  ├─ setup_windows.ps1  # 도구 설치·모델 다운로드·필요 시 학습·패키징
 │  └─ verify_manifest.py # 배포 파일 누락·SHA-256 검사
-├─ third_party/      # DeepPrint 소스·patch, LibTorch 등 라이선스 고지
+├─ third_party/      # DeepPrint 소스·patch, Qt·LibTorch 라이선스 고지
 └─ CMakeLists.txt    # 빌드 대상·의존성·패키징 명령 정의
 ```
 
