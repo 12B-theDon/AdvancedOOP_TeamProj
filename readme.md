@@ -65,7 +65,6 @@ FinalProject/
 │  ├─ setup_windows.ps1  # 도구 설치·모델 다운로드·필요 시 학습·패키징
 │  └─ verify_manifest.py # 배포 파일 누락·SHA-256 검사
 ├─ third_party/      # DeepPrint 외부 소스·라이선스·수정 patch
-├─ 프로젝트 관련 자료-20261029/  # K-NBTC 안내서·DLL 예제·DB 압축본
 └─ CMakeLists.txt    # 빌드 대상·의존성·패키징 명령 정의
 ```
 
