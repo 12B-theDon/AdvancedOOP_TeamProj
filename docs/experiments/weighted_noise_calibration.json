@@ -1,0 +1,44 @@
+{
+  "format": "fingerprint-weighted-noise-calibration-research-v1",
+  "arm": "B",
+  "policy": "per_db",
+  "thresholds": {
+    "FVC2000_DB3_B": 0.5325,
+    "FVC2002_DB3_B": 0.7327,
+    "FVC2004_DB1_B": 0.9161
+  },
+  "reference_thresholds": {
+    "FVC2000_DB3_B": 0.5384,
+    "FVC2002_DB3_B": 0.7378,
+    "FVC2004_DB1_B": 0.8842
+  },
+  "experimental_only": true,
+  "automatic_gui_application": false,
+  "genuine_impostor_same_threshold": true,
+  "training_seed": 42,
+  "windows_dll_sha256": null,
+  "native_research_core_sha256": "758fe905d556738cceddb372a38754ee9321f7ca63d79e5d96ec4ea65533c365",
+  "weight_sha256": {
+    "fvc2000_db3": "2c6c36d7d7d0bd8ee5c5c3e217a04b43f611f474694c762f75f1ab735792b85f",
+    "fvc2002_db3": "13a9986f39d3c9f7e6c9d9a39df7a4c2bbb0ef9f168300d1cb1600ec8a378d9d",
+    "fvc2004_db1": "f00269e1a4efdfc6d63e864872411943612288289e10b769e09d83c3489e7926",
+    "combined": "1a9c8be1475dc2560e68a76f86bf9e772fde691f7d3d0a5da9769028c75a5013"
+  },
+  "reference_weight_sha256": {
+    "fvc2000_db3": "1b9aa8ae95bb766f45976ec3720998ba74a0839eaa9ba1fa9d41689ae0487b65",
+    "fvc2002_db3": "fbd6bcde95221b5b0b36ee2c6419d5d85f98379b3455b3c05bfa3059ab24e9c6",
+    "fvc2004_db1": "95f3bad4332f477b42d6b6e5667e06566263bc805e03cc84bb1e547f983b2919",
+    "combined": "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12"
+  },
+  "preprocessing": "gray01-fvc2004-center-square-aa299-gabor1.8-v2",
+  "score": "minimum matchingDB/combined; (cosine30prob+1)/2",
+  "source_sha256": {
+    "src/Algorithm/encoder.cpp": "6326790707f07e7b6b77742d15362eedc888c4347680eceb26a89a6fee109d51",
+    "src/Algorithm/encoderConfig.h": "a12f7134e31891c6e3f72d0976d568f56daff79d5da4efebb5e540b2e4c2e9d5",
+    "src/Kisa/core.cpp": "33304717e854c34029ec93b13b3491c7713c6ec19bebc4ee03dd037f008a2b47"
+  },
+  "protocol_sha256": "68f783d481bca6691b07f44bcabb0ed869655177f66be1975e4b27bd66484974",
+  "far_target_validation_pct": 1,
+  "strong_noise_influences_threshold": false,
+  "limits": "Research rule; validation FAR target isnotTest guarantee. RejectautomaticcrossDLL orotherweight use. ActualWindows DLLhash unavailable."
+}
