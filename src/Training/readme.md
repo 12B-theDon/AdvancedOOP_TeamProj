@@ -22,6 +22,28 @@
 
 기존 가중치는 덮어쓰지 않으므로 학습에는 새 출력 폴더를 사용합니다. `--augment-only`는 증강만 실행하며, cache 재사용에는 원본·전처리·가중치의 일치가 필요합니다.
 
+## Gaussian noise 예시
+
+각 DB의 원본 `101_8.tif`에 Gaussian noise만 추가한 예시입니다. 회전·밝기 조절·이동 등 추가 증강 없이, 전처리 전 전체 이미지와 원본 비율을 유지했습니다. σ는 0~255 밝기 값 기준의 noise 표준편차이며, 값이 클수록 잡음이 강해집니다.
+
+각 그림의 **윗줄은 원본(σ0)·σ5·σ10·σ15**, **아랫줄은 σ20·σ25·σ30**입니다. 같은 noise 패턴의 세기만 바꿨으며, 평가에 사용한 seed `2026112201`의 이미지와 동일합니다.
+
+[개별 PNG 21장 묶음 다운로드](../../docs/images/noise_examples/noise_examples_21_png.zip)
+
+**FVC2000 DB3**
+
+<img src="../../docs/images/noise_examples/FVC2000_7levels.png" alt="FVC2000 원본과 Gaussian noise σ5·10·15·20·25·30 비교" width="100%">
+
+**FVC2002 DB3**
+
+<img src="../../docs/images/noise_examples/FVC2002_7levels.png" alt="FVC2002 원본과 Gaussian noise σ5·10·15·20·25·30 비교" width="100%">
+
+**FVC2004 DB1**
+
+<img src="../../docs/images/noise_examples/FVC2004_7levels.png" alt="FVC2004 원본과 Gaussian noise σ5·10·15·20·25·30 비교" width="100%">
+
+## 학습 구조
+
 <img src="../../docs/diagrams/training.png" alt="데이터 증강·feature cache·모델 4개 학습·검증 및 export 흐름" width="100%">
 
 <details>
