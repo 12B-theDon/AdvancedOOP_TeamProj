@@ -2,15 +2,11 @@
 
 모델 입출력은 Algorithm의 `LoadArchive()`·`SaveArchive()`를 공유하며 Windows 한글·공백 경로를 처리합니다. 학습 계산·seed·epoch·optimizer·전처리 설정은 유지합니다.
 
-현재 Gaussian noise는 **적용 확률 70%·σ=[1,80]**입니다. 노이즈 상한 10개 수준을 비교하고, 원본 EER 유지 조건과 선택 후 확인 평가를 거쳐 모델 4개를 갱신했습니다. 회전·배율·밝기·crop·원본당 증강 12개와 학습 설정은 유지합니다. [비교 분석·그래프](../../docs/experiments/noise_augmentation.md)에 후보별·모델별 결과와 추가 seed 검증을 기록했습니다.
+현재 Gaussian noise는 **적용 확률 70%·σ=[1,80]**, 원본당 증강은 12개입니다. 회전·배율·밝기·crop과 학습 설정은 각 Config 파일에서 관리합니다.
 
 - `augment.cpp`: 원본에서 `data/augmented`를 생성합니다.
 - `train.cpp`: 검증된 feature cache로 두 projection과 cosine classifier를 학습합니다.
 - `validation.cpp`·`ValidationEngine`: 저장 모델, 고정 parameter·buffer, native 점수와 calibration을 검증합니다.
-
-[후속 전수·Grouped CV 평가](../../docs/experiments/noise_followup.md)는 원본 240장·고유 기존/재생성 증강·별도 Test noise와 120개의 capture 보류 학습 bundle을 비교합니다. Noise FRR는 개선됐지만 모든 DB의 원본 성능을 보존하는 엄격한 조건은 통과하지 못해, 현재 production 모델·학습 코드는 유지했습니다.
-
-[원본·Mild noise 우선 실험](../../docs/experiments/weighted_noise.md)은 raw-original 비중 1/13과 학습량을 맞춰 새 view 12→40장, 감소 noise 분포, 작은 rotation·brightness를 60 bundle·240 heads에서 비교했습니다. 40장 확대의 mild FRR 개선은 통계적으로 확정하지 못했고, 감소 분포·mild geometry의 추가 이득도 확인되지 않았습니다. 잠긴 선택의 원본 보존 조건이 미통과여서 **현재 4개 `.bin`과 기본 학습 설정을 유지**합니다. 실험용 sampler·가중치는 배포 기본값과 구분합니다.
 
 배포 모델은 Git LFS로 받아 재사용합니다. 설치 스크립트는 모델이 없을 때만 자동 학습합니다. 직접 재학습할 때는 새 출력 폴더를 사용합니다.
 

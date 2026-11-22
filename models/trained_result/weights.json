@@ -28,18 +28,5 @@
     "augmentation_seed": 42,
     "training_seed": 42,
     "epochs": 40
-  },
-  "experiment": {
-    "report": "docs/experiments/noise_augmentation.md",
-    "selection_capture": 7,
-    "confirmation_capture": 8,
-    "source_commit_before_experiment": "2a54d1e3fb328d332f1c588d9d324c20d053d64f",
-    "selection_rule": "User priority: preserve original clean performance. Eligible only if mean clean capture-7 deployed EER is no worse than baseline (numerical tolerance 1e-12). Among eligible candidates minimize mean deployed EER equally weighted over DB and noise sigma0/5/10/20, averaging 3 fixed nonzero-noise realizations. Tie by clean EER then smaller training noise max. Capture8 never selects the level. Also preserve capture7 clean deployed EER separately for each DB.",
-    "production_decision": {
-      "study_choice_noise_std_max": 80,
-      "noise_std_max": 80,
-      "confirmation_clean_eer_preserved_per_database": true,
-      "reason": "User prioritizes original performance: adopt the locked candidate only if capture8 clean EER is also non-worse in every DB. Otherwise retain the fixed original baseline; never select another level using capture8."
-    }
   }
 }

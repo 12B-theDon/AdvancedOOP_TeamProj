@@ -3,11 +3,9 @@
 - `pretrained/deepprint.bin`: fine-tuning 초기화에 사용하는 TorchScript encoder입니다. 출처는 같은 폴더의 `deepprint.json`에 기록됩니다.
 - `trained_result/`: Git LFS로 배포하는 기본 학습 출력 폴더입니다. `fvc2000_db3.bin`, `fvc2002_db3.bin`, `fvc2004_db1.bin`, `combined.bin`을 포함합니다.
 
-`trained_result/weights.json`은 네 모델의 크기·SHA-256, LibTorch 버전과 학습 noise 설정을 기록합니다. 현재 배포본은 Gaussian noise 확률 70%·σ=[1,80]으로 학습했습니다. 원본 성능 유지 조건으로 선택한 [노이즈 비교 결과](../docs/experiments/noise_augmentation.md)를 참고합니다.
+`trained_result/weights.json`은 네 모델의 크기·SHA-256, LibTorch 버전과 학습 noise 설정을 기록합니다. 현재 배포본은 Gaussian noise 확률 70%·σ=[1,80]으로 학습했습니다.
 
-Git clone 후 설치 스크립트가 LFS 파일을 가져오므로 보통 로컬 재학습은 필요하지 않습니다. 학습 로그·feature cache는 Git에 포함하지 않습니다. 비교용·이전 weight는 로컬 Git 제외 폴더 `models/noise_experiment_weights/`에 보관합니다.
-
-[후속 전수·Grouped CV 평가](../docs/experiments/noise_followup.md)에서도 현재 모델을 reference로 유지했습니다. 새로운 bundle의 엄격한 개선은 확립되지 않아 네 bin과 manifest는 변경하지 않았습니다. DB별 threshold profile은 자동 적용하지 않는 실험용이며, 현재 weight SHA에만 연결됩니다.
+Git clone 후 설치 스크립트가 LFS 파일을 가져오므로 보통 로컬 재학습은 필요하지 않습니다. 학습 로그·feature cache는 Git에 포함하지 않습니다.
 
 패키징 시 `FINGERPRINT_PACKAGE_MODELS`로 학습 출력 폴더를 지정합니다. 배포 폴더에는 네 모델을 알고리즘 DLL 옆에 배치합니다.
 
