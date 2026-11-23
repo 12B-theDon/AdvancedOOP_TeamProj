@@ -93,6 +93,15 @@ private:
     QLabel* preview_ = nullptr;
     QLabel* enrollmentInfo_ = nullptr;
     QListWidget* imageList_ = nullptr;
+    QWidget* enrollmentBatch_ = nullptr; // Visible only for Multiple enrollment.
+    QComboBox* enrollmentRule_ = nullptr;
+    QSpinBox* enrollmentCount_ = nullptr;
+    QSpinBox* enrollmentPerFinger_ = nullptr;
+    QSpinBox* enrollmentSeed_ = nullptr;
+    QLineEdit* enrollmentCaptures_ = nullptr;
+    QLineEdit* enrollmentCsv_ = nullptr;
+    QLabel* enrollmentFeedback_ = nullptr;
+    QString enrollmentSelection_ = "manual";
     ComparisonControls genuine_;
     ComparisonControls impostor_;
     QComboBox* comparisonType_ = nullptr;
@@ -106,6 +115,10 @@ private:
 
     QWizardPage* DatabasePage();
     QWizardPage* EnrollmentPage();
+    QWidget* EnrollmentBatchControls();
+    void ApplyEnrollmentSelection();
+    void SaveEnrollmentSelection();
+    std::vector<int> EnrollmentIndices() const;
     QWizardPage* TemplatePage();
     QWizardPage* ComparisonTypePage();
     QWizardPage* ComparisonRulesPage();

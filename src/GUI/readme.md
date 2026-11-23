@@ -4,6 +4,28 @@
 
 `Window`는 7단계 QWizard와 DLL adapter를 소유합니다. Step 3에서 DLL 선택 → Worker·timeout 설정 → **Load selected DLL with these settings** → Template 생성 순서로 진행합니다. background 실행 중 진행률과 Stop을 제공합니다.
 
+Step 2의 **Single enrollment**는 기존 단일 선택을 유지합니다. **Multiple enrollment**에서만 Batch selection이 나타납니다. 규칙과 설정을 고른 뒤 **Apply selection**을 누르면 목록에 자동 반영되며, 이후 Ctrl / Shift로 수동 조정할 수 있습니다. 기본 규칙은 **지문별 최대 2장·seed 42**입니다.
+
+| 선택 규칙 | 동작 |
+|---|---|
+| All images | 읽을 수 있는 이미지 전체 선택 |
+| Random N images | 전체에서 중복 없이 최대 N장 선택 |
+| Random images per finger | 지문별 중복 없이 최대 K장 선택 |
+| Selected capture numbers | 입력한 촬영 번호 선택. 예: `1, 3` |
+| Image list from CSV | `image` 열에 지정한 현재 DB의 파일명 선택 |
+
+동일한 DB 목록과 seed는 같은 무작위 선택을 재현합니다. 이미지 수와 포함된 지문 수를 표시하며, **Save selected list CSV...**로 실제 선택 목록을 저장해 다른 DLL에도 재사용할 수 있습니다. 지문·촬영 번호를 모르는 외부 DB에서는 전체·무작위 N장·CSV를 사용합니다. 잘못된 규칙이나 CSV는 기존 선택을 유지하고 이유를 표시합니다. 선택 이미지가 바뀌면 기존 Template·비교 결과가 초기화됩니다. 적용 규칙과 최종 등록 이미지 목록은 결과 저장 시 함께 기록합니다.
+
+`enrollmentSelection.*`는 선택 규칙·seed·CSV 입출력을 처리하며 DLL 호출과 독립적입니다.
+
+선택 목록 CSV 형식은 다음과 같습니다. Step 5의 비교 쌍 CSV와는 별도의 형식입니다.
+
+```csv
+image
+101_1.tif
+102_3.tif
+```
+
 DLL 선택창은 `*.dll`을 보여주며 파일명을 제한하지 않습니다. 다른 팀의 K-NBTC DLL도 그대로 선택합니다. 이 프로젝트의 DLL은 `dist/FingerprintAlgorithm/FingerprintAlgorithm.dll`입니다. 함께 배포된 Core·LibTorch·Qt·Windows runtime DLL은 실행 의존성이므로 폴더에 그대로 둡니다.
 
 DLL 선택·설정 변경만으로는 로드하지 않습니다. **Load selected DLL with these settings**를 누르면 배포 파일·manifest를 검사하고, 설정한 수의 Worker에서 DLL과 KISA exports를 로드합니다. 성공하면 Algorithm / DLL file / Initialization 표에 `Loaded`가 표시되고 **Create enrollment templates**가 활성화됩니다. 실패하면 `Error`와 원인이 표시됩니다. Load에도 진행률·Stop을 제공하며 실패·중단 시 이미 시작한 Worker도 모두 정리합니다. 파일명과 별개로 Windows bitness와 KISA ABI가 호환되어야 합니다.

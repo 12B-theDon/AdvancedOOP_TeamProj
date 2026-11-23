@@ -1,4 +1,4 @@
-# 검증 결과 — 2026-11-22
+# 검증 결과 — 2026-11-23
 
 Windows·MSVC 전용 프로젝트입니다. Windows 로그·화면에서 Qt·LibTorch 설치, MSVC Release 빌드, DLL 등록과 Worker/Core의 모델 로딩 오류 응답까지 확인했습니다. CRLF manifest 등록 오류와 한글 경로의 모델 열기 문제를 수정했으며, 아래 수정 후 검사는 macOS 검증 환경에서 수행했습니다. 실제 Windows에서 수정 후 모델 추론·점수·Stop 동작은 아직 재검증하지 않았습니다.
 
@@ -18,6 +18,7 @@ Windows·MSVC 전용 프로젝트입니다. Windows 로그·화면에서 Qt·Lib
 | GUI 종료 | 현재 GUI·Engine을 Qt 5.15 offscreen·검증용 backend로 컴파일·실행: Stop 버튼, 정리 대기·결과 폐기·저장 차단·재실행, 실행 중 창 닫기의 Yes/No, 확인 중 작업 완료, 정리 후 지연 종료, 예외 시 정리 통과 |
 | GUI DLL 선택·수동 Load | CRLF manifest 정규화·한글 경로·파일 오류 검사를 유지. 실제 GUI·Engine·adapter와 WinAPI mock으로 임의 파일명의 *.dll 선택, 선택·설정 변경 시 Worker 미생성, Load 버튼 이후 설정한 Worker 수·timeout 적용과 Loaded 등록 확인. DLL·설정·파일 변경 시 등록·cache 무효화, DB 변경 시 로드된 DLL 유지, Error 표시·Stop·재시도·Load 중 창 닫기·manifest 실패 시 실행 차단·일부 Worker 실패 시 전체 정리 통과. 실제 Windows DLL 로딩 검사는 아님 |
 | Template 시간 | 실제 GUI·Engine과 검증용 backend로 성공·실패 Template의 Status·Size·Error·Load time(ms) 표시 확인. 시간은 Extract 전체 경과 시간이며 내부 모델 초기화와 요청 중 Worker 재시작을 포함. CSV의 time_ms 보존 확인 |
+| 다중 등록 이미지 선택 | 실제 GUI·Engine을 Qt 5.15 offscreen으로 컴파일·실행. Single enrollment 유지·다중 모드 전환, 전체·무작위 N장·지문별 K장·촬영 번호·CSV 선택, seed 재현·중복 방지·개수 상한·지문별 포함 수, 한글·쉼표 파일명 CSV 저장·재적용과 BOM/CRLF 처리 확인. 잘못된 규칙·누락/중복 CSV의 기존 선택 보존, 수동 조정·선택 변경 시 Template 무효화, 같은 선택 재적용 시 보존 및 기존 GUI smoke 검사 통과. WinAPI mock은 연구용 harness에만 연결했으며 실제 Windows 빌드·실행 검사는 아님 |
 | 보고서 진행률·취소 | 실제 GUI·Engine·report를 Qt offscreen으로 실행. 160,000개 비교 결과의 보고서 저장 중 진행 건수·비율·Stop·재저장·창 닫기, 완료된 평가와 기존 보고서 보존, 임시 폴더 정리 통과. CSV·지표·HTML·RTF·SVG의 진행 건수와 취소 경계, 지표 계산 중 취소 확인. 기존 평가·지표·출력 회귀 검사 통과 |
 | 패키징 검사 | manifest 누락·손상·경로 보호·가중치 누락 거부 통과. 실제 Algorithm·Evaluator CMake 스크립트에서 runtime 탐색·외부 windeployqt만 mock으로 대체하고 Qt/LibTorch 고지 fallback·파일 복사·manifest·폴더 교체 통과. 버전·build·SHA·고지 누락, windeployqt 실패·TIFF 누락 거부와 기존 배포본 보존 통과. SDK의 LICENSES 및 doc/global/licenses 경로도 확인 |
 | LibTorch 고지 출처 | 공식 Windows CPU ZIP 파일 목록 9,573개에 라이선스 고지가 없음을 확인. 동일 버전·build의 공식 Windows CPU wheel SHA-256 확인 후 고지 61개 전문 보존. URL·해시를 provenance에 기록 |

@@ -1,5 +1,6 @@
 #include "GUI.h"
 #include "report.h"
+#include "enrollmentSelection.h"
 #include <QButtonGroup>
 #include <QBrush>
 #include <QCheckBox>
@@ -24,6 +25,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QSet>
+#include <QSignalBlocker>
 #include <QStackedWidget>
 #include <QTableWidget>
 #include <QTabWidget>
@@ -39,6 +41,7 @@
 #include <future>
 #include <chrono>
 #include <utility>
+#include <algorithm>
 
 namespace gui {
 
@@ -170,6 +173,8 @@ Window::Window() {
         stepIndicator_->raise();
     });
     connect(imageList_, &QListWidget::itemSelectionChanged, this, [this] {
+        enrollmentSelection_ = "manual";
+        enrollmentFeedback_->clear();
         ClearTemplates();
         UpdateEnrollment();
     });
@@ -306,6 +311,9 @@ QWizardPage* Window::EnrollmentPage() {
     row->addWidget(imageList_);
     row->addWidget(preview_);
     layout->addWidget(mode);
+    enrollmentBatch_ = EnrollmentBatchControls();
+    enrollmentBatch_->hide();
+    layout->addWidget(enrollmentBatch_);
     layout->addLayout(row);
     layout->addWidget(enrollmentInfo_);
     layout->addWidget(new QLabel(EnrollmentHint));
@@ -316,8 +324,135 @@ QWizardPage* Window::EnrollmentPage() {
                                                 : QAbstractItemView::ExtendedSelection);
         if (row >= 0)
             imageList_->setCurrentRow(row, QItemSelectionModel::ClearAndSelect);
+        enrollmentBatch_->setVisible(index == 1);
     });
     return page;
+}
+
+QWidget* Window::EnrollmentBatchControls() {
+    QGroupBox* box = new QGroupBox("Batch selection");
+    box->setObjectName("enrollmentBatch");
+    QVBoxLayout* layout = new QVBoxLayout(box);
+    QHBoxLayout* ruleRow = new QHBoxLayout;
+    enrollmentRule_ = new QComboBox;
+    enrollmentRule_->setObjectName("enrollmentRule");
+    enrollmentRule_->addItems(EnrollmentRules);
+    ruleRow->addWidget(new QLabel("Rule:"));
+    ruleRow->addWidget(enrollmentRule_, 1);
+    ruleRow->addWidget(new QLabel("Seed:"));
+    enrollmentSeed_ = new QSpinBox;
+    enrollmentSeed_->setObjectName("enrollmentSeed");
+    enrollmentSeed_->setRange(0, std::numeric_limits<int>::max());
+    enrollmentSeed_->setValue(42);
+    ruleRow->addWidget(enrollmentSeed_);
+    layout->addLayout(ruleRow);
+    QStackedWidget* options = new QStackedWidget;
+    options->addWidget(new QLabel("Select every readable image in this DB."));
+    auto countPage = [options](const QString& label, const char* name, int value, QSpinBox*& spin) {
+        QWidget* page = new QWidget;
+        QHBoxLayout* row = new QHBoxLayout(page);
+        row->setContentsMargins(0, 0, 0, 0);
+        row->addWidget(new QLabel(label));
+        spin = new QSpinBox;
+        spin->setObjectName(name);
+        spin->setRange(1, MaxRandomCount);
+        spin->setValue(value);
+        row->addWidget(spin);
+        row->addStretch();
+        options->addWidget(page);
+    };
+    countPage("Up to N images in total:", "enrollmentCount", 20, enrollmentCount_);
+    countPage("Up to K images per finger:", "enrollmentPerFinger", 2, enrollmentPerFinger_);
+    enrollmentCaptures_ = new QLineEdit("1");
+    enrollmentCaptures_->setObjectName("enrollmentCaptures");
+    enrollmentCaptures_->setPlaceholderText(CapturesHint);
+    options->addWidget(enrollmentCaptures_);
+    QWidget* csvPage = new QWidget;
+    QHBoxLayout* csvRow = new QHBoxLayout(csvPage);
+    csvRow->setContentsMargins(0, 0, 0, 0);
+    enrollmentCsv_ = new QLineEdit;
+    enrollmentCsv_->setObjectName("enrollmentCsv");
+    enrollmentCsv_->setPlaceholderText("CSV column: image (filenames from this DB)");
+    QPushButton* browse = new QPushButton("Browse CSV...");
+    csvRow->addWidget(enrollmentCsv_, 1);
+    csvRow->addWidget(browse);
+    options->addWidget(csvPage);
+    connect(browse, &QPushButton::clicked, this, [this] {
+        const QString path = QFileDialog::getOpenFileName(this, "Load enrollment image list", QString(), PairFilter);
+        if (!path.isEmpty()) enrollmentCsv_->setText(path);
+    });
+    QHBoxLayout* actions = new QHBoxLayout;
+    actions->addWidget(options, 1);
+    QPushButton* apply = new QPushButton("Apply selection");
+    apply->setObjectName("applyEnrollmentSelection");
+    QPushButton* save = new QPushButton("Save selected list CSV...");
+    save->setObjectName("saveEnrollmentSelection");
+    actions->addWidget(apply);
+    actions->addWidget(save);
+    layout->addLayout(actions);
+    enrollmentFeedback_ = new QLabel;
+    enrollmentFeedback_->setObjectName("enrollmentSelectionFeedback");
+    enrollmentFeedback_->setWordWrap(true);
+    layout->addWidget(enrollmentFeedback_);
+    connect(apply, &QPushButton::clicked, this, &Window::ApplyEnrollmentSelection);
+    connect(save, &QPushButton::clicked, this, &Window::SaveEnrollmentSelection);
+    connect(enrollmentRule_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this, options](int rule) {
+        options->setCurrentIndex(rule);
+        enrollmentSeed_->setEnabled(rule == int(selection::Rule::RandomCount) || rule == int(selection::Rule::PerFinger));
+    });
+    enrollmentRule_->setCurrentIndex(int(selection::Rule::PerFinger));
+    return box;
+}
+
+std::vector<int> Window::EnrollmentIndices() const {
+    std::vector<int> result;
+    for (const QListWidgetItem* item : imageList_->selectedItems()) result.push_back(imageList_->row(item));
+    std::sort(result.begin(), result.end());
+    return result;
+}
+
+void Window::ApplyEnrollmentSelection() {
+    if (busy_ || imageList_->selectionMode() != QAbstractItemView::ExtendedSelection) return;
+    selection::Options options;
+    options.rule = static_cast<selection::Rule>(enrollmentRule_->currentIndex());
+    options.count = options.rule == selection::Rule::PerFinger ? enrollmentPerFinger_->value() : enrollmentCount_->value();
+    options.seed = static_cast<unsigned int>(enrollmentSeed_->value());
+    options.captures = enrollmentCaptures_->text();
+    options.csv = enrollmentCsv_->text();
+    std::vector<int> selected;
+    QString error;
+    if (!selection::Plan(images_, options, selected, error)) {
+        enrollmentFeedback_->setText("Selection not changed: " + error);
+        return;
+    }
+    const bool changed = selected != EnrollmentIndices();
+    if (changed) {
+        const QSignalBlocker block(imageList_);
+        imageList_->clearSelection();
+        for (int index : selected) imageList_->item(index)->setSelected(true);
+        imageList_->setCurrentRow(selected.front(), QItemSelectionModel::NoUpdate);
+    }
+    enrollmentSelection_ = enrollmentRule_->currentText();
+    if (options.rule == selection::Rule::RandomCount || options.rule == selection::Rule::PerFinger)
+        enrollmentSelection_ += QString("; count=%1; seed=%2").arg(options.count).arg(options.seed);
+    if (options.rule == selection::Rule::Captures) enrollmentSelection_ += "; captures=" + options.captures;
+    if (options.rule == selection::Rule::Csv) enrollmentSelection_ += "; file=" + options.csv;
+    if (changed) {
+        ClearTemplates();
+        ShowImage(selected.front());
+        UpdateEnrollment();
+    }
+    enrollmentFeedback_->setText(QString("Applied: %1 images. Adjust with Ctrl / Shift if needed.").arg(selected.size()));
+}
+
+void Window::SaveEnrollmentSelection() {
+    if (busy_ || imageList_->selectionMode() != QAbstractItemView::ExtendedSelection) return;
+    if (EnrollmentIndices().empty()) { enrollmentFeedback_->setText("Select at least one image first."); return; }
+    const QString path = QFileDialog::getSaveFileName(this, "Save enrollment image list", "enrollment_selection.csv", PairFilter);
+    if (path.isEmpty()) return;
+    QString error;
+    const bool saved = selection::SaveCsv(path, images_, EnrollmentIndices(), error);
+    enrollmentFeedback_->setText(saved ? "Selection saved: " + path : error);
 }
 
 QWizardPage* Window::TemplatePage() {
@@ -609,6 +744,8 @@ QWizardPage* Window::ResultsPage() {
 
 void Window::LoadDatabase(const QString& folder, const QString& database_id) {
     if (busy_) return;
+    enrollmentSelection_ = "manual";
+    enrollmentFeedback_->clear();
     // Unknown names can enroll, but do not provide comparison labels.
     imageList_->clear();
     images_.clear();
@@ -1120,6 +1257,13 @@ void Window::UpdateEnrollment() {
         }
     }
     enrollmentInfo_->setText(QString("Enrolled images: %1").arg(imageList_->selectedItems().size()));
+    if (imageList_->selectionMode() == QAbstractItemView::ExtendedSelection) {
+        QSet<int> available, selected;
+        for (const engine::ImageInfo& image : images_) if (image.finger > 0) available.insert(image.finger);
+        for (int index : EnrollmentIndices()) if (images_[index].finger > 0) selected.insert(images_[index].finger);
+        enrollmentInfo_->setText(QString("Selected images: %1 / %2; known fingers: %3 / %4")
+            .arg(imageList_->selectedItems().size()).arg(images_.size()).arg(selected.size()).arg(available.size()));
+    }
     for (const engine::ImageInfo& image : images_) {
         if (image.finger == 0) {
             enrollmentInfo_->setText(enrollmentInfo_->text() + "\nImages with unknown finger IDs require labelled CSV pairs for comparisons.");
@@ -1214,6 +1358,8 @@ engine::EvaluationRun Window::Snapshot() const {
     settings += "template_format=opaque bytes; lengths retained\nalgorithm_signature=" + dllHash_ + "\n";
     settings += "score_aggregation=selected DLL responsibility\nmatching_time=KISA_Compare only\n";
     settings += "report_metrics=" + selected.join("; ") + "\n";
+    if (imageList_->selectionMode() == QAbstractItemView::ExtendedSelection)
+        settings += "enrollment_selection=" + enrollmentSelection_ + "\n";
     for (const QListWidgetItem* item : imageList_->selectedItems()) {
         const int index = imageList_->row(item);
         engine::EnrollmentRecord record;

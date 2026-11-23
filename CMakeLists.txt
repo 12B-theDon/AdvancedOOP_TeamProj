@@ -27,7 +27,7 @@ target_include_directories(Engine PUBLIC src/Engine)
 target_link_libraries(Engine PUBLIC Qt${QT_VERSION_MAJOR}::Gui Threads::Threads)
 # Engine and GUI have no Torch/encoder link or template-format knowledge.
 if(FINGERPRINT_BUILD_GUI)
-    add_executable(FingerprintGUI WIN32 src/main.cpp src/GUI/GUI.cpp src/GUI/report.cpp src/GUI/startup.cpp)
+    add_executable(FingerprintGUI WIN32 src/main.cpp src/GUI/GUI.cpp src/GUI/enrollmentSelection.cpp src/GUI/report.cpp src/GUI/startup.cpp)
     target_link_libraries(FingerprintGUI PRIVATE Engine Qt${QT_VERSION_MAJOR}::Widgets)
     if(FINGERPRINT_BUILD_ALGORITHM AND FINGERPRINT_BUILD_TRAINING)
         target_compile_definitions(FingerprintGUI PRIVATE FINGERPRINT_AUTO_PREPARE_MODELS=1)

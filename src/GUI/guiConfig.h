@@ -114,6 +114,8 @@ inline const QStringList ComparisonTypes = {"Select...", "Genuine", "Impostor", 
 inline const QStringList ResultTabs = {"Genuine", "Impostor", "Metrics and report"};
 inline const QStringList Resolutions = {"448 × 478 px", "300 × 300 px", "640 × 480 px"};
 inline const QStringList EnrollmentModes = {"Single enrollment", "Multiple enrollment (Ctrl / Shift to select)"};
+inline const QStringList EnrollmentRules = {"All images", "Random N images", "Random images per finger",
+    "Selected capture numbers", "Image list from CSV"};
 inline const QStringList ComparisonRules = {"All eligible images", "One image per finger (first capture)", "Selected capture numbers",
     "Random images per enrollment", "Comparison pairs from CSV"};
 inline const QStringList ModelHeaders = {"Algorithm", "DLL file", "Initialization"};
