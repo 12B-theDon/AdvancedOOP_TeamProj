@@ -64,27 +64,38 @@ static std::vector<double> Thresholds(const ScoreGroups& groups, const engine::E
     return thresholds;
 }
 
-static QString EerBounds(const ScoreGroups& groups, bool successfulOnly, const std::vector<double>& thresholds,
-                         const engine::ExportControl& control) {
-    if (thresholds.empty() || (successfulOnly && (groups.values[0].empty() || groups.values[1].empty()))) return "N/A";
-    double previousFmr = 0, previousFnmr = 0;
-    bool previous = false;
+struct OperatingPoint {
+    double threshold = 0, fmr = 0, fnmr = 0;
+    bool available = false;
+};
+
+static OperatingPoint EerPoint(const ScoreGroups& groups, bool successfulOnly, const std::vector<double>& thresholds,
+                                const engine::ExportControl& control) {
+    OperatingPoint previous;
     for (double threshold : thresholds) {
         control.Check();
         double fmr, fnmr;
         Rates(groups, threshold, threshold, successfulOnly, fmr, fnmr);
-        if (std::abs(fmr - fnmr) <= engine::MetricTolerance) return Value(100 * fmr);
-        if (previous && previousFmr > previousFnmr && fmr < fnmr) {
+        const OperatingPoint current{threshold, fmr, fnmr, true};
+        if (std::abs(fmr - fnmr) <= engine::MetricTolerance) return current;
+        if (previous.available && previous.fmr > previous.fnmr && fmr < fnmr) {
             // Assignment p.8: choose the bracketing threshold with the smaller
             // midpoint, then report its bounds and their estimated midpoint.
-            const bool first = previousFnmr + previousFmr <= fmr + fnmr;
-            const double low = first ? previousFnmr : fmr;
-            const double high = first ? previousFmr : fnmr;
-            return Value(50 * (low + high)) + " [" + Value(100 * low) + " - " + Value(100 * high) + "]";
+            return previous.fnmr + previous.fmr <= fmr + fnmr ? previous : current;
         }
-        previousFmr = fmr; previousFnmr = fnmr; previous = true;
+        previous = current;
     }
-    return "N/A (no crossing)";
+    return {};
+}
+
+static QString EerBounds(const ScoreGroups& groups, bool successfulOnly, const std::vector<double>& thresholds,
+                         const engine::ExportControl& control) {
+    if (thresholds.empty() || (successfulOnly && (groups.values[0].empty() || groups.values[1].empty()))) return "N/A";
+    const OperatingPoint point = EerPoint(groups, successfulOnly, thresholds, control);
+    if (!point.available) return "N/A (no crossing)";
+    if (std::abs(point.fmr - point.fnmr) <= engine::MetricTolerance) return Value(100 * point.fmr);
+    return Value(50 * (point.fmr + point.fnmr)) + " [" + Value(100 * std::min(point.fmr, point.fnmr))
+        + " - " + Value(100 * std::max(point.fmr, point.fnmr)) + "]";
 }
 
 static int FailureIndex(const std::string& error) {
@@ -205,6 +216,75 @@ static QString Line(const QString& points, const QString& color) {
     return "<polyline fill=\"none\" stroke=\"" + color + "\" stroke-width=\"2\" points=\"" + points + "\"/>";
 }
 
+// Match the assignment's logarithmic FMR/FNMR plot. Zero stays zero in the data;
+// only its drawing coordinate is clipped to the explicitly labelled lower limit.
+static QString DetCurve(const ScoreGroups& groups, const std::vector<bool>& selected,
+                        const engine::ExportControl& control) {
+    if (!groups.complete[0] || !groups.complete[1] || groups.total[0] == 0 || groups.total[1] == 0)
+        return EmptyPlot("Complete both comparison groups to plot the DET curve.");
+    const double smallest = std::min(DetMinimumRate, 1.0 / std::max(groups.total[0], groups.total[1]));
+    const int lowestPower = int(std::floor(std::log10(smallest)));
+    const double floor = std::pow(10.0, lowestPower);
+    const auto position = [floor, lowestPower](double rate) {
+        return (std::log10(std::max(floor, rate)) - lowestPower) / -lowestPower;
+    };
+    const auto x = [&position](double rate) { return Number(70 + 740 * position(rate)); };
+    const auto y = [&position](double rate) { return Number(245 - 185 * position(rate)); };
+    const auto raw = [](double value) { return QString::number(value, 'g', engine::CsvPrecision); };
+    QString svg = "<g class=\"det-log-axes\" data-min-rate=\"" + raw(floor) + "\" font-size=\"11\">";
+    for (int power = lowestPower; power <= 0; ++power) {
+        control.Check();
+        const double rate = std::pow(10.0, power);
+        svg += "<path d=\"M" + x(rate) + " 60V245M70 " + y(rate) + "H810\" stroke=\"#e3e7eb\" fill=\"none\"/>"
+            "<text x=\"" + x(rate) + "\" y=\"267\" text-anchor=\"middle\">" + Number(100 * rate) + "</text>"
+            "<text x=\"62\" y=\"" + y(rate) + "\" text-anchor=\"end\">" + Number(100 * rate) + "</text>";
+    }
+    svg += "</g><text x=\"70\" y=\"46\" font-size=\"11\">Zero rates shown at " + Number(100 * floor) + "%</text>";
+    const std::vector<double> thresholds = Thresholds(groups, control);
+    std::vector<OperatingPoint> curve;
+    QString points, samples;
+    for (double threshold : thresholds) {
+        control.Check();
+        double fmr, fnmr;
+        Rates(groups, threshold, threshold, false, fmr, fnmr);
+        curve.push_back({threshold, fmr, fnmr, true});
+        points += x(fmr) + ',' + y(fnmr) + ' ';
+        samples += "<circle class=\"det-point\" data-threshold=\"" + raw(threshold)
+            + "\" data-fmr=\"" + raw(fmr) + "\" data-fnmr=\"" + raw(fnmr) + "\" cx=\"" + x(fmr)
+            + "\" cy=\"" + y(fnmr) + "\" r=\"1.8\" fill=\"#2468a0\"/>";
+    }
+    svg += "<polyline id=\"det-curve\" data-threshold-count=\"" + QString::number(curve.size())
+        + "\" fill=\"none\" stroke=\"#2468a0\" stroke-width=\"2\" points=\"" + points + "\"/>" + samples;
+    int legendRow = 0;
+    const auto marker = [&](const OperatingPoint& point, const QString& label, const QString& color, bool estimated = false) {
+        if (!point.available) return;
+        const QString legendX = QString::number(70 + 245 * legendRow++);
+        svg += "<circle class=\"det-marker\" data-estimated=\"" + QString(estimated ? "true" : "false")
+            + "\" data-fmr=\"" + raw(point.fmr) + "\" data-fnmr=\"" + raw(point.fnmr)
+            + "\" cx=\"" + x(point.fmr) + "\" cy=\"" + y(point.fnmr)
+            + "\" r=\"4\" fill=\"" + color + "\" stroke=\"white\"/>"
+            "<text x=\"" + legendX + "\" y=\"284\" fill=\"" + color + "\" font-size=\"11\">" + label + "</text>";
+    };
+    if (selected.size() > 5 && selected[5]) {
+        const OperatingPoint point = EerPoint(groups, false, thresholds, control);
+        const double estimate = (point.fmr + point.fnmr) / 2;
+        marker({point.threshold, estimate, estimate, point.available}, "EER estimate: " + Number(100 * estimate) + "%", "#111111", true);
+    }
+    for (int metric : {9, 10}) {
+        if (selected.size() <= std::size_t(metric) || !selected[metric]) continue;
+        const double target = metric == 9 ? 0.01 : 0.001;
+        OperatingPoint best;
+        for (const OperatingPoint& point : curve) {
+            control.Check();
+            if (point.fmr <= target + engine::MetricTolerance && (!best.available || point.fnmr < best.fnmr)) best = point;
+        }
+        const QString color = metric == 9 ? "#9a6500" : "#8844aa";
+        svg += "<path d=\"M" + x(target) + " 60V245\" stroke=\"" + color + "\" stroke-dasharray=\"4 4\"/>";
+        marker(best, QString(metric == 9 ? "FMR100: FNMR " : "FMR1000: FNMR ") + Number(100 * best.fnmr) + "%", color);
+    }
+    return svg;
+}
+
 static bool DerivedMetricSelected(const std::vector<bool>& selected) {
     for (int row = 5; row <= 10; ++row)
         if (row < int(selected.size()) && selected[row]) return true;
@@ -224,7 +304,7 @@ QStringList GraphFiles(const std::vector<bool>& selected) {
 
 QString GraphTitle(const QString& file, const std::vector<bool>& selected) {
     if (file == "score_distribution.svg") return "Score distribution";
-    if (file == "error_tradeoff.svg") return "FMR vs FNMR (linear axes)";
+    if (file == "error_tradeoff.svg") return "DET curve (logarithmic axes)";
     if (DerivedMetricSelected(selected) || (selected.size() > 3 && selected[3] && selected.size() > 4 && selected[4]))
         return "FMR / FNMR by threshold";
     return (selected.size() > 3 && selected[3]) ? "FMR by threshold" : "FNMR by threshold";
@@ -306,7 +386,7 @@ bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& sele
     if (first || (showFmr && (!groups.complete[1] || groups.total[1] == 0)) || (showFnmr && (!groups.complete[0] || groups.total[0] == 0))) {
         errors = tradeoff = EmptyPlot("Complete the required comparison groups to plot error rates.");
     } else {
-        QString fmrPoints, fnmrPoints, tradeoffPoints;
+        QString fmrPoints, fnmrPoints;
         const double start = std::fmax(0.0, low - (high - low) * CurvePadding);
         const double end = std::fmin(1.0, high + (high - low) * CurvePadding);
         for (int step = 0; step <= CurveSteps; ++step) {
@@ -317,14 +397,13 @@ bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& sele
             const QString x = Number(70 + 740.0 * step / CurveSteps);
             fmrPoints += x + "," + Number(245 - 185 * fmr) + " ";
             fnmrPoints += x + "," + Number(245 - 185 * fnmr) + " ";
-            tradeoffPoints += Number(70 + 740 * fmr) + "," + Number(245 - 185 * fnmr) + " ";
         }
         if (showFmr)
             errors += Line(fmrPoints, "#2468a0") + "<text x=\"620\" y=\"48\" fill=\"#2468a0\">FMR</text>";
         if (showFnmr)
             errors += Line(fnmrPoints, "#c15b18") + "<text x=\"700\" y=\"48\" fill=\"#c15b18\">FNMR</text>";
         errors += Ticks(start, end, 100);
-        tradeoff = Line(tradeoffPoints, "#2468a0") + Ticks(0, 100, 100);
+        tradeoff = DetCurve(groups, selected, control);
     }
     for (const QString& file : files) {
         QString svg;

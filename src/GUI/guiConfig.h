@@ -33,6 +33,7 @@ inline constexpr int GraphWidth = 840; // [px]
 inline constexpr int GraphHeight = 320; // [px]
 inline constexpr int HistogramBins = 10;
 inline constexpr int CurveSteps = 40;
+inline constexpr double DetMinimumRate = 1e-5; // [fraction] Log-axis floor; expands for larger evaluations.
 inline constexpr int GraphPrecision = 5; // Significant digits in SVG.
 inline constexpr int MetricPrecision = 6; // Significant digits in metric values.
 inline constexpr double CurvePadding = 0.05; // [ratio] Beyond observed score range.

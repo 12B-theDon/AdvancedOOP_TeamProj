@@ -2,6 +2,8 @@
 
 `BioApi.h`는 Windows용 `KISA_Enroll`, `KISA_Attempt`, `KISA_Compare` 세 함수를 선언합니다. C linkage·cdecl을 사용하며 성공은 1, 실패는 0입니다.
 
+`Score.h`는 공개 점수의 소수 셋째 자리 반올림과 Worker의 자릿수 검사를 공유합니다. 유한한 `0~1` 값만 허용하며 float32·double 표현 오차의 허용치는 `1e-7`입니다.
+
 - 입력: header·행 padding이 없는 원본 gray8 픽셀입니다.
 - 출력: Template buffer는 1,000,000 bytes이며 실제 길이는 `0 < size < 1,000,000`입니다. 오류 코드와 256-byte 메시지를 함께 반환합니다.
 - Compare: 길이 인자가 없으므로 같은 DLL이 생성한 완전한 Template을 전달합니다.

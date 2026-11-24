@@ -758,6 +758,7 @@ void Window::LoadDatabase(const QString& folder, const QString& database_id) {
     databasePath_ = QDir(folder).absolutePath();
     QMap<QString, int> resolutions;
     std::vector<QImage> decodedImages;
+    QStringList readFailures;
     const QFileInfoList files = QDir(folder).entryInfoList({"*.tif", "*.tiff"}, QDir::Files, QDir::Name);
     for (const QFileInfo& file : files) {
         QImageReader reader(file.absoluteFilePath());
@@ -767,11 +768,9 @@ void Window::LoadDatabase(const QString& folder, const QString& database_id) {
             : "Resolution unavailable";
         ++resolutions[resolution];
         const QImage decoded = reader.read().convertToFormat(QImage::Format_Grayscale8);
-        if (decoded.isNull())
-            continue;
         int sourceId = int(images_.size());
-        for (int i = 0; i < int(decodedImages.size()); ++i) {
-            if (decoded == decodedImages[i]) {
+        for (int i = 0; !decoded.isNull() && i < int(decodedImages.size()); ++i) {
+            if (!decodedImages[i].isNull() && decoded == decodedImages[i]) {
                 sourceId = images_[i].source_id;
                 break;
             }
@@ -786,7 +785,15 @@ void Window::LoadDatabase(const QString& folder, const QString& database_id) {
                            file.absoluteFilePath().toStdString(), databaseId_.toStdString()});
         decodedImages.push_back(decoded);
         imageList_->addItem(file.fileName());
-        imageList_->item(imageList_->count() - 1)->setToolTip(file.absoluteFilePath());
+        QListWidgetItem* item = imageList_->item(imageList_->count() - 1);
+        item->setToolTip(file.absoluteFilePath());
+        if (decoded.isNull()) {
+            const QString error = "TIFF read failed: " + reader.errorString();
+            item->setForeground(QBrush(Qt::red));
+            item->setData(Qt::UserRole, error);
+            item->setToolTip(file.absoluteFilePath() + '\n' + error);
+            readFailures.append(file.fileName() + ": " + reader.errorString());
+        }
     }
     databaseSummary_ = QString("%1: %2 TIFF files").arg(QFileInfo(folder).fileName()).arg(files.size());
     QStringList sizes;
@@ -794,12 +801,15 @@ void Window::LoadDatabase(const QString& folder, const QString& database_id) {
         sizes.append(resolutions.size() == 1 ? it.key() : QString("%1: %2 files").arg(it.key()).arg(it.value()));
     if (!sizes.isEmpty())
         databaseSummary_ += " / " + sizes.join(", ");
+    if (!readFailures.isEmpty())
+        databaseSummary_ += QString("\nWarning: %1 TIFF file(s) could not be read. They remain selectable; failed enrollment is included in FTE.")
+            .arg(readFailures.size());
     databaseInfo_->setText(databaseSummary_);
-    databaseInfo_->setToolTip(databasePath_);
+    databaseInfo_->setToolTip(databasePath_ + (readFailures.isEmpty() ? QString() : '\n' + readFailures.join('\n')));
     if (!images_.empty())
         imageList_->setCurrentRow(0);
     else {
-        preview_->setText("No readable TIFF images. Check the folder and Qt TIFF image plugin.");
+        preview_->setText("No TIFF files. Check the selected folder.");
         UpdateEnrollment();
     }
     ClearTemplates(); UpdateEnrollment();
@@ -813,8 +823,10 @@ void Window::ShowImage(int row) {
         return;
     }
     const QImage image(QString::fromStdString(images_[row].path));
-    if (image.isNull())
-        preview_->setText("Cannot read this image.");
+    if (image.isNull()) {
+        const QString error = imageList_->item(row)->data(Qt::UserRole).toString();
+        preview_->setText(error.isEmpty() ? "Cannot read this image." : error);
+    }
     else
         preview_->setPixmap(QPixmap::fromImage(image).scaled(preview_->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }

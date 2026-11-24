@@ -1,8 +1,24 @@
-# 검증 결과 — 2026-11-23
+# 검증 결과 — 2026-11-24
+
+이번 변경은 공개 점수의 소수 셋째 자리 반올림, Worker의 자릿수 검사, DET 그래프, 읽기 실패 TIFF의 목록·FTE 처리입니다.
+
+| 이번 검사 | 결과 |
+|---|---|
+| `score_contract` | 반올림 경계값·실제 보고된 점수 `0.997061483`, 1001개 double·float32 점수 수준, 범위 초과·NaN·Infinity·소수 자릿수 위반 검사 통과 |
+| `evaluation` | 기존 비교·cache·Stop·병렬·지표 회귀 검사와 읽기 실패 TIFF의 FTE 반영 통과. DET SVG 파싱, 로그축, 고유 cutoff 전체와 최댓값 직후 지점, 0%·100%·동점·EER 표시·그래프 Stop 검사 통과 |
+| `gui_smoke` | Qt offscreen에서 읽기 실패 TIFF의 경고·tooltip·선택 유지, 전부 손상된 DB, 실패 이미지 간 중복 오판 방지, 기존 7단계·수동 Load·manifest 실패·재시도 검사 통과 |
+| `enrollment_selection` | Batch 규칙·seed·CSV·단일 선택 회귀 검사 통과 |
+| 보존 | 원본 241개·디렉터리, pretrained·production 모델 4개의 SHA-256 일치. iType 매핑, 비교 실행 순서, Word 생성 부분, Windows 전용 CMake 제한, encoder 계산 코드 변경 없음 |
+| 시각 검사 | 생성한 DET SVG를 Qt SVG로 PNG 렌더링하여 로그축·tick·0% 하한 안내·EER/FMR100/FMR1000 표시 확인 |
+| Windows 전용 검사 | `core_integration`의 최솟값 집계 후 반올림 검사, `windows_workers`의 자릿수 위반 거부·표현 오차 허용·점수 보존 검사를 추가했으나 실제 Windows DLL·Worker 실행은 미검증 |
+
+위 실행 검사는 macOS의 임시 검증 환경에서 AppleClang 21·Qt 5.15.17로 수행했습니다. GUI·Engine·보고서는 현재 소스를 빌드하고, Windows DLL backend만 검증용 stub으로 대체했습니다. 실제 DLL 로딩·IPC·MSVC 통합 검사 결과로 해석하지 않습니다. 제품의 Windows 전용 빌드 조건은 유지합니다.
+
+## 이전 검증 기록 — 2026-11-23
 
 Windows·MSVC 전용 프로젝트입니다. Windows 로그·화면에서 Qt·LibTorch 설치, MSVC Release 빌드, DLL 등록과 Worker/Core의 모델 로딩 오류 응답까지 확인했습니다. CRLF manifest 등록 오류와 한글 경로의 모델 열기 문제를 수정했으며, 아래 수정 후 검사는 macOS 검증 환경에서 수행했습니다. 실제 Windows에서 수정 후 모델 추론·점수·Stop 동작은 아직 재검증하지 않았습니다.
 
-| 현재 검사 | 결과 |
+| 이전 검사 | 결과 |
 |---|---|
 | 플랫폼 제한 | CMake가 Windows 외 OS와 MSVC 외 toolchain을 거부하는지 확인 |
 | Windows 빌드 로그 | Windows PowerShell 5.1·MSVC 19.44·Qt 6.8.3·LibTorch 2.15.0 CPU에서 GUI·Train·Worker·공개 DLL·Core DLL 생성 완료. 모델 4개 확인 후 학습 생략. 사용자가 제공한 로그 기준 |

@@ -1,6 +1,7 @@
 #include "Protocol.h"
 #include "../Public/BioApi.h"
 #include "../Public/FvcSpec.h"
+#include "../Public/Score.h"
 #include <windows.h>
 #include <algorithm>
 #include <cmath>
@@ -87,7 +88,7 @@ int wmain(int argc, wchar_t** argv) {
             && std::all_of(data.end() - GuardSize, data.end(), [](unsigned char value) { return value == 0xa5; });
         if (response.status == ipc::Status::Normal && (!guards || !std::memchr(response.message, '\0', kisa::ErrorCapacity)
             || (response.result != 0 && response.result != 1)
-            || (response.result == 1 && (comparison ? !std::isfinite(response.score) || response.score < 0 || response.score > 1 : size <= 0 || size >= kisa::TemplateCapacity))))
+            || (response.result == 1 && (comparison ? !kisa::ValidScore(response.score) : size <= 0 || size >= kisa::TemplateCapacity))))
             response.status = ipc::Status::Mismatch;
         response.message[kisa::ErrorCapacity - 1] = '\0';
         if (response.status == ipc::Status::Normal && response.result == 1 && !comparison) response.data_size = static_cast<std::uint32_t>(size);

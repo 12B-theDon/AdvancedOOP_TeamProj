@@ -8,7 +8,7 @@ Step 2의 **Single enrollment**는 기존 단일 선택을 유지합니다. **Mu
 
 | 선택 규칙 | 동작 |
 |---|---|
-| All images | 읽을 수 있는 이미지 전체 선택 |
+| All images | 읽기 실패 TIFF를 포함한 목록 전체 선택 |
 | Random N images | 전체에서 중복 없이 최대 N장 선택 |
 | Random images per finger | 지문별 중복 없이 최대 K장 선택 |
 | Selected capture numbers | 입력한 촬영 번호 선택. 예: `1, 3` |
@@ -17,6 +17,8 @@ Step 2의 **Single enrollment**는 기존 단일 선택을 유지합니다. **Mu
 동일한 DB 목록과 seed는 같은 무작위 선택을 재현합니다. 이미지 수와 포함된 지문 수를 표시하며, **Save selected list CSV...**로 실제 선택 목록을 저장해 다른 DLL에도 재사용할 수 있습니다. 지문·촬영 번호를 모르는 외부 DB에서는 전체·무작위 N장·CSV를 사용합니다. 잘못된 규칙이나 CSV는 기존 선택을 유지하고 이유를 표시합니다. 선택 이미지가 바뀌면 기존 Template·비교 결과가 초기화됩니다. 적용 규칙과 최종 등록 이미지 목록은 결과 저장 시 함께 기록합니다.
 
 `enrollmentSelection.*`는 선택 규칙·seed·CSV 입출력을 처리하며 DLL 호출과 독립적입니다.
+
+읽기 실패 TIFF도 목록에서 제외하지 않습니다. 빨간색 항목·tooltip·DB 경고로 파일과 원인을 표시하고, 실패한 파일은 서로 다른 이미지로 유지합니다. 해당 파일을 등록 대상으로 선택하면 읽기를 다시 시도하며, 계속 읽을 수 없으면 등록 실패로 FTE에 반영합니다. 이미지가 모두 손상된 DB도 실패 건수를 기록할 수 있습니다.
 
 선택 목록 CSV 형식은 다음과 같습니다. Step 5의 비교 쌍 CSV와는 별도의 형식입니다.
 
@@ -51,5 +53,7 @@ Results에서 임계값(초기 0.5)을 바꾸면 저장된 점수로 다시 판�
 | 시간 / 크기 | 실제 Compare 호출 평균, 성공 템플릿의 평균·최대 byte 수. attempt 시간은 CSV에 별도 기록 |
 
 미실행 그룹의 지표는 N/A입니다. `report.cpp`가 지표와 보고서를 생성합니다.
+
+`error_tradeoff.svg`는 과제 예시와 같은 FMR·FNMR 로그축의 DET 그래프입니다. 성공 점수의 모든 고유 Threshold와 최댓값 직후의 reject-all 지점을 사용합니다. 0%는 원시 값 그대로 유지하고, 그림에서만 명시된 로그축 하한에 표시합니다. 표본 수가 크면 더 작은 오류율도 보이도록 하한을 확장합니다. 선택한 FMR100·FMR1000 운영점과 EER 추정값을 함께 표시합니다. EER 표시는 표와 같은 midpoint 추정치를 양축에 사용하므로 실제 단일 Threshold의 점과 다를 수 있습니다.
 
 [구조도 SVG 원본](../../docs/diagrams/gui.svg) · [사용 순서](../../readme.md#2-gui) · [검증 상태](../../docs/verification.md)

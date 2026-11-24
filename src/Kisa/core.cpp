@@ -1,6 +1,7 @@
 #include "../Algorithm/encoder.h"
 #include "../Public/BioApi.h"
 #include "../Public/FvcSpec.h"
+#include "../Public/Score.h"
 #include <QByteArray>
 #include <QDataStream>
 #include <QDir>
@@ -144,7 +145,7 @@ CORE_API int KISA_CALL CoreCompare(unsigned char* enrollment, unsigned char* att
             }
         }
         if (!success) return Failure(kisa::Error::InvalidTemplate, "No compatible matching-DB/combined templates: " + error, code, message);
-        *score = minimum; return 1;
+        *score = kisa::RoundScore(minimum); return 1;
     } catch (const std::exception& e) { return Failure(kisa::Error::Comparison, e.what(), code, message); }
       catch (...) { return Failure(kisa::Error::Comparison, "Unknown comparison exception.", code, message); }
 }
