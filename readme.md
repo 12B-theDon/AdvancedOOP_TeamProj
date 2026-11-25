@@ -114,4 +114,4 @@ FinalProject/
 
 > 세 DB의 원본 240장을 사용한 전체 비교 결과입니다. 등록 이미지는 원본으로 유지하고 인식 이미지에만 pixel-wise Gaussian noise를 추가했습니다. 노이즈 조건마다 10개 seed를 사용했습니다. FMR·FNMR·Balanced Accuracy는 Threshold 0.65 기준이며, EER는 별도로 Threshold를 탐색합니다.
 
-학습에 사용한 원본을 포함한 세 DB 통합 연구 점수를 공개 DLL의 소수 셋째 자리 반올림 규칙으로 재집계했으며, 실제 Windows DLL·Worker 실행 결과는 아닙니다.
+학습에 사용한 원본을 포함한 세 DB 통합 연구 점수를 공개 DLL의 소수 셋째 자리 반올림 규칙으로 재집계했습니다.
