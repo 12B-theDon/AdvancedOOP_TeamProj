@@ -17,3 +17,5 @@ Template의 `time_ms`는 `Extract()` 요청 전체의 경과 시간입니다. DL
 `Cancel()`은 새 작업을 막고 전체 Worker의 종료를 요청합니다. `CancellationFinished()`로 handle 정리까지 끝났는지 확인합니다. `ResetCancel()`은 이전 호출을 모두 join한 뒤 사용하며, 취소된 Worker 정리가 완료될 때까지 기다립니다. 정상 실행 사이에는 준비된 Worker를 재사용합니다.
 
 [구조도 SVG 원본](../../docs/diagrams/engine.svg) · [GUI·지표](../GUI/readme.md)
+
+`engineConfig.h`의 Genuine·Impostor 기본 Threshold는 모두 `0.65`입니다. `score >= threshold`를 수락하며, GUI·원시 CSV·보고서는 같은 설정을 사용합니다. [전체 원본 평가 결과](../../docs/threshold_065.md)를 참고합니다.

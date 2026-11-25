@@ -35,7 +35,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 소스 저장소 안에서 GUI를 실행했는데 이 프로젝트의 DLL·학습 모델이 빠져 있으면 자동으로 준비 프로그램을 실행합니다. **LFS 다운로드 → 없는 경우에만 학습 → 패키징 → GUI 재실행** 순서로 복구합니다. 완성된 배포본은 학습 없이 바로 열립니다. 다른 PC로 옮길 때는 [dist/FingerprintAlgorithm/](docs/build.md#package)과 [dist/FingerprintEvaluator/](docs/build.md#package)를 함께 복사합니다.
 
-GUI에서 **DB → 등록 이미지 → DLL·옵션·Load·Template 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 파일명에 관계없이 K-NBTC DLL을 선택하고 workers·timeout을 설정한 뒤 **Load selected DLL with these settings**를 누릅니다. 이 프로젝트는 [FingerprintAlgorithm.dll](src/Kisa/readme.md)을 선택합니다. 표에 `Loaded`가 표시되면 **Create enrollment templates**로 상태·크기·오류·생성 시간(ms)을 확인합니다. DLL·설정을 바꾸면 Load를 다시 눌러 적용합니다. Results에서 임계값(초기 0.5)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장합니다. Load·Template 생성·비교·보고서 저장은 진행률과 **Stop**을 제공합니다.
+GUI에서 **DB → 등록 이미지 → DLL·옵션·Load·Template 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 파일명에 관계없이 K-NBTC DLL을 선택하고 workers·timeout을 설정한 뒤 **Load selected DLL with these settings**를 누릅니다. 이 프로젝트는 [FingerprintAlgorithm.dll](src/Kisa/readme.md)을 선택합니다. 표에 `Loaded`가 표시되면 **Create enrollment templates**로 상태·크기·오류·생성 시간(ms)을 확인합니다. DLL·설정을 바꾸면 Load를 다시 눌러 적용합니다. Results에서 임계값(초기 0.65)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장합니다. Load·Template 생성·비교·보고서 저장은 진행률과 **Stop**을 제공합니다.
 
 [학습 옵션](src/Training/readme.md) · [GUI·지표](src/GUI/readme.md) · [검증 상태](docs/verification.md)
 
@@ -91,3 +91,5 @@ FinalProject/
 | Windows API | `<windows.h>` | DLL·Process·IPC |
 
 [구조도·모듈 안내](docs/diagrams/readme.md) · [출처·라이선스](docs/THIRD_PARTY.md)
+
+기본 Threshold `0.65`의 전체 원본 평가 결과는 [Threshold 평가 보고서](docs/threshold_065.md)에 정리했습니다.

@@ -480,7 +480,8 @@ QWizardPage* Window::TemplatePage() {
     inferenceInfo_->setTextFormat(Qt::PlainText);
     inferenceInfo_->setTextInteractionFlags(Qt::TextSelectableByMouse);
     inferenceInfo_->setWordWrap(true);
-    calibrationInfo_ = new QLabel("Threshold starts at 0.5; adjust in Results for the selected DLL.");
+    calibrationInfo_ = new QLabel(QString("Threshold starts at %1; adjust in Results for the selected DLL.")
+        .arg(engine::GenuineThreshold, 0, 'f', 2));
     calibrationInfo_->setObjectName("calibrationInfo");
     calibrationInfo_->setWordWrap(true);
     layout->addWidget(dllPath_);
@@ -964,7 +965,8 @@ void Window::LoadSelectedDll() {
         "Internal model initialization may occur on the first inference call.").arg(options.workers).arg(options.timeout_ms));
     genuine_.threshold->setValue(engine::GenuineThreshold);
     impostor_.threshold->setValue(engine::ImpostorThreshold);
-    const QString hint = "Threshold starts at 0.5; adjust it in Results for this DLL.";
+    const QString hint = QString("Threshold starts at %1; adjust it in Results for this DLL.")
+        .arg(engine::GenuineThreshold, 0, 'f', 2);
     calibrationInfo_->setText(hint); resultCalibrationInfo_->setText(hint);
     inferenceInfo_->setText("DLL loaded with the selected settings. Click Create enrollment templates. "
                            "The DLL may initialize internal models on its first inference call.");

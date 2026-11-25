@@ -1,4 +1,19 @@
-# 검증 결과 — 2026-11-24
+# 검증 결과 — 2026-11-25
+
+## Threshold 0.65 변경
+
+Genuine·Impostor 초기값과 새 DLL Load 시 초기화 값을 모두 `0.65`로 변경했습니다. GUI 안내·README·Engine 구조도를 갱신했습니다. [전체 원본 평가 보고서](threshold_065.md)에 7개 DB 조합과 상세 지표를 정리했습니다.
+
+| 검사 | 결과 |
+|---|---|
+| 기본값·경계 | `EvaluationRun` 기본값 0.65, 점수 0.649·0.650·0.651의 PASS·MISS·FA·REJ 경계 통과 |
+| GUI·평가 회귀 | Qt 5.15 offscreen의 초기값·안내 문구 검사와 기존 `gui_smoke`·`evaluation`·`score_contract` 통과 |
+| 7개 보고서 | 현재 C++ Engine·report로 기존 18,960개 고유 비교 점수를 재판정. 17개 지표·원시 판정·점수·Template·이전 시간·EER 보존을 독립 확인 |
+| 원본·모델 | 현재 원본 240장과 production weight 4개의 SHA-256이 원래 native 평가 입력과 일치 |
+
+세 DB 합산 결과는 FMR 0.185185%, FNMR 0%입니다. 새 추론·시간 측정은 하지 않았으며, 실제 Windows DLL·Worker·IPC 실행 결과는 아닙니다. 기존 점수·시간을 재사용하고 Threshold 판정과 보고서만 다시 생성했습니다.
+
+## 이전 점수·DET·TIFF 변경 검증
 
 이번 변경은 공개 점수의 소수 셋째 자리 반올림, Worker의 자릿수 검사, DET 그래프, 읽기 실패 TIFF의 목록·FTE 처리입니다.
 
