@@ -94,12 +94,23 @@ FinalProject/
 
 ## 5. Performance
 
-| 평가 지표 | 원본 | Noise σ10 | Noise σ30 | Noise σ50 |
-|---|---:|---:|---:|---:|
-| EER (%) | 0.152 | 0.302 | 1.391 | 6.467 |
-| FMR (%) | 0.185 | 0.214 | 2.071 | 7.553 |
-| FNMR (%) | 0.000 | 0.351 | 0.893 | 5.714 |
-| Balanced Accuracy (%) | 99.907 | 99.718 | 98.518 | 93.366 |
+<table width="100%" style="width:100%;table-layout:fixed">
+  <thead>
+    <tr>
+      <th width="28%" align="left">평가 지표</th>
+      <th width="18%">원본</th>
+      <th width="18%">원본 + Gaussian noise σ10</th>
+      <th width="18%">원본 + Gaussian noise σ30</th>
+      <th width="18%">원본 + Gaussian noise σ50</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>EER (%)</td><td align="right">0.152</td><td align="right">0.302</td><td align="right">1.391</td><td align="right">6.467</td></tr>
+    <tr><td>FMR (%)</td><td align="right">0.185</td><td align="right">0.214</td><td align="right">2.071</td><td align="right">7.553</td></tr>
+    <tr><td>FNMR (%)</td><td align="right">0.000</td><td align="right">0.351</td><td align="right">0.893</td><td align="right">5.714</td></tr>
+    <tr><td>Balanced Accuracy (%)</td><td align="right">99.907</td><td align="right">99.718</td><td align="right">98.518</td><td align="right">93.366</td></tr>
+  </tbody>
+</table>
 
 > 세 DB의 원본 240장을 사용한 전체 비교 결과입니다. 등록 이미지는 원본으로 유지하고 인식 이미지에만 pixel-wise Gaussian noise를 추가했습니다. 노이즈 조건마다 10개 seed를 사용했습니다. FMR·FNMR·Balanced Accuracy는 Threshold 0.65 기준이며, EER는 별도로 Threshold를 탐색합니다.
 
