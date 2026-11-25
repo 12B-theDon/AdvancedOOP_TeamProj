@@ -94,12 +94,6 @@ FinalProject/
 
 ## 5. Performance
 
-아래는 FVC2000·FVC2002·FVC2004를 **각각 평가한 결과**입니다. 각 DB의 전용 모델과 `combined.bin`을 모두 사용하며, **이미지 쌍마다 두 점수 중 작은 값을 소수 셋째 자리로 반올림**해 최종 점수로 사용합니다. 표의 모든 지표는 이 최종 점수에서 계산합니다.
-
-### FVC2000 DB3_B
-
-사용 모델: `fvc2000_db3.bin` + `combined.bin` → 이미지 쌍마다 낮은 점수 적용.
-
 <table width="100%" style="width:100%;table-layout:fixed">
   <thead>
     <tr>
@@ -111,59 +105,13 @@ FinalProject/
     </tr>
   </thead>
   <tbody>
-    <tr><td>EER (%)</td><td align="right">0.000</td><td align="right">0.000</td><td align="right">0.040</td><td align="right">0.125</td></tr>
-    <tr><td>FMR (%)</td><td align="right">0.000</td><td align="right">0.000</td><td align="right">0.175</td><td align="right">0.278</td></tr>
-    <tr><td>FNMR (%)</td><td align="right">0.000</td><td align="right">0.000</td><td align="right">0.000</td><td align="right">0.000</td></tr>
-    <tr><td>Balanced Accuracy (%)</td><td align="right">100.000</td><td align="right">100.000</td><td align="right">99.912</td><td align="right">99.861</td></tr>
+    <tr><td>EER (%)</td><td align="right">0.152</td><td align="right">0.302</td><td align="right">1.391</td><td align="right">6.467</td></tr>
+    <tr><td>FMR (%)</td><td align="right">0.185</td><td align="right">0.214</td><td align="right">2.071</td><td align="right">7.553</td></tr>
+    <tr><td>FNMR (%)</td><td align="right">0.000</td><td align="right">0.351</td><td align="right">0.893</td><td align="right">5.714</td></tr>
+    <tr><td>Balanced Accuracy (%)</td><td align="right">99.907</td><td align="right">99.718</td><td align="right">98.518</td><td align="right">93.366</td></tr>
   </tbody>
 </table>
 
-### FVC2002 DB3_B
+> 세 DB의 원본 240장을 사용한 전체 비교 결과입니다. 등록 이미지는 원본으로 유지하고 인식 이미지에만 pixel-wise Gaussian noise를 추가했습니다. 노이즈 조건마다 10개 seed를 사용했습니다. FMR·FNMR·Balanced Accuracy는 Threshold 0.65 기준이며, EER는 별도로 Threshold를 탐색합니다.
 
-사용 모델: `fvc2002_db3.bin` + `combined.bin` → 이미지 쌍마다 낮은 점수 적용.
-
-<table width="100%" style="width:100%;table-layout:fixed">
-  <thead>
-    <tr>
-      <th width="28%" align="left">평가 지표</th>
-      <th width="18%">원본</th>
-      <th width="18%">원본 + Gaussian noise σ10</th>
-      <th width="18%">원본 + Gaussian noise σ30</th>
-      <th width="18%">원본 + Gaussian noise σ50</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td>EER (%)</td><td align="right">0.000</td><td align="right">0.007</td><td align="right">2.735</td><td align="right">18.559</td></tr>
-    <tr><td>FMR (%)</td><td align="right">0.278</td><td align="right">0.299</td><td align="right">5.759</td><td align="right">22.149</td></tr>
-    <tr><td>FNMR (%)</td><td align="right">0.000</td><td align="right">0.000</td><td align="right">1.500</td><td align="right">15.893</td></tr>
-    <tr><td>Balanced Accuracy (%)</td><td align="right">99.861</td><td align="right">99.851</td><td align="right">96.371</td><td align="right">80.979</td></tr>
-  </tbody>
-</table>
-
-### FVC2004 DB1_B
-
-사용 모델: `fvc2004_db1.bin` + `combined.bin` → 이미지 쌍마다 낮은 점수 적용.
-
-<table width="100%" style="width:100%;table-layout:fixed">
-  <thead>
-    <tr>
-      <th width="28%" align="left">평가 지표</th>
-      <th width="18%">원본</th>
-      <th width="18%">원본 + Gaussian noise σ10</th>
-      <th width="18%">원본 + Gaussian noise σ30</th>
-      <th width="18%">원본 + Gaussian noise σ50</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td>EER (%)</td><td align="right">0.139</td><td align="right">0.760</td><td align="right">0.595</td><td align="right">0.990</td></tr>
-    <tr><td>FMR (%)</td><td align="right">0.278</td><td align="right">0.342</td><td align="right">0.280</td><td align="right">0.233</td></tr>
-    <tr><td>FNMR (%)</td><td align="right">0.000</td><td align="right">1.054</td><td align="right">1.179</td><td align="right">1.250</td></tr>
-    <tr><td>Balanced Accuracy (%)</td><td align="right">99.861</td><td align="right">99.302</td><td align="right">99.271</td><td align="right">99.259</td></tr>
-  </tbody>
-</table>
-
-> DB별 원본 80장(총 240장)을 사용해 각 DB 내부의 전체 비교쌍을 평가했습니다. 등록 이미지는 원본으로 유지하고 인식 이미지에만 pixel-wise Gaussian noise를 추가했습니다. 자기 자신에 해당하는 원본과 그 노이즈 이미지의 비교는 제외했습니다. FMR·FNMR·Balanced Accuracy는 Threshold 0.65 기준이며, EER는 별도로 Threshold를 탐색합니다.
-
-**10개 seed**는 같은 노이즈 강도(예: σ30)에서도 잡음의 위치·크기가 다른 이미지 10장을 원본 1장마다 만들었다는 뜻입니다. 따라서 DB별 원본 80장에서 노이즈 강도별로 인식 이미지 800장(80 × 10)을 평가했습니다. Seed는 잡음 패턴을 재현하는 난수 시작값이며, 모델을 10번 학습하거나 노이즈 강도 10개를 사용했다는 뜻은 아닙니다. 표는 이 10개 패턴의 비교 점수를 모아 계산했습니다.
-
-학습에 사용한 원본을 포함한 연구 점수를 공개 DLL의 소수 셋째 자리 반올림 규칙으로 재집계했으며, 실제 Windows DLL·Worker 실행 결과는 아닙니다.
+학습에 사용한 원본을 포함한 세 DB 통합 연구 점수를 공개 DLL의 소수 셋째 자리 반올림 규칙으로 재집계했으며, 실제 Windows DLL·Worker 실행 결과는 아닙니다.

@@ -7,6 +7,7 @@ CMakeUserPresets.json
 
 # Generated data, experimental weights, caches and validation outputs.
 /data/augmented/
+/data/inference/
 /model/
 /models/*
 !/models/readme.md
