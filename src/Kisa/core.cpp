@@ -41,16 +41,19 @@ QString ModuleFolder() {
 }
 struct State {
     algorithm::FingerprintEncoder encoder;
-    bool initialized = false;
+    std::array<bool, 4> attempted = {};
     std::array<bool, 4> loaded = {};
     std::array<std::string, 4> errors;
     std::mutex mutex;
-    void Load() {
-        if (initialized) return;
-        const QDir folder(ModuleFolder());
-        for (int i = 0; i < 4; ++i)
-            loaded[i] = encoder.LoadModel(ModelIds[i], folder.filePath(QString::fromStdString(ModelIds[i]) + ".bin").toStdString(), errors[i]);
-        initialized = true;
+    void Load(int type) {
+        // Each iType needs only its matching-DB model and the shared combined model.
+        // Cache successes and failures independently so another DB can load later.
+        for (int i : {type - 1, 3}) {
+            if (attempted[i]) continue;
+            const QString path = QDir(ModuleFolder()).filePath(QString::fromStdString(ModelIds[i]) + ".bin");
+            loaded[i] = encoder.LoadModel(ModelIds[i], path.toStdString(), errors[i]);
+            attempted[i] = true;
+        }
     }
 };
 State& SharedState() { static State state; return state; }
@@ -94,7 +97,7 @@ int Extract(int type, unsigned char* image, unsigned char* output, int* size, in
     const kisa::FvcSpec* spec = kisa::Find(type);
     if (!spec) return Failure(kisa::Error::InvalidType, "Expected FVC iType 1, 2 or 3.", code, message);
     try {
-        State& state = SharedState(); std::lock_guard<std::mutex> lock(state.mutex); state.Load();
+        State& state = SharedState(); std::lock_guard<std::mutex> lock(state.mutex); state.Load(type);
         if (!state.loaded[type - 1] && !state.loaded[3])
             return Failure(kisa::Error::ModelLoad, "No matching-DB/combined model: " + state.errors[type - 1] + "; " + state.errors[3], code, message);
         algorithm::AlgorithmImage raw;
@@ -103,12 +106,12 @@ int Extract(int type, unsigned char* image, unsigned char* output, int* size, in
         Bundle bundle; bundle.type = type;
         bool decisionAvailable = false;
         std::string error;
-        for (int i = 0; i < 4; ++i) {
+        for (int i : {type - 1, 3}) {
             if (!state.loaded[i]) { error = state.errors[i]; continue; }
             algorithm::PreparedImage prepared;
             if (!state.encoder.Preprocess(ModelIds[i], raw, prepared, error)
                 || !state.encoder.CreateTemplate(ModelIds[i], prepared, bundle.templates[i], error)) continue;
-            if (i == type - 1 || i == 3) decisionAvailable = true;
+            decisionAvailable = true;
         }
         if (!decisionAvailable) return Failure(kisa::Error::Extraction, "No matching-DB/combined template: " + error, code, message);
         const QByteArray bytes = Encode(bundle);
@@ -133,7 +136,7 @@ CORE_API int KISA_CALL CoreCompare(unsigned char* enrollment, unsigned char* att
         Bundle a, b;
         if (!Decode(enrollment, a) || !Decode(attempt, b) || a.type != b.type)
             return Failure(kisa::Error::InvalidTemplate, "Invalid or incompatible algorithm template.", code, message);
-        State& state = SharedState(); std::lock_guard<std::mutex> lock(state.mutex); state.Load();
+        State& state = SharedState(); std::lock_guard<std::mutex> lock(state.mutex); state.Load(a.type);
         bool success = false;
         double minimum = 1;
         std::string error;

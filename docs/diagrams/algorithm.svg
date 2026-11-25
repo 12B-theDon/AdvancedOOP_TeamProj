@@ -36,7 +36,7 @@
 <text x="150.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">LoadCore()</text>
 <text x="150.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">module-relative Core DLL</text>
 <text x="470.0" y="323.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">core.cpp</text>
-<text x="470.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">ModuleFolder() / State::Load()</text>
+<text x="470.0" y="348.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">State::Load(iType): DB + combined</text>
 <text x="470.0" y="366.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">Extract() / Encode() / Decode()</text>
 <text x="470.0" y="384.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">CoreEnroll() / CoreAttempt()</text>
 <text x="470.0" y="402.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">min: matching-DB / combined</text>
