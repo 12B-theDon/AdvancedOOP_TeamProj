@@ -58,7 +58,7 @@ FinalProject/
 │  └─ original/      # 보존 대상 원본 FVC 데이터
 ├─ models/
 │  ├─ pretrained/     # 학습 초기화용 DeepPrint 가중치
-│  └─ trained_result/ # Git LFS로 배포하는 학습 모델 4개·검증 manifest
+│  └─ trained_result/ # Git LFS로 배포하는 학습 모델 4개·파일 검사값 목록
 ├─ dist/             # 배포 결과 (패키징 시 생성, Git 제외)
 │  ├─ FingerprintAlgorithm/ # 알고리즘 DLL·모델·runtime
 │  └─ FingerprintEvaluator/ # GUI·Worker·Qt runtime·plugins
@@ -85,10 +85,12 @@ FinalProject/
 |---|---|---|
 | Qt Widgets | `<QApplication>`, `<QWizard>` | GUI |
 | Qt Gui | `<QImage>`, `<QPainter>` | 이미지·augmentation |
-| Qt Core | `<QFile>`, `<QSaveFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·label SHA-256 |
+| Qt Core | `<QFile>`, `<QSaveFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·지문 ID 목록 검사 |
 | LibTorch·ATen | `<torch/torch.h>`, `<torch/script.h>`, `<ATen/core/Tensor.h>` | 학습·inference·Tensor |
 | C++ Standard Library | `<vector>`, `<thread>`, `<future>`, `<mutex>`, `<condition_variable>`, `<random>` | 자료구조·병렬·동기화·sampling |
-| Windows API·CNG | `<windows.h>`, `<bcrypt.h>` | DLL·Process·IPC·파일 SHA-256 |
+| Windows API | `<windows.h>`, `<bcrypt.h>` | DLL·Process·IPC·파일 SHA-256 |
+
+SHA-256은 파일 내용을 64자리 16진수 검사값으로 요약하는 방법입니다. 모델 파일이 바뀌었는지, Template이 현재 모델로 만들어졌는지 확인하는 데 사용하며, 파일 검사값은 Windows 기본 기능인 BCrypt로 계산합니다.
 
 [구조도·모듈 안내](docs/diagrams/readme.md) · [출처·라이선스](docs/THIRD_PARTY.md)
 
