@@ -92,4 +92,15 @@ FinalProject/
 
 [구조도·모듈 안내](docs/diagrams/readme.md) · [출처·라이선스](docs/THIRD_PARTY.md)
 
-기본 Threshold `0.65`의 전체 원본 평가 결과는 [Threshold 평가 보고서](docs/threshold_065.md)에 정리했습니다.
+## 5. Performance
+
+| 평가 지표 | 원본 | Noise σ10 | Noise σ30 | Noise σ50 |
+|---|---:|---:|---:|---:|
+| EER (%) | 0.152 | 0.302 | 1.391 | 6.467 |
+| FMR (%) | 0.185 | 0.214 | 2.071 | 7.553 |
+| FNMR (%) | 0.000 | 0.351 | 0.893 | 5.714 |
+| Balanced Accuracy (%) | 99.907 | 99.718 | 98.518 | 93.366 |
+
+> 세 DB의 원본 240장을 사용한 전체 비교 결과입니다. 등록 이미지는 원본으로 유지하고 인식 이미지에만 pixel-wise Gaussian noise를 추가했습니다. 노이즈 조건마다 10개 seed를 사용했습니다. FMR·FNMR·Balanced Accuracy는 Threshold 0.65 기준이며, EER는 별도로 Threshold를 탐색합니다.
+
+학습에 사용한 원본을 포함한 세 DB 통합 연구 점수를 공개 DLL의 소수 셋째 자리 반올림 규칙으로 재집계했으며, 실제 Windows DLL·Worker 실행 결과는 아닙니다. 원본 평가 상세는 [Threshold 평가 보고서](docs/threshold_065.md)를 참고합니다.
