@@ -40,7 +40,7 @@ Stop은 전체 Worker를 종료하고 생성 중인 Template·비교 결과를 �
 
 <img src="../../docs/diagrams/gui.png" alt="GUI의 화면 구성·백그라운드 평가·결과 및 보고서 생성 관계" width="100%">
 
-Results에서 Genuine·Impostor 임계값(초기 모두 `0.65`)을 바꾸면 저장된 점수로 다시 판정합니다. DLL을 새로 Load하면 두 임계값을 초기값으로 되돌립니다. 다른 DLL·노이즈 데이터에는 점수 분포를 확인해 조절합니다. EER는 공통 Threshold를 별도로 탐색하므로 초기값 변경으로 달라지지 않습니다. [전체 원본 평가 결과](../../docs/threshold_065.md)를 참고합니다. Save는 원시 CSV, 선택 지표의 HTML·Word 호환 RTF, 별도 SVG 그래프를 background에서 생성하며 진행 건수·비율과 Stop을 표시합니다. CSV 행·지표·그래프 계산과 파일 쓰기 중 취소를 확인합니다. 임시 폴더에 작성한 파일은 완료 후 `run_N`으로 저장합니다. 보고서 Stop·창 닫기는 미완성 파일만 폐기하고, 완료된 Template·비교 결과와 기존 보고서는 보존합니다. Stop 후 다시 저장할 수 있습니다.
+Results에서 Genuine·Impostor 임계값(초기 모두 `0.65`)을 바꾸면 저장된 점수로 다시 판정합니다. DLL을 새로 Load하면 두 임계값을 초기값으로 되돌립니다. 다른 DLL·노이즈 데이터에는 점수 분포를 확인해 조절합니다. EER는 공통 Threshold를 별도로 탐색하므로 초기값 변경으로 달라지지 않습니다. Save는 원시 CSV, 선택 지표의 HTML·Word 호환 RTF, 별도 SVG 그래프를 background에서 생성하며 진행 건수·비율과 Stop을 표시합니다. CSV 행·지표·그래프 계산과 파일 쓰기 중 취소를 확인합니다. 임시 폴더에 작성한 파일은 완료 후 `run_N`으로 저장합니다. 보고서 Stop·창 닫기는 미완성 파일만 폐기하고, 완료된 Template·비교 결과와 기존 보고서는 보존합니다. Stop 후 다시 저장할 수 있습니다.
 
 | 지표 | 계산 기준 |
 |---|---|
@@ -56,4 +56,4 @@ Results에서 Genuine·Impostor 임계값(초기 모두 `0.65`)을 바꾸면 저
 
 `error_tradeoff.svg`는 과제 예시와 같은 FMR·FNMR 로그축의 DET 그래프입니다. 성공 점수의 모든 고유 Threshold와 최댓값 직후의 reject-all 지점을 사용합니다. 0%는 원시 값 그대로 유지하고, 그림에서만 명시된 로그축 하한에 표시합니다. 표본 수가 크면 더 작은 오류율도 보이도록 하한을 확장합니다. 선택한 FMR100·FMR1000 운영점과 EER 추정값을 함께 표시합니다. EER 표시는 표와 같은 midpoint 추정치를 양축에 사용하므로 실제 단일 Threshold의 점과 다를 수 있습니다.
 
-[구조도 SVG 원본](../../docs/diagrams/gui.svg) · [사용 순서](../../readme.md#2-gui) · [검증 상태](../../docs/verification.md)
+[구조도 SVG 원본](../../docs/diagrams/gui.svg) · [사용 순서](../../readme.md#2-gui)

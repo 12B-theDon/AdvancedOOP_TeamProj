@@ -20,4 +20,4 @@ Results에서 임계값(초기 0.65)을 조절하고,
 DLL·설정 변경 후에는 Load와 템플릿 생성을 다시 수행합니다.
 
 파일 검사: python verify_manifest.py .
-라이선스: licenses/. 검증 상태: 소스 저장소의 docs/verification.md.
+라이선스: licenses/.

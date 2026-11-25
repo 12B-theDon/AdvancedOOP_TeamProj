@@ -14,4 +14,3 @@ Compare에는 같은 배포본이 반환한 완전한 템플릿을 전달합니�
 평가는 FingerprintGUI·FingerprintWorker로 실행합니다. 임계값은 Results에서 조절합니다.
 파일 검사: python verify_manifest.py .
 출처·라이선스: licenses/. LGPL source·patch는 소스 저장소에 보존합니다.
-검증 상태: 소스 저장소의 docs/verification.md.

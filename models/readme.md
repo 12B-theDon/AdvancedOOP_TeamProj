@@ -9,4 +9,4 @@ Git clone 후 설치 스크립트가 LFS 파일을 가져오므로 보통 로컬
 
 패키징 시 `FINGERPRINT_PACKAGE_MODELS`로 학습 출력 폴더를 지정합니다. 배포 폴더에는 네 모델을 알고리즘 DLL 옆에 배치합니다.
 
-[학습](../src/Training/readme.md) · [패키징](../docs/build.md#package) · [검증 상태](../docs/verification.md)
+[학습](../src/Training/readme.md) · [패키징](../docs/build.md#package)

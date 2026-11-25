@@ -43,6 +43,8 @@ __pycache__/
 !/tools/verify_manifest.py
 
 # Local reference materials and diagram PDF exports.
+/docs/threshold_065.md
+/docs/verification.md
 /프로젝트 관련 자료-20261029/
 /Deepprint.pdf
 /01. 프로젝트(202602SME3007)_ver1.pdf

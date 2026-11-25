@@ -14,4 +14,4 @@ Stop은 실행 중·대기 중인 모든 Worker와 각 Windows job에 속한 자
 
 기본값은 worker 1개(최대 16개), 호출 30초, 새 worker의 첫 호출 최소 120초, 시작 30초입니다. 실패는 `FAIL`(DLL 코드·메시지), `TIMEOUT`, `CRASH`, `MISMATCH`, `CANCELLED`로 구분합니다.
 
-[구조도 SVG 원본](../../docs/diagrams/worker.svg) · [검증 상태](../../docs/verification.md)
+[구조도 SVG 원본](../../docs/diagrams/worker.svg)

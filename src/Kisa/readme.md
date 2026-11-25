@@ -11,4 +11,4 @@ Core는 성공한 모델별 Template을 묶어 반환하고, 비교 시 matching
 
 오류 코드 1–7은 각각 null 인자, iType, 모델 로딩, 추출, 템플릿, 비교, Core 로딩 오류입니다. 공개 ABI와 버퍼 규칙은 [Public](../Public/readme.md), 배포 파일은 [패키징 안내](../../docs/build.md#package)에 정리했습니다.
 
-[구조도 SVG 원본](../../docs/diagrams/algorithm.svg) · [검증 결과](../../docs/verification.md)
+[구조도 SVG 원본](../../docs/diagrams/algorithm.svg)

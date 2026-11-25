@@ -18,4 +18,4 @@ Template의 `time_ms`는 `Extract()` 요청 전체의 경과 시간입니다. DL
 
 [구조도 SVG 원본](../../docs/diagrams/engine.svg) · [GUI·지표](../GUI/readme.md)
 
-`engineConfig.h`의 Genuine·Impostor 기본 Threshold는 모두 `0.65`입니다. `score >= threshold`를 수락하며, GUI·원시 CSV·보고서는 같은 설정을 사용합니다. [전체 원본 평가 결과](../../docs/threshold_065.md)를 참고합니다.
+`engineConfig.h`의 Genuine·Impostor 기본 Threshold는 모두 `0.65`입니다. `score >= threshold`를 수락하며, GUI·원시 CSV·보고서는 같은 설정을 사용합니다.

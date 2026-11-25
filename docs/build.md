@@ -79,7 +79,7 @@ python tools/verify_manifest.py dist/FingerprintAlgorithm
 - `dist/FingerprintAlgorithm`: 공개 DLL·Core·Worker·모델·runtime·라이선스·SHA-256 목록을 포함합니다.
 - `dist/FingerprintEvaluator`: GUI·Worker와 windeployqt로 수집한 Qt·TIFF·runtime·라이선스·SHA-256 목록을 포함합니다.
 
-DLL과 모델은 같은 배포 폴더에 둡니다. 필수 파일이 빠지면 기존 배포 폴더를 교체하지 않습니다. [검증 상태](verification.md) · [출처·라이선스](THIRD_PARTY.md)
+DLL과 모델은 같은 배포 폴더에 둡니다. 필수 파일이 빠지면 기존 배포 폴더를 교체하지 않습니다. [출처·라이선스](THIRD_PARTY.md)
 
 `LibTorch license files missing` 또는 `Qt license files missing`으로 중단된 경우, 기존 프로젝트 폴더에서 수정본을 `git pull --ff-only`로 받고 설치 스크립트를 다시 실행합니다. 기존 도구·라이브러리·정상 모델은 재사용합니다.
 
