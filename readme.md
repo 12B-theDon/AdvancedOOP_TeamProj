@@ -85,10 +85,10 @@ FinalProject/
 |---|---|---|
 | Qt Widgets | `<QApplication>`, `<QWizard>` | GUI |
 | Qt Gui | `<QImage>`, `<QPainter>` | 이미지·augmentation |
-| Qt Core | `<QFile>`, `<QSaveFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·SHA-256 |
+| Qt Core | `<QFile>`, `<QSaveFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·label SHA-256 |
 | LibTorch·ATen | `<torch/torch.h>`, `<torch/script.h>`, `<ATen/core/Tensor.h>` | 학습·inference·Tensor |
 | C++ Standard Library | `<vector>`, `<thread>`, `<future>`, `<mutex>`, `<condition_variable>`, `<random>` | 자료구조·병렬·동기화·sampling |
-| Windows API | `<windows.h>` | DLL·Process·IPC |
+| Windows API·CNG | `<windows.h>`, `<bcrypt.h>` | DLL·Process·IPC·파일 SHA-256 |
 
 [구조도·모듈 안내](docs/diagrams/readme.md) · [출처·라이선스](docs/THIRD_PARTY.md)
 

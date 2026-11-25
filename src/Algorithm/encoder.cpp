@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <windows.h>
+#include <bcrypt.h>
 
 namespace algorithm {
 void Require(bool ok, const QString& message) {
@@ -21,9 +23,36 @@ void Require(bool ok, const QString& message) {
 QString Hash(const QString& path) {
     QFile file(path);
     Require(file.open(QIODevice::ReadOnly), "Cannot open " + path);
-    QCryptographicHash hash(QCryptographicHash::Sha256);
-    Require(hash.addData(&file), "Cannot hash " + path);
-    return QString::fromLatin1(hash.result().toHex());
+    struct Context {
+        BCRYPT_ALG_HANDLE algorithm = nullptr;
+        BCRYPT_HASH_HANDLE hash = nullptr;
+        ~Context() {
+            if (hash) BCryptDestroyHash(hash);
+            if (algorithm) BCryptCloseAlgorithmProvider(algorithm, 0);
+        }
+    } context;
+    const auto check = [&path](NTSTATUS status, const char* operation) {
+        if (status < 0)
+            throw std::runtime_error(QString("%1 failed (0x%2): %3")
+                .arg(QLatin1String(operation)).arg(static_cast<quint32>(status), 8, 16, QLatin1Char('0'))
+                .arg(path).toStdString());
+    };
+    check(BCryptOpenAlgorithmProvider(&context.algorithm, BCRYPT_SHA256_ALGORITHM, nullptr, 0),
+          "BCryptOpenAlgorithmProvider");
+    // Windows owns the hash object's storage until BCryptDestroyHash().
+    check(BCryptCreateHash(context.algorithm, &context.hash, nullptr, 0, nullptr, 0, 0), "BCryptCreateHash");
+    QByteArray buffer(1024 * 1024, '\0');
+    for (;;) {
+        const qint64 count = file.read(buffer.data(), buffer.size());
+        Require(count >= 0, "Cannot read for SHA-256: " + path + " (" + file.errorString() + ")");
+        if (count == 0) break;
+        check(BCryptHashData(context.hash, reinterpret_cast<PUCHAR>(buffer.data()), static_cast<ULONG>(count), 0),
+              "BCryptHashData");
+    }
+    QByteArray digest(32, '\0'); // SHA-256 always produces 32 bytes.
+    check(BCryptFinishHash(context.hash, reinterpret_cast<PUCHAR>(digest.data()), static_cast<ULONG>(digest.size()), 0),
+          "BCryptFinishHash");
+    return QString::fromLatin1(digest.toHex());
 }
 QString LabelHash(const QJsonArray& labels) {
     return QString::fromLatin1(QCryptographicHash::hash(QJsonDocument(labels).toJson(QJsonDocument::Compact),
