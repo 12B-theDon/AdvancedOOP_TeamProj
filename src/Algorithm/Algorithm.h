@@ -37,7 +37,7 @@ public:
                             PreparedImage& prepared, std::string& error) = 0;
     virtual bool CreateTemplate(const std::string& model_id, const PreparedImage& prepared,
                                 std::vector<unsigned char>& data, std::string& error) = 0;
-    // [0.5,1] Cosine of nonnegative probability templates, mapped by (cos+1)/2.
+    // [0,1] Raw cosine of nonnegative probability templates; higher is closer.
     virtual bool Compare(const std::string& model_id, const std::vector<unsigned char>& enrollment,
                          const std::vector<unsigned char>& attempt, double& score,
                          std::string& error) = 0;

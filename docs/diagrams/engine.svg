@@ -20,7 +20,7 @@
 <text x="150.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">engineConfig.h</text>
 <text x="150.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">workers 1–16 / seed 42</text>
 <text x="150.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">call 30 s / first call ≥120 s</text>
-<text x="150.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">startup 30 s / threshold 0.65</text>
+<text x="150.0" y="194.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">startup 30 s / threshold 0.30</text>
 <text x="470.0" y="133.5" font-family="Arial" font-size="18" font-weight="700" text-anchor="middle" fill="#ffffff">Engine.h</text>
 <text x="470.0" y="158.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">ImageInfo / ComparisonPair</text>
 <text x="470.0" y="176.5" font-family="Arial" font-size="14" font-weight="400" text-anchor="middle" fill="#111111">EnrollmentTemplates / EvaluationRun</text>

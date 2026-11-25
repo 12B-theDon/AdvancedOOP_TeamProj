@@ -292,7 +292,7 @@ bool FingerprintEncoder::Compare(const std::string& id, const std::vector<unsign
     for (int i = 0; i < TemplateSize; ++i) {
         dot += double(a[i]) * b[i]; normA += double(a[i]) * a[i]; normB += double(b[i]) * b[i];
     }
-    score = (std::clamp(dot / std::sqrt(normA * normB), 0.0, 1.0) + 1.0) / 2.0;
+    score = std::clamp(dot / std::sqrt(normA * normB), 0.0, 1.0);
     return true;
 }
 

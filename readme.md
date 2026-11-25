@@ -35,7 +35,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 소스 저장소 안에서 GUI를 실행했는데 이 프로젝트의 DLL·학습 모델이 빠져 있으면 자동으로 준비 프로그램을 실행합니다. **LFS 다운로드 → 없는 경우에만 학습 → 패키징 → GUI 재실행** 순서로 복구합니다. 완성된 배포본은 학습 없이 바로 열립니다. 다른 PC로 옮길 때는 [dist/FingerprintAlgorithm/](docs/build.md#package)과 [dist/FingerprintEvaluator/](docs/build.md#package)를 함께 복사합니다.
 
-GUI에서 **DB → 등록 이미지 → DLL·옵션·Load·Template 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 파일명에 관계없이 K-NBTC DLL을 선택하고 workers·timeout을 설정한 뒤 **Load selected DLL with these settings**를 누릅니다. 이 프로젝트는 [FingerprintAlgorithm.dll](src/Kisa/readme.md)을 선택합니다. 표에 `Loaded`가 표시되면 **Create enrollment templates**로 상태·크기·오류·생성 시간(ms)을 확인합니다. DLL·설정을 바꾸면 Load를 다시 눌러 적용합니다. Results에서 임계값(초기 0.65)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장합니다. Load·Template 생성·비교·보고서 저장은 진행률과 **Stop**을 제공합니다.
+GUI에서 **DB → 등록 이미지 → DLL·옵션·Load·Template 생성 → 비교 종류 → 비교 규칙 → 실행 → 결과·보고서** 순서로 진행합니다. Step 3에서 파일명에 관계없이 K-NBTC DLL을 선택하고 workers·timeout을 설정한 뒤 **Load selected DLL with these settings**를 누릅니다. 이 프로젝트는 [FingerprintAlgorithm.dll](src/Kisa/readme.md)을 선택합니다. 표에 `Loaded`가 표시되면 **Create enrollment templates**로 상태·크기·오류·생성 시간(ms)을 확인합니다. DLL·설정을 바꾸면 Load를 다시 눌러 적용합니다. Results에서 임계값(초기 0.30, 다른 팀 DLL은 별도 조절)을 바꾸고 CSV·HTML·Word 호환 RTF·SVG를 저장합니다. Load·Template 생성·비교·보고서 저장은 진행률과 **Stop**을 제공합니다.
 
 [학습 옵션](src/Training/readme.md) · [GUI·지표](src/GUI/readme.md)
 
@@ -107,6 +107,33 @@ SHA-256은 파일 내용을 64자리 16진수 검사값으로 요약하는 방�
     </tr>
   </thead>
   <tbody>
+    <tr><td>EER (%)</td><td align="right">0.046</td><td align="right">0.244</td><td align="right">1.208</td><td align="right">6.518</td></tr>
+    <tr><td>FMR (%)</td><td align="right">0.185</td><td align="right">0.249</td><td align="right">2.082</td><td align="right">7.448</td></tr>
+    <tr><td>FNMR (%)</td><td align="right">0.000</td><td align="right">0.381</td><td align="right">0.851</td><td align="right">5.798</td></tr>
+    <tr><td>Balanced Accuracy (%)</td><td align="right">99.907</td><td align="right">99.685</td><td align="right">98.534</td><td align="right">93.377</td></tr>
+  </tbody>
+</table>
+
+> 세 DB의 원본 240장을 사용해 DB 내부의 전체 비교쌍을 평가한 뒤, **DB별 지표를 같은 비중으로 평균**했습니다. 등록 이미지는 원본으로 유지하고 인식 이미지에만 pixel-wise Gaussian noise를 추가했습니다. 각 노이즈 조건은 서로 다른 10개 seed로 만든 잡음 패턴의 평균입니다. FMR·FNMR·Balanced Accuracy는 **Threshold 0.30** 기준이며, EER는 본인·타인에 같은 임계값을 적용하면서 이를 바꿔 계산합니다.
+
+기존 가중치 4개를 그대로 사용해 **raw cosine → DB 전용·combined 최솟값 → 소수 셋째 자리 반올림**으로 재계산했습니다. 학습에 쓴 원본이 포함된 연구 평가이며, 새 지문 identity에 대한 독립 Test 결과는 아닙니다.
+
+<details>
+<summary>이전 점수 방식의 결과 보존</summary>
+
+아래는 이전 `(cosine + 1) / 2`·Threshold **0.65**의 기록입니다. 세 DB의 비교쌍을 합산한 통합 지표이고 노이즈 seed도 달라, 위의 DB별 평균과 직접 비교하지 않습니다.
+
+<table width="100%" style="width:100%;table-layout:fixed">
+  <thead>
+    <tr>
+      <th width="28%" align="left">평가 지표</th>
+      <th width="18%">원본</th>
+      <th width="18%">원본 + Gaussian noise σ10</th>
+      <th width="18%">원본 + Gaussian noise σ30</th>
+      <th width="18%">원본 + Gaussian noise σ50</th>
+    </tr>
+  </thead>
+  <tbody>
     <tr><td>EER (%)</td><td align="right">0.152</td><td align="right">0.302</td><td align="right">1.391</td><td align="right">6.467</td></tr>
     <tr><td>FMR (%)</td><td align="right">0.185</td><td align="right">0.214</td><td align="right">2.071</td><td align="right">7.553</td></tr>
     <tr><td>FNMR (%)</td><td align="right">0.000</td><td align="right">0.351</td><td align="right">0.893</td><td align="right">5.714</td></tr>
@@ -114,6 +141,4 @@ SHA-256은 파일 내용을 64자리 16진수 검사값으로 요약하는 방�
   </tbody>
 </table>
 
-> 세 DB의 원본 240장을 사용한 전체 비교 결과입니다. 등록 이미지는 원본으로 유지하고 인식 이미지에만 pixel-wise Gaussian noise를 추가했습니다. 노이즈 조건마다 10개 seed를 사용했습니다. FMR·FNMR·Balanced Accuracy는 Threshold 0.65 기준이며, EER는 별도로 Threshold를 탐색합니다.
-
-학습에 사용한 원본을 포함한 세 DB 통합 연구 점수를 공개 DLL의 소수 셋째 자리 반올림 규칙으로 재집계했습니다.
+</details>

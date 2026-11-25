@@ -56,3 +56,5 @@
 </details>
 
 [구조도 SVG 원본](../../docs/diagrams/training.svg) · [학습 설정](../../docs/baseline/training_configuration.md) · [모델 파일](../../models/readme.md)
+
+학습 후 검증의 `probability30` 점수도 raw cosine `[0, 1]`을 사용합니다. `same_encoder512`·`previous_saved512`는 음수가 가능한 512차원 embedding의 진단용 비교이므로 기존 `(cosine + 1) / 2` 표시를 유지합니다. 이 변경은 학습 loss·optimizer·가중치에 영향을 주지 않습니다.

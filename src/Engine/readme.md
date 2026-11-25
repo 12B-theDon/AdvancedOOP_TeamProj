@@ -18,4 +18,4 @@ Template의 `time_ms`는 `Extract()` 요청 전체의 경과 시간입니다. DL
 
 [구조도 SVG 원본](../../docs/diagrams/engine.svg) · [GUI·지표](../GUI/readme.md)
 
-`engineConfig.h`의 Genuine·Impostor 기본 Threshold는 모두 `0.65`입니다. `score >= threshold`를 수락하며, GUI·원시 CSV·보고서는 같은 설정을 사용합니다.
+`engineConfig.h`의 Genuine·Impostor 기본 Threshold는 모두 `0.30`입니다. 우리 알고리즘의 raw cosine 점수에 맞춘 시작값이며, 다른 팀 DLL은 해당 팀의 점수 분포에 맞게 조절합니다. `score >= threshold`를 수락하며, GUI·원시 CSV·보고서는 같은 설정을 사용합니다. 외부 DLL 점수에는 별도 변환을 적용하지 않습니다.

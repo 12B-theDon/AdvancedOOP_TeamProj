@@ -245,6 +245,6 @@
 <text x="297.5" y="709.5" font-family="Arial" font-size="10" fill="#173452" text-anchor="middle">Final Output</text>
 <text x="297.5" y="720.5" font-family="Arial" font-size="10" fill="#173452" text-anchor="middle">Fingerprint Template</text>
 <text x="297.5" y="729.9" font-family="Arial" font-size="8" fill="#000000" text-anchor="middle">(N×30)</text>
-<text x="297.5" y="762.0" font-family="Arial" font-size="8" fill="#000000" text-anchor="middle">Per-model score = (cosine of probability templates + 1) / 2.</text>
+<text x="297.5" y="762.0" font-family="Arial" font-size="8" fill="#000000" text-anchor="middle">Per-model score = raw cosine of probability templates (0 to 1).</text>
 <text x="297.5" y="778.0" font-family="Arial" font-size="8" fill="#000000" text-anchor="middle">N: batch size. Core uses the minimum successful matching-DB / combined score.</text>
 </svg>

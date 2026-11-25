@@ -18,6 +18,7 @@
 #include <cmath>
 #include <limits>
 #include <exception>
+#include <functional>
 
 namespace algorithm {
 static bool Trainable(const std::string& name) {
@@ -71,9 +72,10 @@ Metrics Measure(const Scores& scores, double fixed = -1) {
     }
     return {threshold, AcceptanceRate(genuineScores, threshold), AcceptanceRate(impostorScores, threshold), eer, auc, int(genuineScores.size()), int(impostorScores.size())};
 }
-double Score(const torch::Tensor& rows, int a, int b) {
+double Score(const torch::Tensor& rows, int a, int b, bool probability) {
     const torch::Tensor x = rows[a].to(torch::kFloat64), y = rows[b].to(torch::kFloat64);
-    return std::clamp((torch::dot(x, y).item<double>() / (x.norm().item<double>() * y.norm().item<double>()) + 1) / 2, 0., 1.);
+    const double cosine = torch::dot(x, y).item<double>() / (x.norm().item<double>() * y.norm().item<double>());
+    return probability ? std::clamp(cosine, 0., 1.) : std::clamp((cosine + 1) / 2, 0., 1.);
 }
 Scores Pool(const Scores groups[3]) {
     Scores result;
@@ -111,7 +113,7 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
     for (const torch::jit::Named<torch::Tensor>& parameter : reference.named_parameters()) referenceParameters.push_back(parameter);
     for (const torch::jit::Named<torch::Tensor>& buffer : reference.named_buffers()) referenceBuffers.push_back(buffer);
     QJsonArray frozenChecks;
-    auto record = [&](const QString& kind, int modelIndex, const Scores groups[3]) -> void {
+    std::function<void(const QString&, int, const Scores*)> record = [&](const QString& kind, int modelIndex, const Scores groups[3]) -> void {
         const QString id = QString::fromStdString(training::ModelIds[modelIndex]);
         for (int db = 0; db <= 3; ++db) {
             const Metrics m = db == 3 ? Measure(Pool(groups)) : Measure(groups[db]);
@@ -123,10 +125,10 @@ void EvaluateTrainingRun(const QString& folder, const TrainingData& data, const 
                 + Number(m.tar * 100) + ',' + Number(m.far * 100) + ',' + QString::number(m.genuine) + ',' + QString::number(m.impostor) + '\n').toUtf8();
         }
     };
-    auto makeGroups = [&](const QString& kind, int modelIndex, const torch::Tensor& values, Scores groups[3]) -> void {
+    std::function<void(const QString&, int, const torch::Tensor&, Scores*)> makeGroups = [&](const QString& kind, int modelIndex, const torch::Tensor& values, Scores groups[3]) -> void {
         for (int db = 0; db < 3; ++db) groups[db] = Scores();
         for (int db = 0; db < 3; ++db) for (const Pair& pair : pairs[db]) {
-            const double score = Score(values, pair.enrollment, pair.probe);
+            const double score = Score(values, pair.enrollment, pair.probe, kind == "probability30");
             groups[db].value.push_back(score); groups[db].genuine.push_back(pair.genuine);
             raw += (kind + ',' + QString::fromStdString(training::ModelIds[modelIndex]) + ',' + originals[pair.enrollment].database + ','
                 + originals[pair.enrollment].original + ',' + originals[pair.probe].original + ',' + (pair.genuine ? "1," : "0,") + Number(score) + '\n').toUtf8();
