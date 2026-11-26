@@ -59,12 +59,12 @@ public static class WizardUI {
 }
 '@
 function Check([bool]$Ok, [string]$Message) { if (-not $Ok) { throw $Message } }
-function Wait-For([scriptblock]$Action, [int]$Seconds=60) {
+function Wait-For([scriptblock]$Action, [int]$Seconds=60, [switch]$AllowDialogs) {
     $timer=[Diagnostics.Stopwatch]::StartNew()
     do {
         $value=& $Action; if($value){return $value}
         $dialog=[WizardUI]::Find([IntPtr]::Zero) | Where-Object { $_.Class -eq '#32770' } | Select-Object -First 1
-        if($dialog) {
+        if($dialog -and -not $AllowDialogs) {
             $details=([WizardUI]::Find($dialog.Handle) | ForEach-Object { $_.Text }) -join ' '
             throw "Unexpected installation dialog: $($dialog.Text) $details"
         }
@@ -122,7 +122,7 @@ function Start-UninstallConfirmation {
             if($window.Text -like '*Fingerprint Evaluator*' -and
                 (Button $window.Handle '예|Yes') -and (Button $window.Handle '아니요|No')) { return $window }
         }
-    }
+    } -AllowDialogs
     Check ($launcher.WaitForExit(10000) -and $launcher.ExitCode -eq 0) 'Uninstall launcher failed'
     return $confirmation
 }
@@ -130,7 +130,7 @@ try {
     $env:Path="$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
     $env:QT_PLUGIN_PATH=$null; $env:QT_QPA_PLATFORM=$null
     $absent=Start-Process -FilePath $Uninstaller -PassThru
-    $notice=Wait-For { [WizardUI]::Find([IntPtr]::Zero) | Where-Object { $_.Text -eq 'Fingerprint Evaluator Uninstall' } | Select-Object -First 1 }
+    $notice=Wait-For { [WizardUI]::Find([IntPtr]::Zero) | Where-Object { $_.Text -eq 'Fingerprint Evaluator Uninstall' } | Select-Object -First 1 } -AllowDialogs
     [WizardUI]::Capture($notice.Handle,(Join-Path $Results '00-not-installed.png'))
     $ok=Button $notice.Handle '확인|OK'
     Check ($null -ne $ok) 'Not-installed message missing'
@@ -155,7 +155,7 @@ try {
     $cancel=Start-UninstallConfirmation
     [WizardUI]::Capture($cancel.Handle,(Join-Path $Results '06-uninstall-cancel.png'))
     [WizardUI]::Click((Button $cancel.Handle '아니요|No').Handle)
-    Wait-For { -not (Button $cancel.Handle '예|Yes') } | Out-Null
+    Wait-For { -not (Button $cancel.Handle '예|Yes') } -AllowDialogs | Out-Null
     Check ((Test-Path $key) -and (Test-Path -LiteralPath (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe'))) 'Cancel removed the installation'
     $env:Path=(Join-Path $target 'FingerprintEvaluator')+';'+$env:Path
     $env:QT_PLUGIN_PATH=Join-Path $target 'FingerprintEvaluator'
@@ -205,7 +205,7 @@ try {
             }
         }
         (-not (Test-Path $key)) -and (-not (Test-Path -LiteralPath (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe')))
-    } 120 | Out-Null
+    } 120 -AllowDialogs | Out-Null
     Check (-not (Test-Path $key)) 'Windows Apps entry survived uninstall'
     Check (-not (Test-Path (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe'))) 'GUI survived uninstall'
     Check ((Get-Content -LiteralPath $report -Raw) -eq 'preserve user report') 'Uninstall removed user report'
