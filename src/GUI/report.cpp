@@ -186,17 +186,25 @@ static QString Number(double value) {
     return QString::number(value, 'g', GraphPrecision);
 }
 
+static constexpr double Left = 90, Right = 800, Top = 60, Bottom = 390, DetBottom = 770;
+static constexpr double PlotWidth = Right - Left, PlotHeight = Bottom - Top;
+static const char* GenuineColor = "#4caf50";
+static const char* ImpostorColor = "#ff5252";
+
 static QString Plot(const QString& title, const QString& xLabel, const QString& yLabel,
-                    const QString& content) {
-    return "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + QString::number(GraphWidth)
-        + "\" height=\"" + QString::number(GraphHeight) + "\" viewBox=\"0 0 840 320\">"
-        "<rect width=\"840\" height=\"320\" fill=\"white\"/>"
+                    const QString& content, bool square = false) {
+    const QString width = QString::number(GraphWidth), height = QString::number(square ? GraphWidth : GraphHeight);
+    const double bottom = square ? DetBottom : Bottom;
+    return "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + width
+        + "\" height=\"" + height + "\" viewBox=\"0 0 " + width + ' ' + height + "\">"
+        "<rect width=\"" + width + "\" height=\"" + height + "\" fill=\"white\"/>"
         "<g font-family=\"Arial\" fill=\"#222\">"
-        "<text x=\"28\" y=\"28\" font-size=\"22\">" + title + "</text>"
-        "<path d=\"M70 60V245H810\" fill=\"none\" stroke=\"#555\"/>"
-        "<text x=\"440\" y=\"302\" text-anchor=\"middle\" font-size=\"14\">" + xLabel + "</text>"
-        "<text transform=\"translate(20 155) rotate(-90)\" text-anchor=\"middle\" font-size=\"14\">"
-        + yLabel + "</text>" + content + "</g></svg>";
+        "<text x=\"445\" y=\"28\" text-anchor=\"middle\" font-size=\"22\">" + title.toHtmlEscaped() + "</text>"
+        "<text x=\"445\" y=\"" + Number(bottom + 64) + "\" text-anchor=\"middle\" font-size=\"15\">" + xLabel + "</text>"
+        "<text transform=\"translate(23 " + Number((Top + bottom) / 2)
+        + ") rotate(-90)\" text-anchor=\"middle\" font-size=\"15\">" + yLabel + "</text>" + content
+        + "<rect x=\"90\" y=\"60\" width=\"710\" height=\"" + Number(bottom - Top)
+        + "\" fill=\"none\" stroke=\"#222\" stroke-width=\"1.2\"/></g></svg>";
 }
 
 static QString EmptyPlot(const QString& message) {
@@ -205,15 +213,114 @@ static QString EmptyPlot(const QString& message) {
           "Results will appear after evaluation.</text>";
 }
 
-static QString Ticks(double low, double high, double maximum) {
-    return "<g font-size=\"12\"><text x=\"70\" y=\"267\">" + Number(low)
-        + "</text><text x=\"810\" y=\"267\" text-anchor=\"end\">" + Number(high)
-        + "</text><text x=\"62\" y=\"249\" text-anchor=\"end\">0</text>"
-          "<text x=\"62\" y=\"66\" text-anchor=\"end\">" + Number(maximum) + "</text></g>";
+static QString Ticks(double maximum, bool percentages = false) {
+    QString svg = "<g font-size=\"12\">";
+    for (int i = 0; i <= 5; ++i) {
+        const QString x = Number(Left + PlotWidth * i / 5), y = Number(Bottom - PlotHeight * i / 5);
+        svg += "<path d=\"M" + x + " 60V390M90 " + y + "H800\" stroke=\"#dedede\" fill=\"none\"/>"
+            "<text x=\"" + x + "\" y=\"415\" text-anchor=\"middle\">" + QString::number(i / 5.0, 'f', 1) + "</text>"
+            "<text x=\"80\" y=\"" + Number(Bottom - PlotHeight * i / 5 + 4) + "\" text-anchor=\"end\">"
+            + Number(maximum * i / 5) + (percentages ? "%" : "") + "</text>";
+    }
+    return svg + "</g>";
 }
 
-static QString Line(const QString& points, const QString& color) {
-    return "<polyline fill=\"none\" stroke=\"" + color + "\" stroke-width=\"2\" points=\"" + points + "\"/>";
+static QString Line(const QString& points, const QString& color, const QString& id) {
+    return "<polyline id=\"" + id + "\" fill=\"none\" stroke=\"" + color
+        + "\" stroke-width=\"2\" points=\"" + points + "\"/>";
+}
+
+static QString ErrorRateCurves(const ScoreGroups& groups, bool showFmr, bool showFnmr, const std::vector<bool>& selected,
+                               const engine::ExportControl& control) {
+    const auto raw = [](double value) { return QString::number(value, 'g', engine::CsvPrecision); };
+    const auto x = [](double threshold) { return Number(Left + PlotWidth * std::clamp(threshold, 0.0, 1.0)); };
+    const auto point = [&x](double threshold, double rate) { return x(threshold) + ',' + Number(Bottom - PlotHeight * rate) + ' '; };
+    double fmr, fnmr;
+    Rates(groups, 0, 0, false, fmr, fnmr);
+    QString fmrPoints = point(0, fmr), fnmrPoints = point(0, fnmr);
+    QString samples = "<g display=\"none\">";
+    const auto sample = [&raw, &samples](double threshold, const char* side, double fmr, double fnmr) {
+        samples += "<g class=\"error-rate-point\" data-threshold=\"" + raw(threshold)
+            + "\" data-side=\"" + side + "\" data-fmr=\"" + raw(fmr) + "\" data-fnmr=\"" + raw(fnmr) + "\"/>";
+    };
+    const std::vector<double> thresholds = Thresholds(groups, control);
+    for (std::size_t i = 0; i + 1 < thresholds.size(); ++i) {
+        control.Check();
+        const double threshold = thresholds[i];
+        Rates(groups, threshold, threshold, false, fmr, fnmr);
+        fmrPoints += point(threshold, fmr); fnmrPoints += point(threshold, fnmr);
+        sample(threshold, "at-score", fmr, fnmr);
+        // score >= threshold accepts ties. The jump occurs immediately AFTER
+        // the score, not at the next observed score; group all tied scores.
+        const double after = std::nextafter(threshold, std::numeric_limits<double>::infinity());
+        Rates(groups, after, after, false, fmr, fnmr);
+        fmrPoints += point(threshold, fmr); fnmrPoints += point(threshold, fnmr);
+        sample(after, "after-score", fmr, fnmr);
+    }
+    fmrPoints += point(1, fmr); fnmrPoints += point(1, fnmr);
+    samples += "</g>";
+    QString svg = Ticks(100, true) + "<g class=\"error-rate-axes\" data-threshold-min=\"0\" data-threshold-max=\"1\">" + samples;
+    if (showFmr)
+        svg += Line(fmrPoints, ImpostorColor, "fmr-curve");
+    if (showFnmr)
+        svg += Line(fnmrPoints, GenuineColor, "fnmr-curve");
+    QString eerLabel;
+    if (selected.size() > 5 && selected[5]) {
+        const OperatingPoint eer = EerPoint(groups, false, thresholds, control);
+        if (eer.available) {
+            const double estimate = (eer.fmr + eer.fnmr) / 2;
+            svg += "<path d=\"M" + x(eer.threshold) + " 60V390\" stroke=\"#777\" stroke-dasharray=\"5 4\"/>"
+                "<circle class=\"eer-threshold-marker\" data-threshold=\"" + raw(eer.threshold)
+                + "\" data-eer=\"" + raw(estimate) + "\" cx=\"" + x(eer.threshold) + "\" cy=\""
+                + Number(Bottom - PlotHeight * estimate) + "\" r=\"4.5\" fill=\"#111\"/>";
+            eerLabel = "Estimated EER = " + Number(100 * estimate) + "% @ t = " + Number(eer.threshold);
+        }
+    }
+    svg += "</g><g font-size=\"12\">";
+    if (showFmr) svg += "<path d=\"M100 45H125\" stroke=\"" + QString(ImpostorColor) + "\" stroke-width=\"2\"/><text x=\"135\" y=\"49\">FMR(t)</text>";
+    if (showFnmr) svg += "<path d=\"M220 45H245\" stroke=\"" + QString(GenuineColor) + "\" stroke-width=\"2\"/><text x=\"255\" y=\"49\">FNMR(t)</text>";
+    if (!eerLabel.isEmpty()) svg += "<circle cx=\"350\" cy=\"45\" r=\"4\" fill=\"#111\"/><text x=\"365\" y=\"49\">" + eerLabel + "</text>";
+    svg += "</g><text x=\"90\" y=\"473\" font-size=\"10\">All observed cutoffs; score = threshold is accepted. EER marker shows the midpoint estimate.</text>";
+    return svg;
+}
+
+static QString ScoreDistribution(const ScoreGroups& groups, const engine::ExportControl& control) {
+    std::array<std::vector<int>, 2> bins = {std::vector<int>(HistogramBins), std::vector<int>(HistogramBins)};
+    double maximum = 0;
+    for (int group = 0; group < 2; ++group) {
+        for (double score : groups.values[group]) {
+            control.Check();
+            ++bins[group][std::clamp(int(score * HistogramBins), 0, HistogramBins - 1)];
+        }
+        if (!groups.values[group].empty())
+            for (int count : bins[group]) maximum = std::max(maximum, double(count) * HistogramBins / groups.values[group].size());
+    }
+    if (maximum == 0) return EmptyPlot("No scored comparison results available.");
+    QString svg = Ticks(maximum);
+    for (int group = 0; group < 2; ++group) {
+        if (groups.values[group].empty()) continue;
+        for (int bin = 0; bin < HistogramBins; ++bin) {
+            control.Check();
+            const int count = bins[group][bin];
+            if (!count) continue;
+            const double density = double(count) * HistogramBins / groups.values[group].size();
+            const double height = PlotHeight * density / maximum;
+            svg += "<rect class=\"score-bin\" data-group=\"" + QString(group == 0 ? "genuine" : "impostor")
+                + "\" data-count=\"" + QString::number(count) + "\" data-bin=\"" + QString::number(bin)
+                + "\" data-density=\"" + QString::number(density, 'g', engine::CsvPrecision)
+                + "\" x=\"" + Number(Left + PlotWidth * bin / HistogramBins) + "\" y=\"" + Number(Bottom - height)
+                + "\" width=\"" + Number(PlotWidth / HistogramBins) + "\" height=\"" + Number(height)
+                + "\" fill=\"" + (group == 0 ? GenuineColor : ImpostorColor) + "\" fill-opacity=\"0.65\"/>";
+        }
+    }
+    svg += "<g font-size=\"14\"><rect x=\"105\" y=\"74\" width=\"268\" height=\"64\" rx=\"4\" fill=\"white\" fill-opacity=\"0.93\" stroke=\"#ccc\"/>";
+    for (int group = 0; group < 2; ++group) {
+        const int y = 96 + 26 * group;
+        svg += "<rect x=\"117\" y=\"" + QString::number(y - 12) + "\" width=\"25\" height=\"14\" fill=\""
+            + (group == 0 ? GenuineColor : ImpostorColor) + "\" fill-opacity=\"0.65\"/><text x=\"153\" y=\"" + QString::number(y)
+            + "\">" + (group == 0 ? "Genuine" : "Impostor") + " (n=" + QString::number(groups.values[group].size()) + ")</text>";
+    }
+    return svg + "</g><text x=\"90\" y=\"473\" font-size=\"10\">Successful scores only; each group is normalized to unit area.</text>";
 }
 
 // Match the assignment's logarithmic FMR/FNMR plot. Zero stays zero in the data;
@@ -228,18 +335,34 @@ static QString DetCurve(const ScoreGroups& groups, const std::vector<bool>& sele
     const auto position = [floor, lowestPower](double rate) {
         return (std::log10(std::max(floor, rate)) - lowestPower) / -lowestPower;
     };
-    const auto x = [&position](double rate) { return Number(70 + 740 * position(rate)); };
-    const auto y = [&position](double rate) { return Number(245 - 185 * position(rate)); };
+    const auto x = [&position](double rate) { return Number(Left + PlotWidth * position(rate)); };
+    const auto y = [&position](double rate) { return Number(DetBottom - PlotWidth * position(rate)); };
     const auto raw = [](double value) { return QString::number(value, 'g', engine::CsvPrecision); };
     QString svg = "<g class=\"det-log-axes\" data-min-rate=\"" + raw(floor) + "\" font-size=\"11\">";
     for (int power = lowestPower; power <= 0; ++power) {
         control.Check();
         const double rate = std::pow(10.0, power);
-        svg += "<path d=\"M" + x(rate) + " 60V245M70 " + y(rate) + "H810\" stroke=\"#e3e7eb\" fill=\"none\"/>"
-            "<text x=\"" + x(rate) + "\" y=\"267\" text-anchor=\"middle\">" + Number(100 * rate) + "</text>"
-            "<text x=\"62\" y=\"" + y(rate) + "\" text-anchor=\"end\">" + Number(100 * rate) + "</text>";
+        svg += "<path d=\"M" + x(rate) + " 60V770M90 " + y(rate) + "H800\" stroke=\"#bbb\" stroke-dasharray=\"2 2\" fill=\"none\"/>"
+            "<text x=\"" + Number(x(rate).toDouble() - 1) + "\" y=\"797\" text-anchor=\"end\">10</text>"
+            "<text x=\"" + x(rate) + "\" y=\"792\" font-size=\"9\">" + QString::number(power) + "</text>"
+            "<text x=\"68\" y=\"" + Number(y(rate).toDouble() + 4) + "\" text-anchor=\"end\">10</text>"
+            "<text x=\"69\" y=\"" + Number(y(rate).toDouble() - 1) + "\" font-size=\"9\">" + QString::number(power) + "</text>";
+        if (power < 0) for (int minor = 2; minor < 10; ++minor) {
+            const double value = minor * rate;
+            svg += "<path d=\"M" + x(value) + " 60V770M90 " + y(value)
+                + "H800\" stroke=\"#e5e5e5\" stroke-dasharray=\"1 3\" fill=\"none\"/>";
+        }
     }
-    svg += "</g><text x=\"70\" y=\"46\" font-size=\"11\">Zero rates shown at " + Number(100 * floor) + "%</text>";
+    svg += "</g><text x=\"90\" y=\"46\" font-size=\"10\">Rates are fractions; zero rates are drawn at the axis floor (" + Number(floor) + ").</text>"
+        "<path id=\"eer-equality-line\" d=\"M90 770L800 60\" stroke=\"#777\" stroke-width=\"1.2\" fill=\"none\"/>"
+        "<text transform=\"translate(451 405) rotate(-45)\" font-size=\"11\" fill=\"#666\">FMR = FNMR</text>";
+    for (int denominator : {10000, 1000, 100}) {
+        const QString xx = x(1.0 / denominator);
+        svg += "<path class=\"fmr-reference\" data-target=\"" + raw(1.0 / denominator) + "\" d=\"M" + xx
+            + " 60V770\" stroke=\"#555\" stroke-width=\"1\" fill=\"none\"/>"
+            "<text transform=\"translate(" + Number(xx.toDouble() - 6) + " 142) rotate(-90)\" font-size=\"10\">FMR"
+            + QString::number(denominator) + "</text>";
+    }
     const std::vector<double> thresholds = Thresholds(groups, control);
     std::vector<OperatingPoint> curve;
     QString points, samples;
@@ -251,36 +374,39 @@ static QString DetCurve(const ScoreGroups& groups, const std::vector<bool>& sele
         points += x(fmr) + ',' + y(fnmr) + ' ';
         samples += "<circle class=\"det-point\" data-threshold=\"" + raw(threshold)
             + "\" data-fmr=\"" + raw(fmr) + "\" data-fnmr=\"" + raw(fnmr) + "\" cx=\"" + x(fmr)
-            + "\" cy=\"" + y(fnmr) + "\" r=\"1.8\" fill=\"#2468a0\"/>";
+            + "\" cy=\"" + y(fnmr) + "\" r=\"0.8\" fill=\"#1148c8\"/>";
     }
     svg += "<polyline id=\"det-curve\" data-threshold-count=\"" + QString::number(curve.size())
-        + "\" fill=\"none\" stroke=\"#2468a0\" stroke-width=\"2\" points=\"" + points + "\"/>" + samples;
-    int legendRow = 0;
-    const auto marker = [&](const OperatingPoint& point, const QString& label, const QString& color, bool estimated = false) {
+        + "\" fill=\"none\" stroke=\"#1148c8\" stroke-width=\"2\" points=\"" + points + "\"/>" + samples;
+    std::vector<std::pair<double, double>> labels;
+    const auto marker = [&](const OperatingPoint& point, const QString& label, bool estimated = false) {
         if (!point.available) return;
-        const QString legendX = QString::number(70 + 245 * legendRow++);
-        svg += "<circle class=\"det-marker\" data-estimated=\"" + QString(estimated ? "true" : "false")
+        const double xx = x(point.fmr).toDouble(), yy = y(point.fnmr).toDouble();
+        const double labelX = std::clamp(xx + 12, Left + 12, Right - 245);
+        double labelY = std::clamp(yy - 12, Top + 20, DetBottom - 12);
+        for (const auto& previous : labels)
+            if (std::abs(labelX - previous.first) < 245 && std::abs(labelY - previous.second) < 19)
+                labelY = previous.second + (yy < Top + 100 ? 21 : -21);
+        labels.push_back({labelX, labelY});
+        svg += "<rect class=\"det-marker\" data-estimated=\"" + QString(estimated ? "true" : "false")
             + "\" data-fmr=\"" + raw(point.fmr) + "\" data-fnmr=\"" + raw(point.fnmr)
-            + "\" cx=\"" + x(point.fmr) + "\" cy=\"" + y(point.fnmr)
-            + "\" r=\"4\" fill=\"" + color + "\" stroke=\"white\"/>"
-            "<text x=\"" + legendX + "\" y=\"284\" fill=\"" + color + "\" font-size=\"11\">" + label + "</text>";
+            + "\" x=\"" + Number(xx - 4) + "\" y=\"" + Number(yy - 4)
+            + "\" width=\"8\" height=\"8\" fill=\"#1148c8\" stroke=\"#111\"/>"
+            "<text x=\"" + Number(labelX) + "\" y=\"" + Number(labelY) + "\" font-size=\"11\">" + label + "</text>";
     };
     if (selected.size() > 5 && selected[5]) {
         const OperatingPoint point = EerPoint(groups, false, thresholds, control);
         const double estimate = (point.fmr + point.fnmr) / 2;
-        marker({point.threshold, estimate, estimate, point.available}, "EER estimate: " + Number(100 * estimate) + "%", "#111111", true);
+        marker({point.threshold, estimate, estimate, point.available}, "EER est. = " + Number(100 * estimate) + "%", true);
     }
-    for (int metric : {9, 10}) {
-        if (selected.size() <= std::size_t(metric) || !selected[metric]) continue;
-        const double target = metric == 9 ? 0.01 : 0.001;
+    for (int denominator : {10000, 1000, 100}) {
+        const double target = 1.0 / denominator;
         OperatingPoint best;
         for (const OperatingPoint& point : curve) {
             control.Check();
             if (point.fmr <= target + engine::MetricTolerance && (!best.available || point.fnmr < best.fnmr)) best = point;
         }
-        const QString color = metric == 9 ? "#9a6500" : "#8844aa";
-        svg += "<path d=\"M" + x(target) + " 60V245\" stroke=\"" + color + "\" stroke-dasharray=\"4 4\"/>";
-        marker(best, QString(metric == 9 ? "FMR100: FNMR " : "FMR1000: FNMR ") + Number(100 * best.fnmr) + "%", color);
+        marker(best, "FMR" + QString::number(denominator) + ": FNMR = " + Number(100 * best.fnmr) + "%");
     }
     return svg;
 }
@@ -303,11 +429,11 @@ QStringList GraphFiles(const std::vector<bool>& selected) {
 }
 
 QString GraphTitle(const QString& file, const std::vector<bool>& selected) {
-    if (file == "score_distribution.svg") return "Score distribution";
-    if (file == "error_tradeoff.svg") return "DET curve (logarithmic axes)";
+    if (file == "score_distribution.svg") return "Score Distribution";
+    if (file == "error_tradeoff.svg") return "DET Curve";
     if (DerivedMetricSelected(selected) || (selected.size() > 3 && selected[3] && selected.size() > 4 && selected[4]))
-        return "FMR / FNMR by threshold";
-    return (selected.size() > 3 && selected[3]) ? "FMR by threshold" : "FNMR by threshold";
+        return "FMR(t) and FNMR(t)";
+    return (selected.size() > 3 && selected[3]) ? "FMR(t)" : "FNMR(t)";
 }
 
 static bool WriteReportFile(const QString& path, const QString& text, const engine::ExportControl& control) {
@@ -337,7 +463,6 @@ bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& sele
     const bool showFmr = derived || (selected.size() > 3 && selected[3]);
     const bool showFnmr = derived || (selected.size() > 4 && selected[4]);
     ScoreGroups groups = CollectScores(run, control);
-    double low = EmptyScoreLow, high = EmptyScoreHigh;
     bool first = true;
     for (const engine::ComparisonRecord& record : run.comparisons) {
         control.Check();
@@ -347,72 +472,29 @@ bool WriteGraphs(const engine::EvaluationRun& run, const std::vector<bool>& sele
             groups.complete[record.genuine ? 0 : 1] = false;
             continue;
         }
-        if (first) { low = high = score; first = false; }
-        if (score < low) low = score;
-        if (score > high) high = score;
-    }
-    if (low == high) {
-        low = std::fmax(0.0, low - CurvePadding);
-        high = std::fmin(1.0, high + CurvePadding);
+        first = false;
     }
     QString distribution, errors, tradeoff;
     if (first)
         distribution = EmptyPlot("No scored comparison results available.");
-    else {
-        std::vector<int> bins[2] = {std::vector<int>(HistogramBins), std::vector<int>(HistogramBins)};
-        int maximum = 1;
-        for (int group = 0; group < 2; ++group) {
-            for (double score : groups.values[group]) {
-                control.Check();
-                int bin = int((score - low) / (high - low) * HistogramBins);
-                if (bin >= HistogramBins) bin = HistogramBins - 1;
-                ++bins[group][bin];
-                if (bins[group][bin] > maximum) maximum = bins[group][bin];
-            }
-        }
-        for (int group = 0; group < 2; ++group) {
-            const QString color = group == 0 ? "#2468a0" : "#c15b18";
-            for (int bin = 0; bin < HistogramBins; ++bin) {
-                const double height = 185.0 * bins[group][bin] / maximum;
-                distribution += QString("<rect x=\"%1\" y=\"%2\" width=\"%5\" height=\"%3\" fill=\"%4\"/>")
-                    .arg(72 + bin * (740.0 / HistogramBins) + group * (340.0 / HistogramBins))
-                    .arg(Number(245 - height)).arg(Number(height)).arg(color).arg(Number(320.0 / HistogramBins));
-            }
-        }
-        distribution += Ticks(low, high, maximum);
-    }
-    distribution += "<text x=\"570\" y=\"48\" fill=\"#2468a0\">Genuine</text>"
-                    "<text x=\"670\" y=\"48\" fill=\"#c15b18\">Impostor</text>";
+    else distribution = ScoreDistribution(groups, control);
     if (first || (showFmr && (!groups.complete[1] || groups.total[1] == 0)) || (showFnmr && (!groups.complete[0] || groups.total[0] == 0))) {
         errors = tradeoff = EmptyPlot("Complete the required comparison groups to plot error rates.");
     } else {
-        QString fmrPoints, fnmrPoints;
-        const double start = std::fmax(0.0, low - (high - low) * CurvePadding);
-        const double end = std::fmin(1.0, high + (high - low) * CurvePadding);
-        for (int step = 0; step <= CurveSteps; ++step) {
-            control.Check();
-            const double threshold = start + (end - start) * step / CurveSteps;
-            double fmr, fnmr;
-            Rates(groups, threshold, threshold, false, fmr, fnmr);
-            const QString x = Number(70 + 740.0 * step / CurveSteps);
-            fmrPoints += x + "," + Number(245 - 185 * fmr) + " ";
-            fnmrPoints += x + "," + Number(245 - 185 * fnmr) + " ";
-        }
-        if (showFmr)
-            errors += Line(fmrPoints, "#2468a0") + "<text x=\"620\" y=\"48\" fill=\"#2468a0\">FMR</text>";
-        if (showFnmr)
-            errors += Line(fnmrPoints, "#c15b18") + "<text x=\"700\" y=\"48\" fill=\"#c15b18\">FNMR</text>";
-        errors += Ticks(start, end, 100);
+        errors = ErrorRateCurves(groups, showFmr, showFnmr, selected, control);
         tradeoff = DetCurve(groups, selected, control);
     }
     for (const QString& file : files) {
         QString svg;
+        QString title = GraphTitle(file, selected);
+        const QString database = QDir(QString::fromStdString(run.database)).dirName();
+        if (!run.database.empty() && !database.isEmpty()) title += " - " + database;
         if (file == "score_distribution.svg")
-            svg = Plot(GraphTitle(file, selected), "Normalized similarity (0-1)", "Successful comparisons", distribution);
+            svg = Plot(title, "Similarity score", "Probability density", distribution);
         else if (file == "error_rates.svg")
-            svg = Plot(GraphTitle(file, selected), "Normalized threshold (0-1)", "Error rate (%)", errors);
+            svg = Plot(title, "Threshold", "Error rate", errors);
         else
-            svg = Plot(GraphTitle(file, selected), "FMR (%)", "FNMR (%)", tradeoff);
+            svg = Plot(title, "FMR", "FNMR", tradeoff, true);
         if (!WriteReportFile(folder + "/" + file, svg, control)) return false;
     }
     return true;
@@ -443,7 +525,7 @@ bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, c
         "<title>Fingerprint performance report</title><style>"
         "body{font:16px Arial,sans-serif;max-width:900px;margin:32px auto;padding:0 20px;color:#222}"
         "table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:7px;text-align:left}"
-        "pre{white-space:pre-wrap;overflow-wrap:anywhere}img{max-width:100%}"
+        "pre{white-space:pre-wrap;overflow-wrap:anywhere}img{max-width:100%;height:auto}"
         "</style></head><body><h1>Fingerprint performance report</h1>";
     bool executed = false;
     for (const engine::ComparisonRecord& item : run.comparisons) {
@@ -484,7 +566,7 @@ bool Save(const engine::EvaluationRun& run, const std::vector<bool>& selected, c
     if (!files.isEmpty()) html += "<h2>Graphs</h2>";
     for (const QString& file : files)
         html += "<h3>" + GraphTitle(file, selected) + "</h3><img src=\"" + file + "\" width=\""
-            + QString::number(GraphWidth) + "\" height=\"" + QString::number(GraphHeight) + "\" alt=\""
+            + QString::number(GraphWidth) + "\" height=\"" + QString::number(file == "error_tradeoff.svg" ? GraphWidth : GraphHeight) + "\" alt=\""
             + GraphTitle(file, selected) + "\"><p><a href=\"" + file + "\">Open vector image (SVG)</a></p>";
     html += "<h2>Saved data</h2><p><a href=\"enrollments.csv\">Enrollment images</a> | "
         "<a href=\"comparisons.csv\">Comparison pairs in saved order</a> | <a href=\"metrics.csv\">All metrics</a> | "
