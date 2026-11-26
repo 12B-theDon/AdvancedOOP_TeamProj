@@ -44,6 +44,13 @@ function Install-Tool {
     param([string]$Id, [string]$Override)
     $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
     if (-not $winget) {
+        if (-not (Get-Command Ensure-WinGet -ErrorAction SilentlyContinue)) {
+            . (Join-Path $PSScriptRoot 'bootstrap_windows.ps1') -FunctionsOnly
+        }
+        Ensure-WinGet | Out-Null
+        $winget = Get-Command winget.exe -ErrorAction Stop
+    }
+    if (-not $winget) {
         throw 'WinGet is missing. Install Microsoft App Installer, then rerun this script: https://aka.ms/getwinget'
     }
     $installerArgs = @('install', '--exact', '--id', $Id, '--source', 'winget',

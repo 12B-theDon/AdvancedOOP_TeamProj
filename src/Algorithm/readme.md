@@ -9,6 +9,12 @@
 - `encoderConfig.h`: 입력 크기, 모델 차원, 전처리·Template 형식을 정의합니다.
 - `Algorithm.h`: native encoder 인터페이스와 입력·metadata 자료형을 정의합니다.
 
+`CreateTemplates()`는 호환성이 확인된 DB 전용·combined 모델의 전처리와 고정 Backbone(지문 특징을 추출하는 공통 연산)을 한 번만 실행합니다. `features()` 결과를 각각의 projection·classifier에 전달하므로 두 모델의 확률 벡터와 Template은 별도로 유지합니다. 기존 `Preprocess()`·`CreateTemplate()` API도 그대로 사용합니다.
+
+공유 전에 forward가 features→head로 분리되는지, 전처리·features가 학습 head를 참조하지 않는지도 확인합니다. 확인할 수 없는 호출·비결정적 연산은 공유하지 않습니다. TorchScript method·상수 tensor·고정 parameter·buffer·tensor layout·scalar 설정을 직접 비교하고, 검증 입력에서 기존 forward와 확률 출력이 바이트 수준으로 같은지 확인합니다. CRC나 metadata만으로 판정하지 않습니다. 확인되지 않은 모델 쌍, 공유 연산 실패, 한쪽 head 실패는 기존 개별 경로로 처리합니다. 기존 모델 파일과 SHA-256은 바꾸지 않습니다.
+
+archive 로딩과 SHA-256 중첩, 두 모델의 독립 병렬 로딩, 실제 입력 전처리를 포함한 초기화는 별도 측정 옵션입니다. 해시와 출력 검사가 끝난 모델만 호출 thread에서 등록하며, 읽는 동안 Windows 파일 잠금으로 archive와 hash 대상의 변경을 막습니다. 기본값은 검증된 공유 추론만 사용하며 초기화 실험 옵션은 꺼져 있습니다.
+
 512차원 embedding을 cosine classifier ×16과 Softmax에 통과시킨 30차원 확률 벡터를 사용합니다. 각 값이 0 이상이므로 cosine도 `0~1`이며, 이 값을 그대로 모델별 점수로 사용합니다. 전용 모델·combined의 성공 점수 중 최솟값을 구한 뒤 소수 셋째 자리로 반올림합니다.
 
 이전 `(cosine + 1) / 2` 변환만 제거했으며, 모델 구조·학습 대상·기존 가중치·Template 형식은 같습니다. 반올림 전 점수에서 이전 Threshold `0.65`에 대응하는 값은 현재 `0.30`입니다. 반올림 때문에 경계 판정은 일부 달라질 수 있습니다. 다른 팀 DLL의 점수는 해당 DLL이 반환한 값을 그대로 사용합니다.

@@ -4,6 +4,10 @@ DeepPrint 기반 지문 알고리즘을 학습하고, K-NBTC 규격 DLL의 유�
 
 ## 1. Install
 
+배포받은 **`install.exe`를 더블클릭**하면 저장소·필요 도구·가중치를 준비하고 Release 빌드·패키징 후 GUI를 실행합니다. `install.exe` 하나만 있어도 시작할 수 있고, 기존 checkout과 정상 가중치는 재사용합니다. [설치기·로그 안내](docs/installer.md)
+
+소스에서 직접 설치하려면 아래 명령을 사용합니다.
+
 Windows x64의 **PowerShell**에서 아래 순서대로 실행합니다. Git이 없다면 `winget install --exact --id Git.Git`으로 설치한 뒤 PowerShell을 다시 엽니다.
 
 **저장소 복제**
@@ -53,7 +57,8 @@ FinalProject/
 │  ├─ Kisa/          # 공개 DLL wrapper와 알고리즘 Core DLL
 │  ├─ Engine/        # 비교 계획·템플릿 캐시·병렬 평가·원시 결과 저장
 │  ├─ Worker/        # Windows DLL 실행 프로세스와 IPC 규약
-│  └─ GUI/           # 단계별 화면·결과 표시·지표·보고서
+│  ├─ GUI/           # 단계별 화면·결과 표시·지표·보고서
+│  └─ Installer/     # 독립 Windows 설치기 install.exe
 ├─ data/
 │  └─ original/      # 보존 대상 원본 FVC 데이터
 ├─ models/
@@ -61,10 +66,11 @@ FinalProject/
 │  └─ trained_result/ # Git LFS로 배포하는 학습 모델 4개·파일 검사값 목록
 ├─ dist/             # 배포 결과 (패키징 시 생성, Git 제외)
 │  ├─ FingerprintAlgorithm/ # 알고리즘 DLL·모델·runtime
-│  └─ FingerprintEvaluator/ # GUI·Worker·Qt runtime·plugins
+│  └─ FingerprintEvaluator/ # install.exe·GUI·Worker·Qt runtime·plugins
 ├─ docs/             # 빌드·검증·출처 문서, 구조도, 보존 기준
 ├─ cmake/            # 알고리즘·평가 프로그램 배포 폴더 생성 (dist/)
 ├─ tools/            # Windows 설치·빌드·패키징·배포 파일 검사
+│  ├─ bootstrap_windows.ps1 # 저장소 확보·설치 스크립트 연결
 │  ├─ setup_windows.ps1  # 도구 설치·모델 다운로드·필요 시 학습·패키징
 │  └─ verify_manifest.py # 배포 파일 누락·SHA-256 검사
 ├─ third_party/      # DeepPrint 소스·patch, Qt·LibTorch 라이선스 고지
@@ -88,7 +94,7 @@ FinalProject/
 | Qt Core | `<QFile>`, `<QSaveFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·지문 ID 목록 검사 |
 | LibTorch·ATen | `<torch/torch.h>`, `<torch/script.h>`, `<ATen/core/Tensor.h>` | 학습·inference·Tensor |
 | C++ Standard Library | `<vector>`, `<thread>`, `<future>`, `<mutex>`, `<condition_variable>`, `<random>` | 자료구조·병렬·동기화·sampling |
-| Windows API | `<windows.h>`, `<bcrypt.h>` | DLL·Process·IPC·파일 SHA-256 |
+| Windows API | `<windows.h>`, `<bcrypt.h>`, `<shlobj.h>` | DLL·Process·IPC·파일 검사·설치 |
 
 SHA-256은 파일 내용을 64자리 16진수 검사값으로 요약하는 방법입니다. 모델 파일이 바뀌었는지, Template이 현재 모델로 만들어졌는지 확인하는 데 사용하며, 파일 검사값은 Windows 기본 기능인 BCrypt로 계산합니다.
 

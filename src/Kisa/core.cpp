@@ -39,20 +39,35 @@ QString ModuleFolder() {
     if (length == 0 || length >= 32768) throw std::runtime_error("Invalid Core DLL path.");
     return QFileInfo(QString::fromWCharArray(path, static_cast<int>(length))).absolutePath();
 }
+algorithm::EncoderOptions RuntimeOptions() {
+    algorithm::EncoderOptions options;
+    options.shared_features = qgetenv("FINGERPRINT_SHARED_FEATURES") != "0";
+    options.overlap_hash = qgetenv("FINGERPRINT_OVERLAP_HASH") == "1";
+    options.parallel_loading = qgetenv("FINGERPRINT_PARALLEL_LOAD") == "1";
+    options.representative_initialization = qgetenv("FINGERPRINT_REPRESENTATIVE_INIT") == "1";
+    return options;
+}
 struct State {
+    State() : encoder(RuntimeOptions()) {}
     algorithm::FingerprintEncoder encoder;
     std::array<bool, 4> attempted = {};
     std::array<bool, 4> loaded = {};
     std::array<std::string, 4> errors;
     std::mutex mutex;
-    void Load(int type) {
-        // Each iType needs only its matching-DB model and the shared combined model.
-        // Cache successes and failures independently so another DB can load later.
+    void Load(int type, const algorithm::AlgorithmImage* initialization = nullptr) {
+        std::vector<int> indices;
+        std::vector<std::string> ids, files, failures;
         for (int i : {type - 1, 3}) {
             if (attempted[i]) continue;
-            const QString path = QDir(ModuleFolder()).filePath(QString::fromStdString(ModelIds[i]) + ".bin");
-            loaded[i] = encoder.LoadModel(ModelIds[i], path.toStdString(), errors[i]);
-            attempted[i] = true;
+            indices.push_back(i); ids.push_back(ModelIds[i]);
+        }
+        if (indices.empty()) return;
+        const QString folder = ModuleFolder();
+        for (int index : indices) files.push_back(QDir(folder).filePath(QString::fromStdString(ModelIds[index]) + ".bin").toStdString());
+        const std::vector<bool> successes = encoder.LoadModels(ids, files, failures, initialization);
+        for (std::size_t i = 0; i < indices.size(); ++i) {
+            const int index = indices[i];
+            loaded[index] = successes[i]; errors[index] = failures[i]; attempted[index] = true;
         }
     }
 };
@@ -97,21 +112,24 @@ int Extract(int type, unsigned char* image, unsigned char* output, int* size, in
     const kisa::FvcSpec* spec = kisa::Find(type);
     if (!spec) return Failure(kisa::Error::InvalidType, "Expected FVC iType 1, 2 or 3.", code, message);
     try {
-        State& state = SharedState(); std::lock_guard<std::mutex> lock(state.mutex); state.Load(type);
-        if (!state.loaded[type - 1] && !state.loaded[3])
-            return Failure(kisa::Error::ModelLoad, "No matching-DB/combined model: " + state.errors[type - 1] + "; " + state.errors[3], code, message);
         algorithm::AlgorithmImage raw;
         raw.width = spec->width; raw.height = spec->height; raw.database_id = spec->database;
         raw.pixels.assign(image, image + std::size_t(spec->width) * spec->height);
+        State& state = SharedState(); std::lock_guard<std::mutex> lock(state.mutex); state.Load(type, &raw);
+        if (!state.loaded[type - 1] && !state.loaded[3])
+            return Failure(kisa::Error::ModelLoad, "No matching-DB/combined model: " + state.errors[type - 1] + "; " + state.errors[3], code, message);
         Bundle bundle; bundle.type = type;
         bool decisionAvailable = false;
         std::string error;
+        std::vector<int> indices; std::vector<std::string> ids;
         for (int i : {type - 1, 3}) {
-            if (!state.loaded[i]) { error = state.errors[i]; continue; }
-            algorithm::PreparedImage prepared;
-            if (!state.encoder.Preprocess(ModelIds[i], raw, prepared, error)
-                || !state.encoder.CreateTemplate(ModelIds[i], prepared, bundle.templates[i], error)) continue;
-            decisionAvailable = true;
+            if (state.loaded[i]) { indices.push_back(i); ids.push_back(ModelIds[i]); }
+            else error = state.errors[i];
+        }
+        const std::vector<algorithm::TemplateResult> results = state.encoder.CreateTemplates(ids, raw);
+        for (std::size_t i = 0; i < results.size(); ++i) {
+            if (!results[i].success) { error = results[i].error; continue; }
+            bundle.templates[indices[i]] = results[i].data; decisionAvailable = true;
         }
         if (!decisionAvailable) return Failure(kisa::Error::Extraction, "No matching-DB/combined template: " + error, code, message);
         const QByteArray bytes = Encode(bundle);

@@ -39,8 +39,5 @@ file(COPY "${SOURCE}/src/Kisa/README.txt" "${SOURCE}/tools/verify_manifest.py" D
 file(COPY "${SOURCE}/third_party/deepprint/LICENSE" DESTINATION "${stage}/licenses")
 file(RENAME "${stage}/licenses/LICENSE" "${stage}/licenses/DeepPrint-LGPL-3.0.txt")
 file(COPY "${SOURCE}/third_party/deepprint.NOTICE.txt" "${SOURCE}/docs/THIRD_PARTY.md" "${SOURCE}/docs/InceptionV4-BSD-3-Clause.txt" DESTINATION "${stage}/licenses")
-write_manifest("${stage}")
-# Only replace the explicitly configured deployment directory after validation.
-file(REMOVE_RECURSE "${DESTINATION}")
-file(RENAME "${stage}" "${DESTINATION}")
+publish_package("${stage}")
 message(STATUS "Packaged ${DESTINATION}; manifest excludes only itself.")

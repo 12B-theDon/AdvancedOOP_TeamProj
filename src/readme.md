@@ -20,3 +20,5 @@ Windows에서는 `GUI/startup.cpp`가 배포 파일을 확인하고, 필요하�
 외부 DLL 교체는 GUI Step 3에서 경로를 선택합니다. 이 프로젝트의 DLL을 배포할 때는 패키징으로 생성한 `dist/FingerprintAlgorithm/`을 사용합니다.
 
 [설치·학습·실행·배포](../readme.md) · [전체 구조도](../docs/diagrams/overview.svg)
+
+[Installer](Installer/readme.md)는 Qt·LibTorch 없이 시작하는 Windows `install.exe`를 빌드하며, 기존 설치 스크립트와 패키징을 연결합니다.

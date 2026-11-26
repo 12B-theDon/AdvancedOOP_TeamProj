@@ -1,0 +1,14 @@
+{
+  "toolchain_release": "20261117",
+  "source": "https://github.com/mstorsjo/llvm-mingw/releases/tag/20261117",
+  "archive_sha256": "98d340bbb8d46b09ad6886ffba88bd9d5415e131c316de48e6bd7647377446aa",
+  "files": {
+    "LICENSE.TXT": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+    "x86_64-w64-mingw32/share/mingw32/COPYING.MinGW-w64.txt": "f38e6194bd3bfa1b654f118e5acefe0aead437bbe669eee43957ccc65a7127f1",
+    "x86_64-w64-mingw32/share/mingw32/COPYING.winpthreads.txt": "63263614cdd29f2f93cba85e992f041b31f9fc7b4033692f31269489a8a1b177",
+    "x86_64-w64-mingw32/share/mingw32/COPYING.winstorecompat.txt": "fa7368d1f93d890c173177475d8ec7aff265a7d08f1f364d66f74d138978ce36",
+    "x86_64-w64-mingw32/share/mingw32/COPYING.MinGW-w64-runtime.txt": "1db8da07b436c68833c0673ffee3d9fcb2526047f3820b81661865dfedc79a1f",
+    "x86_64-w64-mingw32/share/mingw32/COPYING": "99a69660981156c21336fdb5661f89341b013c94e4bf9e1c7467b4745718397f"
+  },
+  "notice_sha256": "159b3722722d790e530fa3b8c93c4bf24e11bf6c217a9fbe79ae5aa514f23f86"
+}

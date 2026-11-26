@@ -3,6 +3,15 @@ project(FingerprintEvaluator VERSION 1.0 LANGUAGES CXX)
 if(NOT WIN32)
     message(FATAL_ERROR "FingerprintEvaluator supports Windows only.")
 endif()
+option(FINGERPRINT_INSTALLER_ONLY "Build only the dependency-free installer" OFF)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    add_subdirectory(src/Installer)
+elseif(FINGERPRINT_INSTALLER_ONLY)
+    message(FATAL_ERROR "The standalone installer targets Windows x64.")
+endif()
+if(FINGERPRINT_INSTALLER_ONLY)
+    return()
+endif()
 if(NOT MSVC)
     message(FATAL_ERROR "FingerprintEvaluator requires MSVC.")
 endif()
@@ -84,15 +93,30 @@ if(FINGERPRINT_BUILD_GUI)
     get_target_property(QMAKE_EXE Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
     get_filename_component(QT_BIN "${QMAKE_EXE}" DIRECTORY)
     find_program(WINDEPLOYQT windeployqt HINTS "${QT_BIN}" REQUIRED)
+    set(installer_dependency "")
+    if(TARGET FingerprintInstaller)
+        set(installer_binary "$<TARGET_FILE:FingerprintInstaller>")
+        set(installer_dependency FingerprintInstaller)
+    else()
+        set(FINGERPRINT_INSTALLER_FILE "" CACHE FILEPATH "Prebuilt x64 install.exe for an optional 32-bit evaluator package")
+        set(installer_binary "${FINGERPRINT_INSTALLER_FILE}")
+    endif()
     add_custom_target(FingerprintEvaluatorPackage
         COMMAND ${CMAKE_COMMAND}
             "-DGUI_EXE=$<TARGET_FILE:FingerprintGUI>"
             "-DWORKER_EXE=$<TARGET_FILE:FingerprintWorker>"
+            "-DINSTALLER_EXE=${installer_binary}"
+            "-DRUNNING_INSTALLER=$ENV{FINGERPRINT_RUNNING_INSTALLER}"
             "-DWINDEPLOYQT=${WINDEPLOYQT}"
             "-DDESTINATION=${CMAKE_SOURCE_DIR}/dist/FingerprintEvaluator"
             "-DSOURCE=${CMAKE_SOURCE_DIR}"
             -P "${CMAKE_SOURCE_DIR}/cmake/PackageEvaluator.cmake"
-        DEPENDS FingerprintGUI FingerprintWorker VERBATIM)
+        DEPENDS FingerprintGUI FingerprintWorker ${installer_dependency} VERBATIM)
+endif()
+option(FINGERPRINT_BUILD_BENCHMARKS "Build reproducible Windows pipeline benchmarks" OFF)
+if(FINGERPRINT_BUILD_BENCHMARKS AND TARGET Algorithm
+    AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/CMakeLists.txt")
+    add_subdirectory(benchmarks)
 endif()
 if(BUILD_TESTING AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
     add_subdirectory(tests)

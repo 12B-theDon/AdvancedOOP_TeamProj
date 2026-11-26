@@ -9,3 +9,5 @@
 - **Pretrained checkpoint**: 출처는 `models/pretrained/deepprint.json`에 기록합니다. upstream은 별도의 checkpoint 라이선스를 제공하지 않았습니다. 이 리팩터링으로 해당 파일의 권리를 변경하거나 추가 권리를 주장하지 않습니다.
 
 과제·안내서 PDF와 IndustryAlgorithm 예제는 원래 위치에 로컬 참고 자료로 보관합니다. 상호운용성 규격을 설명하는 자료이며 알고리즘 소스의 빌드 의존성에는 포함되지 않습니다.
+
+- **Standalone installer cross-build**: 로컬 Windows PE는 LLVM-MinGW 20261117 UCRT x86_64로 빌드했습니다. LLVM·MinGW runtime 고지와 출처는 `third_party/installer-notices/llvm-mingw-20261117/`에 보존하고, 해당 cross-build EXE에 포함합니다. `install.exe --licenses`로 확인합니다. 기본 MSVC 빌드는 기존 Visual Studio runtime 재배포 조건을 따릅니다.

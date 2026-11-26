@@ -41,6 +41,7 @@ __pycache__/
 /tests/
 /tools/*
 !/tools/setup_windows.ps1
+!/tools/bootstrap_windows.ps1
 !/tools/verify_manifest.py
 
 # Local reference materials and diagram PDF exports.
@@ -54,3 +55,6 @@ __pycache__/
 
 # Generated deployment packages.
 /dist/
+
+# Local benchmark tools, generated references and profiling results.
+/benchmarks/

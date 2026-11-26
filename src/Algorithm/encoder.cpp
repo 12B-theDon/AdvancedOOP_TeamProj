@@ -13,6 +13,14 @@
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <chrono>
+#include <future>
+#include <map>
+#include <set>
+#include <functional>
+#include <optional>
+#include <QRegularExpression>
+#include <torch/csrc/jit/ir/constants.h>
 #include <windows.h>
 #include <bcrypt.h>
 
@@ -145,28 +153,233 @@ bool Decode(const std::vector<unsigned char>& bytes, const QJsonObject& expected
         return Fail(error, "Template probabilities do not sum to one.");
     return true;
 }
+using Clock = std::chrono::steady_clock;
+double Elapsed(Clock::time_point start) { return std::chrono::duration<double, std::milli>(Clock::now() - start).count(); }
+torch::Tensor PrepareTensor(torch::jit::Module& module, const AlgorithmImage& image) {
+    Require(image.width > 0 && image.height > 0 && image.pixels.size() == std::size_t(image.width) * image.height,
+            "Expected tightly packed gray8 image.");
+    torch::Tensor tensor = torch::from_blob(const_cast<unsigned char*>(image.pixels.data()), {1, 1, image.height, image.width}, torch::kUInt8)
+              .to(torch::kFloat32).div(double(GrayMaximum));
+    if (image.database_id == CenterCropDatabase) {
+        const int side = std::min(image.width, image.height), left = (image.width - side) / 2, top = (image.height - side) / 2;
+        tensor = tensor.slice(2, top, top + side).slice(3, left, left + side);
+    } else {
+        const int side = std::max(image.width, image.height), left = (side - image.width) / 2, top = (side - image.height) / 2;
+        tensor = torch::constant_pad_nd(tensor, {left, side - image.width - left, top, side - image.height - top}, 1.0);
+    }
+    tensor = at::_upsample_bilinear2d_aa(tensor, {InputSize, InputSize}, false, {}, {});
+    tensor = module.run_method("preprocess", tensor).toTensor().contiguous();
+    if (tensor.numel() != InputSize * InputSize || !torch::isfinite(tensor).all().item<bool>())
+        throw std::runtime_error("Invalid preprocessed input.");
+    return tensor;
+}
+bool Serialize(const std::string& id, const AlgorithmModelInfo& info, const torch::Tensor& probabilities,
+               std::vector<unsigned char>& data, std::string& error) {
+    if (!Probabilities(probabilities, 1)) return Fail(error, "Invalid 30-dimensional probability output.");
+    QByteArray payload;
+    QDataStream values(&payload, QIODevice::WriteOnly);
+    values.setVersion(QDataStream::Qt_5_15);
+    values.setByteOrder(QDataStream::LittleEndian); values.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    for (int i = 0; i < TemplateSize; ++i) values << probabilities[0][i].item<float>();
+    QByteArray envelope;
+    QDataStream stream(&envelope, QIODevice::WriteOnly);
+    stream.setVersion(QDataStream::Qt_5_15);
+    stream.setByteOrder(QDataStream::LittleEndian);
+    stream << TemplateMagic << quint16(TemplateVersion)
+           << QJsonDocument(TemplateMetadata(id, info)).toJson(QJsonDocument::Compact) << payload;
+    if (stream.status() != QDataStream::Ok) return Fail(error, "Template serialization failed.");
+    data.assign(envelope.begin(), envelope.end());
+    return true;
+}
+bool EqualValue(const c10::IValue& a, const c10::IValue& b) {
+    if (std::string(a.tagKind()) != b.tagKind()) return false;
+    if (a.isTensor()) {
+        const torch::Tensor& x = a.toTensor(); const torch::Tensor& y = b.toTensor();
+        return x.scalar_type() == y.scalar_type() && x.device() == y.device() && x.layout() == y.layout()
+            && x.sizes() == y.sizes() && x.strides() == y.strides() && torch::equal(x, y);
+    }
+    if (a.isList()) {
+        const c10::List<c10::IValue> x = a.toList(), y = b.toList();
+        if (x.size() != y.size()) return false;
+        for (std::size_t i = 0; i < x.size(); ++i) if (!EqualValue(x.get(i), y.get(i))) return false;
+        return true;
+    }
+    if (a.isTuple()) {
+        const std::vector<c10::IValue>& x = a.toTupleRef().elements(), &y = b.toTupleRef().elements();
+        if (x.size() != y.size()) return false;
+        for (std::size_t i = 0; i < x.size(); ++i) if (!EqualValue(x[i], y[i])) return false;
+        return true;
+    }
+    if (a.isGenericDict()) {
+        const c10::impl::GenericDict x = a.toGenericDict(), y = b.toGenericDict();
+        if (x.size() != y.size()) return false;
+        for (c10::impl::GenericDict::iterator item = x.begin(); item != x.end(); ++item) {
+            const c10::impl::GenericDict::iterator found = y.find(item->key());
+            if (found == y.end() || !EqualValue(item->value(), found->value())) return false;
+        }
+        return true;
+    }
+    return a == b;
+}
+QString GraphText(const torch::jit::Method& method) {
+    QString text = QString::fromStdString(method.graph()->toString());
+    text.remove(QRegularExpression("\\.___torch_mangle_[0-9]+"));
+    return text;
+}
+void Constants(const torch::jit::Block* block, std::vector<c10::IValue>& values) {
+    for (const torch::jit::Node* node : block->nodes()) {
+        if (node->kind() == torch::jit::prim::Constant && node->outputs().size() == 1) {
+            const std::optional<c10::IValue> value = torch::jit::toIValue(node->output());
+            if (value) values.push_back(*value);
+        }
+        for (const torch::jit::Block* child : node->blocks()) Constants(child, values);
+    }
+}
+bool HeadTensor(const std::string& name) {
+    return name == "classifier_weight" || name.rfind("encoder.texture_projection.", 0) == 0
+        || name.rfind("encoder.minutia_projection.", 0) == 0;
+}
+using MethodWork = std::pair<torch::jit::Module, std::string>;
+std::optional<torch::jit::Module> Receiver(const torch::jit::Module& module,
+        const torch::jit::Value* self, const torch::jit::Value* value) {
+    if (value == self) return module;
+    const torch::jit::Node* node = value->node();
+    if (node->kind() != torch::jit::prim::GetAttr || node->inputs().size() != 1) return std::nullopt;
+    const std::optional<torch::jit::Module> parent = Receiver(module, self, node->input());
+    if (!parent) return std::nullopt;
+    const c10::IValue attribute = parent->attr(node->s(torch::jit::attr::name));
+    if (!attribute.isObject() || !attribute.toObject()->type()->is_module()) return std::nullopt;
+    return attribute.toModule();
+}
+bool FeatureBlock(const torch::jit::Block* block, const torch::jit::Module& module,
+                  const torch::jit::Value* self, std::vector<MethodWork>& pending) {
+    for (const torch::jit::Node* node : block->nodes()) {
+        const std::string kind = node->kind().toQualString();
+        if (kind == "prim::CallFunction" || kind == "prim::PythonOp" || kind == "prim::SetAttr") return false;
+        if (node->isNondeterministic()) {
+            bool disabledDropout = false;
+            if (kind == "aten::dropout" && node->inputs().size() >= 3) {
+                const std::optional<c10::IValue> training = torch::jit::toIValue(node->input(2));
+                disabledDropout = training && training->isBool() && !training->toBool();
+            }
+            if (!disabledDropout) return false;
+        }
+        if (node->kind() == torch::jit::prim::GetAttr) {
+            const std::string name = node->s(torch::jit::attr::name);
+            if (name == "classifier_weight" || name == "texture_projection" || name == "minutia_projection") return false;
+        }
+        if (node->kind() == torch::jit::prim::CallMethod) {
+            const std::optional<torch::jit::Module> target = Receiver(module, self, node->input(0));
+            if (!target) return false;
+            pending.emplace_back(*target, node->s(torch::jit::attr::name));
+        }
+        for (const torch::jit::Block* child : node->blocks()) if (!FeatureBlock(child, module, self, pending)) return false;
+    }
+    return true;
+}
+bool SplitForwardAndIndependentFeatures(torch::jit::Module& module) {
+    // Only the declared features -> head wrapper may be split. A producer whose
+    // features depend on trained heads, state updates or opaque calls falls back.
+    const std::shared_ptr<torch::jit::Graph> graph = module.get_method("forward").graph();
+    if (graph->inputs().size() != 2 || graph->outputs().size() != 1) return false;
+    std::vector<const torch::jit::Node*> nodes;
+    for (const torch::jit::Node* node : graph->nodes()) nodes.push_back(node);
+    if (nodes.size() != 2 || nodes[0]->kind() != torch::jit::prim::CallMethod
+        || nodes[1]->kind() != torch::jit::prim::CallMethod
+        || nodes[0]->s(torch::jit::attr::name) != "features"
+        || nodes[1]->s(torch::jit::attr::name) != "probabilities_from_features"
+        || nodes[0]->inputs().size() != 2 || nodes[1]->inputs().size() != 2
+        || nodes[0]->input(0) != graph->inputs()[0] || nodes[0]->input(1) != graph->inputs()[1]
+        || nodes[1]->input(0) != graph->inputs()[0] || nodes[1]->input(1) != nodes[0]->output()
+        || graph->outputs()[0] != nodes[1]->output()) return false;
+    std::vector<MethodWork> pending{{module, "preprocess"}, {module, "features"}};
+    std::set<std::pair<std::uintptr_t, std::string>> visited;
+    for (std::size_t i = 0; i < pending.size(); ++i) {
+        const MethodWork work = pending[i];
+        if (!visited.emplace(reinterpret_cast<std::uintptr_t>(work.first._ivalue().get()), work.second).second) continue;
+        const std::optional<torch::jit::Method> method = work.first.find_method(work.second);
+        if (!method || method->graph()->inputs().empty()
+            || !FeatureBlock(method->graph()->block(), work.first, method->graph()->inputs()[0], pending)) return false;
+    }
+    return true;
+}
+bool SameProgramAndFrozenTensors(torch::jit::Module& a, torch::jit::Module& b) {
+    std::map<std::string, torch::jit::Module> modules;
+    for (const torch::jit::Named<torch::jit::Module>& m : b.named_modules()) modules.emplace(m.name, m.value);
+    std::size_t seen = 0;
+    for (const torch::jit::Named<torch::jit::Module>& m : a.named_modules()) {
+        const std::map<std::string, torch::jit::Module>::iterator found = modules.find(m.name);
+        if (found == modules.end()) return false;
+        const torch::jit::Module& other = found->second; ++seen;
+        const std::vector<torch::jit::Method> methods = m.value.get_methods(), otherMethods = other.get_methods();
+        if (methods.size() != otherMethods.size() || m.value.type()->numAttributes() != other.type()->numAttributes()) return false;
+        for (const torch::jit::Method& method : methods) {
+            const std::optional<torch::jit::Method> match = other.find_method(method.name());
+            if (!match || GraphText(method) != GraphText(*match)) return false;
+            std::vector<c10::IValue> x, y; Constants(method.graph()->block(), x); Constants(match->graph()->block(), y);
+            if (x.size() != y.size()) return false;
+            for (std::size_t i = 0; i < x.size(); ++i) if (!EqualValue(x[i], y[i])) return false;
+        }
+        for (std::size_t i = 0; i < m.value.type()->numAttributes(); ++i) {
+            const std::string& name = m.value.type()->getAttributeName(i);
+            if (!other.hasattr(name)) return false;
+            const c10::IValue x = m.value.attr(name), y = other.attr(name);
+            const std::string full = m.name.empty() ? name : m.name + "." + name;
+            if (x.isObject() && y.isObject()) {
+                if (!x.toObject()->type()->is_module() || !y.toObject()->type()->is_module()) return false;
+                continue; // Module objects were recursively checked above.
+            }
+            if (!HeadTensor(full) && !EqualValue(x, y)) return false;
+        }
+    }
+    return seen == modules.size();
+}
+// Keep an immutable read lease while the archive and its digest are being read.
+class ModelReadLease {
+public:
+    explicit ModelReadLease(const QString& path) {
+        file_ = CreateFileW(reinterpret_cast<LPCWSTR>(path.utf16()), GENERIC_READ, FILE_SHARE_READ,
+                            nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        Require(file_ != INVALID_HANDLE_VALUE, "Cannot open stable model input: " + path);
+    }
+    ~ModelReadLease() { if (file_ != INVALID_HANDLE_VALUE) CloseHandle(file_); }
+    ModelReadLease(const ModelReadLease&) = delete;
+    ModelReadLease& operator=(const ModelReadLease&) = delete;
+private:
+    HANDLE file_ = INVALID_HANDLE_VALUE;
+};
+
 }
 
 struct FingerprintEncoder::State {
-    struct Model { std::string id; torch::jit::Module module; AlgorithmModelInfo info; };
+    struct Model {
+        std::string id; torch::jit::Module module; AlgorithmModelInfo info;
+        torch::Tensor validation_input, validation_output; EncoderProfile profile;
+    };
+    struct Built { std::unique_ptr<Model> model; std::string error; };
+    EncoderOptions options; EncoderProfile profile;
     std::vector<Model> models;
+    std::map<std::pair<std::string, std::string>, bool> compatible;
     Model* Find(const std::string& id) {
         for (Model& model : models) if (model.id == id) return &model;
         return nullptr;
     }
-};
-
-FingerprintEncoder::FingerprintEncoder() : state_(new State) { torch::set_num_threads(Threads); }
-FingerprintEncoder::~FingerprintEncoder() = default;
-
-bool FingerprintEncoder::LoadModel(const std::string& id, const std::string& file, std::string& error) {
-    error.clear();
-    // Failed reloads cannot expose a previously loaded model with this ID.
-    for (std::vector<State::Model>::iterator it = state_->models.begin(); it != state_->models.end();)
-        if (it->id == id) it = state_->models.erase(it); else ++it;
-    try {
+    static Built Reject(std::unique_ptr<Model>& model, const std::string& error) { model.reset(); return {nullptr, error}; }
+    static Built Build(const std::string& id, const std::string& file, const EncoderOptions& options,
+                       const AlgorithmImage* initialization) {
+        std::unique_ptr<Model> result(new Model); result->id = id;
+        try {
+            ModelReadLease lease(QString::fromStdString(file));
+            std::future<std::pair<QString, double>> hashing;
+            if (options.overlap_hash) hashing = std::async(std::launch::async, [file]() {
+                const Clock::time_point start = Clock::now();
+                const QString digest = Hash(QString::fromStdString(file));
+                return std::make_pair(digest, Elapsed(start));
+            });
         torch::jit::ExtraFilesMap extras{{"metadata.json", ""}};
+        const Clock::time_point archiveStart = Clock::now();
         torch::jit::Module module = LoadArchive(QString::fromStdString(file), extras);
+        result->profile.archive_ms = Elapsed(archiveStart);
         const QJsonObject metadata = QJsonDocument::fromJson(QByteArray::fromStdString(extras["metadata.json"])).object();
         const QString preprocessing = metadata.value("preprocessing").toString();
         const bool pretrained = id == "pretrained";
@@ -174,44 +387,116 @@ bool FingerprintEncoder::LoadModel(const std::string& id, const std::string& fil
             || (pretrained && preprocessing == CompatibleArchivePreprocessing);
         if (metadata.value("model_id").toString().toStdString() != id || !compatible
             || metadata.value("embedding_size").toInt() != EmbeddingSize)
-            return Fail(error, "Incompatible model ID, encoder dimension or preprocessing.");
+            return Reject(result, "Incompatible model ID, encoder dimension or preprocessing.");
         if (pretrained) {
             if (metadata.value("format").toString() != "deepprint-torchscript-v1"
                 || metadata.value("architecture").toString() != Architecture)
-                return Fail(error, "Expected the original pretrained 512-dimensional encoder.");
+                return Reject(result, "Expected the original pretrained 512-dimensional encoder.");
         } else if (metadata.value("format").toString() != ProbabilityFormat
                    || metadata.value("architecture").toString() != ProbabilityArchitecture
                    || metadata.value("output_dim").toInt() != TemplateSize) {
-            return Fail(error, "Legacy/incompatible weights: retrain with retained Cosine Classifier (30 probabilities, v2).");
+            return Reject(result, "Legacy/incompatible weights: retrain with retained Cosine Classifier (30 probabilities, v2).");
         }
         AlgorithmModelInfo info;
         info.format = metadata.value("format").toString().toStdString();
-        info.weight_sha256 = Hash(QString::fromStdString(file)).toStdString();
+        if (options.overlap_hash) {
+            const std::pair<QString, double> digest = hashing.get();
+            info.weight_sha256 = digest.first.toStdString(); result->profile.hash_ms = digest.second;
+        } else {
+            const Clock::time_point hashStart = Clock::now();
+            info.weight_sha256 = Hash(QString::fromStdString(file)).toStdString(); result->profile.hash_ms = Elapsed(hashStart);
+        }
         info.preprocessing = preprocessing.toStdString();
         info.output_size = pretrained ? EmbeddingSize : TemplateSize;
         if (!pretrained) {
             const QJsonArray labels = metadata.value("labels").toArray();
             for (const QJsonValue& label : labels) {
-                if (!label.isString() || label.toString().isEmpty()) return Fail(error, "Invalid ID label.");
+                if (!label.isString() || label.toString().isEmpty()) return Reject(result, "Invalid ID label.");
                 const std::string identity = label.toString().toStdString();
                 if (std::find(info.labels.begin(), info.labels.end(), identity) != info.labels.end())
-                    return Fail(error, "Expected 30 unique labels in the recorded label order.");
+                    return Reject(result, "Expected 30 unique labels in the recorded label order.");
                 info.labels.push_back(identity);
             }
             info.label_order_sha256 = LabelHash(labels).toStdString();
             if (labels.size() != TemplateSize
                 || metadata.value("label_order_sha256").toString().toStdString() != info.label_order_sha256)
-                return Fail(error, "Expected 30 unique labels in the recorded label order.");
+                return Reject(result, "Expected 30 unique labels in the recorded label order.");
         }
         module.eval();
         torch::NoGradGuard guard;
-        torch::Tensor sample = module.forward({torch::zeros({1, 1, InputSize, InputSize})}).toTensor();
+        const Clock::time_point validationStart = Clock::now();
+        torch::Tensor input = torch::zeros({1, 1, InputSize, InputSize});
+        if (options.representative_initialization && initialization) input = PrepareTensor(module, *initialization);
+        torch::Tensor sample = module.forward({input}).toTensor();
+        result->profile.validation_ms = Elapsed(validationStart);
+        result->validation_input = input.clone(); result->validation_output = sample.clone();
         if (pretrained ? (sample.sizes() != torch::IntArrayRef({1, EmbeddingSize}) || !torch::isfinite(sample).all().item<bool>())
                        : !Probabilities(sample, 1))
-            return Fail(error, "Invalid model output.");
-        state_->models.push_back({id, module, info});
-        return true;
-    } catch (const std::exception& exception) { error = exception.what(); return false; }
+            return Reject(result, "Invalid model output.");
+        result->module = std::move(module); result->info = std::move(info);
+        return {std::move(result), {}};
+        } catch (const std::exception& exception) { return Reject(result, exception.what()); }
+    }
+    bool CanShare(Model& a, Model& b) {
+        const std::pair<std::string, std::string> key(a.id, b.id);
+        const std::map<std::pair<std::string, std::string>, bool>::iterator found = compatible.find(key);
+        if (found != compatible.end()) return found->second;
+        const Clock::time_point start = Clock::now(); bool ok = false;
+        try {
+            torch::NoGradGuard guard;
+            ok = a.info.preprocessing == b.info.preprocessing && a.info.output_size == TemplateSize
+                && b.info.output_size == TemplateSize && a.module.find_method("features")
+                && b.module.find_method("features") && a.module.find_method("probabilities_from_features")
+                && b.module.find_method("probabilities_from_features") && SplitForwardAndIndependentFeatures(a.module)
+                && SplitForwardAndIndependentFeatures(b.module) && SameProgramAndFrozenTensors(a.module, b.module)
+                && torch::equal(a.validation_input, b.validation_input);
+            if (ok) {
+                torch::Tensor features = a.module.run_method("features", a.validation_input).toTensor();
+                const torch::Tensor saved = features.clone();
+                const torch::Tensor first = a.module.run_method("probabilities_from_features", features).toTensor();
+                ok = torch::equal(features, saved) && torch::equal(first, a.validation_output);
+                const torch::Tensor second = b.module.run_method("probabilities_from_features", features).toTensor();
+                ok = ok && torch::equal(features, saved) && torch::equal(second, b.validation_output);
+            }
+        } catch (const std::exception&) { ok = false; }
+        profile.compatibility_ms += Elapsed(start);
+        profile.sharing_status = ok ? "verified program, constants, frozen tensors and exact outputs" : "unverified pair; legacy fallback";
+        compatible[key] = ok; return ok;
+    }
+};
+FingerprintEncoder::FingerprintEncoder(const EncoderOptions& options) : state_(new State) {
+    state_->options = options; torch::set_num_threads(Threads);
+}
+FingerprintEncoder::~FingerprintEncoder() = default;
+EncoderProfile FingerprintEncoder::Profile() const { return state_->profile; }
+bool FingerprintEncoder::LoadModel(const std::string& id, const std::string& file, std::string& error) {
+    std::vector<std::string> errors;
+    const std::vector<bool> result = LoadModels({id}, {file}, errors);
+    error = errors.front(); return result.front();
+}
+std::vector<bool> FingerprintEncoder::LoadModels(const std::vector<std::string>& ids,
+        const std::vector<std::string>& files, std::vector<std::string>& errors, const AlgorithmImage* initialization) {
+    errors.assign(ids.size(), {}); std::vector<bool> loaded(ids.size(), false);
+    if (ids.size() != files.size()) { errors.assign(ids.size(), "Model ID/path count mismatch."); return loaded; }
+    state_->compatible.clear();
+    for (const std::string& id : ids)
+        for (std::vector<State::Model>::iterator it = state_->models.begin(); it != state_->models.end();)
+            if (it->id == id) it = state_->models.erase(it); else ++it;
+    std::vector<std::future<State::Built>> tasks;
+    if (state_->options.parallel_loading)
+        for (std::size_t i = 0; i < ids.size(); ++i) tasks.push_back(std::async(std::launch::async,
+            [id = ids[i], file = files[i], options = state_->options, initialization]() { return State::Build(id, file, options, initialization); }));
+    for (std::size_t i = 0; i < ids.size(); ++i) {
+        State::Built result = state_->options.parallel_loading ? tasks[i].get() : State::Build(ids[i], files[i], state_->options, initialization);
+        errors[i] = result.error;
+        if (result.model) {
+            state_->profile.archive_ms += result.model->profile.archive_ms;
+            state_->profile.hash_ms += result.model->profile.hash_ms;
+            state_->profile.validation_ms += result.model->profile.validation_ms;
+            state_->models.push_back(std::move(*result.model)); loaded[i] = true;
+        }
+    }
+    return loaded;
 }
 
 bool FingerprintEncoder::GetModelInfo(const std::string& id, AlgorithmModelInfo& info, std::string& error) const {
@@ -230,19 +515,9 @@ bool FingerprintEncoder::Preprocess(const std::string& id, const AlgorithmImage&
         torch::NoGradGuard guard;
         State::Model* model = state_->Find(id);
         if (!model) return Fail(error, "Model is not loaded: " + id);
-        torch::Tensor tensor = torch::from_blob(const_cast<unsigned char*>(image.pixels.data()), {1, 1, image.height, image.width}, torch::kUInt8)
-                          .to(torch::kFloat32).div(double(GrayMaximum));
-        if (image.database_id == CenterCropDatabase) {
-            const int side = std::min(image.width, image.height), left = (image.width - side) / 2, top = (image.height - side) / 2;
-            tensor = tensor.slice(2, top, top + side).slice(3, left, left + side);
-        } else {
-            const int side = std::max(image.width, image.height), left = (side - image.width) / 2, top = (side - image.height) / 2;
-            tensor = torch::constant_pad_nd(tensor, {left, side - image.width - left, top, side - image.height - top}, 1.0);
-        }
-        tensor = at::_upsample_bilinear2d_aa(tensor, {InputSize, InputSize}, false, {}, {});
-        tensor = model->module.run_method("preprocess", tensor).toTensor().contiguous();
-        if (tensor.numel() != InputSize * InputSize || !torch::isfinite(tensor).all().item<bool>())
-            return Fail(error, "Invalid preprocessed input.");
+        const Clock::time_point start = Clock::now();
+        torch::Tensor tensor = PrepareTensor(model->module, image);
+        state_->profile.preprocess_ms += Elapsed(start);
         prepared.width = prepared.height = InputSize;
         prepared.values.assign(tensor.data_ptr<float>(), tensor.data_ptr<float>() + tensor.numel());
         return true;
@@ -262,21 +537,49 @@ bool FingerprintEncoder::CreateTemplate(const std::string& id, const PreparedIma
         torch::Tensor input = torch::from_blob(const_cast<float*>(prepared.values.data()), {1, 1, prepared.height, prepared.width}, torch::kFloat32);
         torch::Tensor probabilities = model->module.forward({input}).toTensor().contiguous();
         if (!Probabilities(probabilities, 1)) return Fail(error, "Invalid 30-dimensional probability output.");
-        QByteArray payload;
-        QDataStream values(&payload, QIODevice::WriteOnly);
-        values.setVersion(QDataStream::Qt_5_15);
-        values.setByteOrder(QDataStream::LittleEndian); values.setFloatingPointPrecision(QDataStream::SinglePrecision);
-        for (int i = 0; i < TemplateSize; ++i) values << probabilities[0][i].item<float>();
-        QByteArray envelope;
-        QDataStream stream(&envelope, QIODevice::WriteOnly);
-        stream.setVersion(QDataStream::Qt_5_15);
-        stream.setByteOrder(QDataStream::LittleEndian);
-        stream << TemplateMagic << quint16(TemplateVersion)
-               << QJsonDocument(TemplateMetadata(id, model->info)).toJson(QJsonDocument::Compact) << payload;
-        if (stream.status() != QDataStream::Ok) return Fail(error, "Template serialization failed.");
-        data.assign(envelope.begin(), envelope.end());
-        return true;
+        ++state_->profile.legacy_model_calls;
+        return Serialize(id, model->info, probabilities, data, error);
     } catch (const std::exception& exception) { error = exception.what(); return false; }
+}
+
+std::vector<TemplateResult> FingerprintEncoder::CreateTemplates(const std::vector<std::string>& ids, const AlgorithmImage& image) {
+    std::vector<TemplateResult> result(ids.size());
+    bool shared = false;
+    if (ids.size() == 2 && state_->options.shared_features) {
+        State::Model* first = state_->Find(ids[0]); State::Model* second = state_->Find(ids[1]);
+        if (first && second && state_->CanShare(*first, *second)) {
+            try {
+                PreparedImage prepared; std::string error;
+                if (!Preprocess(ids[0], image, prepared, error)) throw std::runtime_error(error);
+                torch::NoGradGuard guard;
+                torch::Tensor input = torch::from_blob(prepared.values.data(), {1, 1, InputSize, InputSize}, torch::kFloat32);
+                const Clock::time_point start = Clock::now();
+                torch::Tensor features = first->module.run_method("features", input).toTensor();
+                Require(features.sizes() == torch::IntArrayRef({1, FeatureSize}) && torch::isfinite(features).all().item<bool>(), "Invalid shared features.");
+                state_->profile.features_ms += Elapsed(start);
+                const torch::Tensor saved = features.clone();
+                for (std::size_t i = 0; i < ids.size(); ++i) {
+                    try {
+                        State::Model* model = state_->Find(ids[i]); const Clock::time_point headStart = Clock::now();
+                        torch::Tensor probabilities = model->module.run_method("probabilities_from_features", features).toTensor().contiguous();
+                        Require(torch::equal(features, saved), "Head modified shared features.");
+                        result[i].success = Serialize(ids[i], model->info, probabilities, result[i].data, result[i].error);
+                        state_->profile.heads_ms += Elapsed(headStart);
+                    } catch (const std::exception& exception) {
+                        result[i] = {}; result[i].error = exception.what(); features = saved.clone();
+                    }
+                }
+                ++state_->profile.shared_images; shared = true;
+            } catch (const std::exception&) { /* Independent original paths preserve partial success. */ }
+        }
+    }
+    for (std::size_t i = 0; i < ids.size(); ++i) {
+        if (shared && result[i].success) continue;
+        PreparedImage prepared;
+        result[i].success = Preprocess(ids[i], image, prepared, result[i].error)
+            && CreateTemplate(ids[i], prepared, result[i].data, result[i].error);
+    }
+    return result;
 }
 
 bool FingerprintEncoder::Compare(const std::string& id, const std::vector<unsigned char>& enrollment,
