@@ -135,6 +135,7 @@ procedure CurStepChanged(CurStep: TSetupStep);
 var
   I: Integer;
   Current, Source, Target, Manifest, Line: String;
+  SameInstaller: Boolean;
 begin
   if CurStep <> ssPostInstall then Exit;
   WizardForm.StatusLabel.Caption := CustomMessage('Verify');
@@ -149,7 +150,12 @@ begin
   end;
   Source := ExpandConstant('{srcexe}');
   Target := ExpandConstant('{app}\FingerprintEvaluator\install.exe');
-  if CompareText(Source, Target) <> 0 then begin
+  { Windows can name the same running EXE with a short or long profile path. }
+  SameInstaller := CompareText(Source, Target) = 0;
+  if (not SameInstaller) and FileExists(Target) then
+    SameInstaller := CompareText(GetSHA256OfFile(Source), GetSHA256OfFile(Target)) = 0;
+  Log('Setup source: ' + Source + '; repair target: ' + Target);
+  if not SameInstaller then begin
     if CopyWindowsFile(Source, Target, 0) = 0 then RaiseException(CustomMessage('CacheError'));
   end;
   Manifest := ExpandConstant('{app}\FingerprintEvaluator\SHA256SUMS.txt');

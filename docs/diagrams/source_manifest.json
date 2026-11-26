@@ -23,7 +23,7 @@
   "src/GUI/startup.cpp": "32cf9b25c67e1bb2b09de0dcc07f662e24f7704d2fe03bb6ebafdd36f6816646",
   "src/GUI/startup.h": "cea10b8fcbd7b279fc0f157cb903bf8f624a3e5159cdeffad117c38e1886d4f4",
   "src/Installer/CMakeLists.txt": "b8094094f2d7e3037d408c36d4b796b345b2295c84b6eae46df59b910162683c",
-  "src/Installer/FingerprintSetup.iss": "8307ec7198e990efe6c010540e1199b29e79025fe50cd35e3506067f967088ca",
+  "src/Installer/FingerprintSetup.iss": "050d9cb92117e937a7c425308019918780d511ffd9d9d5cbad70dfea6400527f",
   "src/Installer/PackageInstaller.cmake": "5ae7feb74b54a3e7ea16a950b7ff5da3f484a48b0b5979dc1e599bfd32ed3714",
   "src/Kisa/BioApi.cpp": "8ab63925f3dedf13fc6b1bad3a222262ef55113b2ba85bebc5049726b7bb36eb",
   "src/Kisa/FingerprintAlgorithm.def": "c87769f8df2a004bcf1537b1df86d0aa381d030782e4c0d61008f6be9571c850",

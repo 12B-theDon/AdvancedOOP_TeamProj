@@ -60,7 +60,15 @@ public static class WizardUI {
 function Check([bool]$Ok, [string]$Message) { if (-not $Ok) { throw $Message } }
 function Wait-For([scriptblock]$Action, [int]$Seconds=60) {
     $timer=[Diagnostics.Stopwatch]::StartNew()
-    do { $value=& $Action; if($value){return $value}; Start-Sleep -Milliseconds 200 } while($timer.Elapsed.TotalSeconds -lt $Seconds)
+    do {
+        $value=& $Action; if($value){return $value}
+        $dialog=[WizardUI]::Find([IntPtr]::Zero) | Where-Object { $_.Class -eq '#32770' } | Select-Object -First 1
+        if($dialog) {
+            $details=([WizardUI]::Find($dialog.Handle) | ForEach-Object { $_.Text }) -join ' '
+            throw "Unexpected installation dialog: $($dialog.Text) $details"
+        }
+        Start-Sleep -Milliseconds 200
+    } while($timer.Elapsed.TotalSeconds -lt $Seconds)
     throw 'Timed out waiting for installer/application state'
 }
 function Wizard { return [WizardUI]::Find([IntPtr]::Zero) | Where-Object { $_.Class -eq 'TWizardForm' -and $_.Text -like '*Fingerprint Evaluator*' } | Select-Object -First 1 }
@@ -102,7 +110,7 @@ function Complete-Wizard([string]$Prefix) {
     [WizardUI]::Capture($wizard.Handle,(Join-Path $Results "$Prefix-ready.png"))
     [WizardUI]::Click($installButton.Handle); Start-Sleep -Milliseconds 750
     [WizardUI]::Capture($wizard.Handle,(Join-Path $Results "$Prefix-progress.png"))
-    $finish=Wait-For { Button $wizard.Handle '^마침|^Finish' } 600
+    $finish=Wait-For { Button $wizard.Handle '^마침|^Finish' } 300
     [WizardUI]::Capture($wizard.Handle,(Join-Path $Results "$Prefix-finished.png"))
     [WizardUI]::Click($finish.Handle)
 }
@@ -174,7 +182,7 @@ try {
         $windows=@([WizardUI]::Find([IntPtr]::Zero))
         $windows | Select-Object Text,Class | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $Results 'failure-windows.json') -Encoding UTF8
         for($i=0;$i -lt $windows.Count;$i++) {
-            [WizardUI]::Capture($windows[$i].Handle,(Join-Path $Results "failure-window-$i.png"))
+            try { [WizardUI]::Capture($windows[$i].Handle,(Join-Path $Results "failure-window-$i.png")) } catch { Write-Host "Skipped an empty diagnostic window" }
         }
         $logs=Join-Path $env:LOCALAPPDATA 'FingerprintEvaluator\logs'
         if(Test-Path -LiteralPath $logs) { Copy-Item -LiteralPath $logs -Destination (Join-Path $Results 'saved-setup-logs') -Recurse -Force }
