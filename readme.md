@@ -4,9 +4,9 @@ DeepPrint 기반 지문 알고리즘을 학습하고, K-NBTC 규격 DLL의 유�
 
 ## 1. Install
 
-**[install.exe 다운로드 — Windows x64 Preview](https://github.com/12B-theDon/AdvancedOOP_TeamProj/releases/download/windows-installer-20261126/install.exe)** 후 더블클릭하면 저장소·필요 도구·가중치를 준비하고 Release 빌드·패키징 후 GUI를 실행합니다. `install.exe` 하나만 있어도 시작할 수 있고, 기존 checkout과 정상 가중치는 재사용합니다. [설치기·로그 안내](docs/installer.md)
+**[install.exe 다운로드 — Windows x64 Preview](https://github.com/12B-theDon/AdvancedOOP_TeamProj/releases/download/windows-ui-installer-20261126-preview/install.exe)** 후 더블클릭합니다.
 
-새 PC에서는 위 EXE만 받으면 됩니다. Git clone과 빌드는 설치기가 자동으로 처리합니다.
+**설치 위치 → 바로가기 → 설치 진행률 → 완료·GUI 실행** 순서의 Windows 설치 마법사입니다. 프로그램·필수 runtime·학습 모델 4개·예제 이미지를 포함하며, 사용자 PC에 Git·Python·CMake·MSVC 등의 개발 도구를 설치하거나 소스를 빌드하지 않습니다. Windows 앱 목록에서 제거할 수 있습니다. [설치·복구 안내](docs/installer.md)
 
 소스에서 직접 설치하려면 아래 명령을 사용합니다.
 
@@ -60,7 +60,7 @@ FinalProject/
 │  ├─ Engine/        # 비교 계획·템플릿 캐시·병렬 평가·원시 결과 저장
 │  ├─ Worker/        # Windows DLL 실행 프로세스와 IPC 규약
 │  ├─ GUI/           # 단계별 화면·결과 표시·지표·보고서
-│  └─ Installer/     # 독립 Windows 설치기 install.exe
+│  └─ Installer/     # Windows 설치 마법사·빌드·배포 검사
 ├─ data/
 │  └─ original/      # 보존 대상 원본 FVC 데이터
 ├─ models/
@@ -68,11 +68,12 @@ FinalProject/
 │  └─ trained_result/ # Git LFS로 배포하는 학습 모델 4개·파일 검사값 목록
 ├─ dist/             # 배포 결과 (패키징 시 생성, Git 제외)
 │  ├─ FingerprintAlgorithm/ # 알고리즘 DLL·모델·runtime
-│  └─ FingerprintEvaluator/ # install.exe·GUI·Worker·Qt runtime·plugins
+│  ├─ FingerprintEvaluator/ # GUI·Worker·Qt runtime·plugins
+│  └─ FingerprintSetup/     # 설치 마법사 install.exe
 ├─ docs/             # 빌드·검증·출처 문서, 구조도, 보존 기준
 ├─ cmake/            # 알고리즘·평가 프로그램 배포 폴더 생성 (dist/)
 ├─ tools/            # Windows 설치·빌드·패키징·배포 파일 검사
-│  ├─ bootstrap_windows.ps1 # 저장소 확보·설치 스크립트 연결
+│  ├─ bootstrap_windows.ps1 # 개발용 설치의 WinGet 준비
 │  ├─ setup_windows.ps1  # 도구 설치·모델 다운로드·필요 시 학습·패키징
 │  └─ verify_manifest.py # 배포 파일 누락·SHA-256 검사
 ├─ third_party/      # DeepPrint 소스·patch, Qt·LibTorch 라이선스 고지
@@ -96,7 +97,7 @@ FinalProject/
 | Qt Core | `<QFile>`, `<QSaveFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·지문 ID 목록 검사 |
 | LibTorch·ATen | `<torch/torch.h>`, `<torch/script.h>`, `<ATen/core/Tensor.h>` | 학습·inference·Tensor |
 | C++ Standard Library | `<vector>`, `<thread>`, `<future>`, `<mutex>`, `<condition_variable>`, `<random>` | 자료구조·병렬·동기화·sampling |
-| Windows API | `<windows.h>`, `<bcrypt.h>`, `<shlobj.h>` | DLL·Process·IPC·파일 검사·설치 |
+| Windows API | `<windows.h>`, `<bcrypt.h>` | DLL·Process·IPC·파일 검사·설치 |
 
 SHA-256은 파일 내용을 64자리 16진수 검사값으로 요약하는 방법입니다. 모델 파일이 바뀌었는지, Template이 현재 모델로 만들어졌는지 확인하는 데 사용하며, 파일 검사값은 Windows 기본 기능인 BCrypt로 계산합니다.
 

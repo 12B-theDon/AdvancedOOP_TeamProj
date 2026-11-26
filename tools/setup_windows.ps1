@@ -4,7 +4,9 @@ param(
     [string]$DependenciesPath,
     [ValidateRange(1, 64)][int]$Jobs = 4,
     [ValidateRange(0, 2147483647)][int]$WaitForProcessId = 0,
-    [switch]$LaunchGui
+    [switch]$LaunchGui,
+    [switch]$DistributedModelsOnly,
+    [switch]$BuildInstaller
 )
 
 Set-StrictMode -Version Latest
@@ -71,6 +73,13 @@ function Find-Python311 {
                 $executable = (@($result)[-1]).Trim()
                 if (Test-Path -LiteralPath $executable -PathType Leaf) { return $executable }
             }
+        } catch { }
+    }
+    $onPath = Get-Command python.exe -ErrorAction SilentlyContinue
+    if ($onPath) {
+        try {
+            $result = & $onPath.Source -c 'import sys; print(sys.executable if sys.version_info[:2] == (3, 11) else str())' 2>$null
+            if ($LASTEXITCODE -eq 0 -and $result) { return (@($result)[-1]).Trim() }
         } catch { }
     }
     foreach ($folder in @(
@@ -321,7 +330,9 @@ try {
     Write-Host '[2/9] Submodules and Git LFS weights (download before training)'
     Invoke-Checked $git @('submodule', 'update', '--init', '--recursive')
     Invoke-Checked $git @('lfs', 'install', '--local')
-    try { Invoke-Checked $git @('lfs', 'pull') }
+    $lfsArguments = @('lfs', 'pull')
+    if ($DistributedModelsOnly) { $lfsArguments += '--include=models/trained_result/*.bin' }
+    try { Invoke-Checked $git $lfsArguments }
     catch { Write-Warning "Git LFS download failed. Available local models will be reused; missing models will require training. $($_.Exception.Message)" }
     $checkpoint = Join-Path $projectRoot 'models\pretrained\deepprint.bin'
     if ((-not (Test-Path -LiteralPath $checkpoint -PathType Leaf) -or (Get-Item -LiteralPath $checkpoint).Length -lt 1024) `
@@ -365,18 +376,20 @@ try {
     $env:QT_PLUGIN_PATH = Join-Path $qtRoot 'plugins'
     $env:CMAKE_PREFIX_PATH = "$qtRoot;$torchRoot"
 
+    $training = if ($DistributedModelsOnly) { 'OFF' } else { 'ON' }
     Write-Host '[6/9] Configure and build Release'
     Invoke-Checked $cmake @('-S', $projectRoot, '-B', $buildRoot, '-G', 'Visual Studio 17 2022', '-A', 'x64',
         '-UQt*_DIR', '-UQT_DIR', '-UTorch_DIR', '-UWINDEPLOYQT',
         "-DQt6_DIR=$qtRoot\lib\cmake\Qt6", "-DQT_DIR=$qtRoot\lib\cmake\Qt6", "-DTorch_DIR=$torchRoot\share\cmake\Torch",
         "-DCMAKE_PREFIX_PATH=$qtRoot;$torchRoot", "-DPython3_EXECUTABLE=$python", "-DFINGERPRINT_PACKAGE_MODELS=$modelsRoot",
-        '-DFINGERPRINT_BUILD_ALGORITHM=ON', '-DFINGERPRINT_BUILD_TRAINING=ON', '-DFINGERPRINT_BUILD_GUI=ON')
+        '-DFINGERPRINT_BUILD_ALGORITHM=ON', "-DFINGERPRINT_BUILD_TRAINING=$training", '-DFINGERPRINT_BUILD_GUI=ON', '-DBUILD_TESTING=OFF')
     Invoke-Checked $cmake @('--build', $buildRoot, '--config', 'Release', '--parallel', "$Jobs")
 
     Write-Host '[7/9] Production models'
     if (Test-ProductionModels $modelsRoot) {
         Write-Host 'All four production models are available; training skipped.'
     } else {
+        if ($DistributedModelsOnly) { throw 'Distributed models are missing or invalid; installer builds never train replacement weights.' }
         if (Test-Path -LiteralPath $modelsRoot) {
             $backup = "${modelsRoot}_incomplete_$(Get-Date -Format yyyyMMdd_HHmmss)_$([guid]::NewGuid().ToString('N').Substring(0, 8))"
             Move-Item -LiteralPath $modelsRoot -Destination $backup
@@ -396,6 +409,9 @@ try {
     foreach ($package in @('FingerprintAlgorithm', 'FingerprintEvaluator')) {
         Invoke-Checked $python @((Join-Path $projectRoot 'tools\verify_manifest.py'),
             (Join-Path $projectRoot "dist\$package"))
+    }
+    if ($BuildInstaller) {
+        Invoke-Checked $cmake @('--build', $buildRoot, '--config', 'Release', '--target', 'FingerprintInstaller')
     }
     $gui = Join-Path $projectRoot 'dist\FingerprintEvaluator\FingerprintGUI.exe'
     if (-not (Test-Path -LiteralPath $gui -PathType Leaf)) { throw 'The packaged GUI is missing.' }

@@ -10,4 +10,6 @@
 
 과제·안내서 PDF와 IndustryAlgorithm 예제는 원래 위치에 로컬 참고 자료로 보관합니다. 상호운용성 규격을 설명하는 자료이며 알고리즘 소스의 빌드 의존성에는 포함되지 않습니다.
 
-- **Standalone installer cross-build**: 로컬 Windows PE는 LLVM-MinGW 20261117 UCRT x86_64로 빌드했습니다. LLVM·MinGW runtime 고지와 출처는 `third_party/installer-notices/llvm-mingw-20261117/`에 보존하고, 해당 cross-build EXE에 포함합니다. `install.exe --licenses`로 확인합니다. 기본 MSVC 빌드는 기존 Visual Studio runtime 재배포 조건을 따릅니다.
+- **이전 console installer cross-build (보존 기록)**: 로컬 Windows PE는 LLVM-MinGW 20261117 UCRT x86_64로 빌드했습니다. LLVM·MinGW runtime 고지와 출처는 `third_party/installer-notices/llvm-mingw-20261117/`에 보존하고, 해당 cross-build EXE에 포함합니다. `install.exe --licenses`로 확인합니다. 기본 MSVC 빌드는 기존 Visual Studio runtime 재배포 조건을 따릅니다.
+
+- **Windows 설치 마법사**: Inno Setup으로 빌드한 설치 프로그램입니다. [Inno Setup 출처·라이선스](https://jrsoftware.org/isinfo.php)를 따르며, Qt·LibTorch·DeepPrint 고지는 설치한 runtime 폴더에 함께 보존합니다.

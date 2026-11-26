@@ -1,7 +1,6 @@
 # Windows 빌드·배포
 
-[독립 설치기 `install.exe`](installer.md)는 기존 설치 스크립트를 실행하는 진입점입니다. Qt·LibTorch 없이 설치기만 빌드하는 방법과 설치 로그 위치는 해당 안내를 참고합니다.
-
+[Windows 설치 마법사](installer.md)는 빌드된 프로그램과 runtime을 설치합니다. 일반 사용자는 EXE만 받으면 되며, 아래는 소스 개발용 절차입니다.
 
 ## Windows 자동 설치·빌드·패키징
 
@@ -38,7 +37,7 @@ Qt는 설치 명령 성공 후 `qmake`의 설치 경로·버전, Widgets·TIFF �
 
 ## 환경
 
-Windows·MSVC 전용입니다. C++17, CMake 3.21+, Qt 5.15/6 Widgets·TIFF 플러그인이 필요하며 알고리즘·학습은 호환되는 LibTorch CPU를 사용합니다. MSVC와 동일한 architecture의 Qt·LibTorch를 준비하고, 빌드 디렉터리 실행 시 Qt `bin`·LibTorch `lib`를 PATH에 추가합니다. 자동 설치는 Windows x64를 대상으로 합니다. 외부 32-bit DLL은 32-bit Evaluator·Worker를 별도로 빌드해야 합니다. 선택적인 32-bit Evaluator 패키징에는 `FINGERPRINT_INSTALLER_FILE`로 미리 빌드한 x64 `install.exe`를 지정합니다.
+Windows·MSVC 전용입니다. C++17, CMake 3.21+, Qt 5.15/6 Widgets·TIFF 플러그인이 필요하며 알고리즘·학습은 호환되는 LibTorch CPU를 사용합니다. MSVC와 동일한 architecture의 Qt·LibTorch를 준비하고, 빌드 디렉터리 실행 시 Qt `bin`·LibTorch `lib`를 PATH에 추가합니다. 자동 설치는 Windows x64를 대상으로 합니다. 외부 32-bit DLL은 32-bit Evaluator·Worker를 별도로 빌드해야 합니다. 설치 마법사는 x64 배포만 지원합니다.
 
 알고리즘·학습을 준비할 때는 submodule과 LFS 파일을 가져옵니다. upstream 수정 적용은 [NOTICE](../third_party/deepprint.NOTICE.txt)를 따릅니다. Python 3.11+은 배포 파일의 SHA-256 검사에 사용됩니다.
 
@@ -80,7 +79,7 @@ python tools/verify_manifest.py dist/FingerprintAlgorithm
 ```
 
 - `dist/FingerprintAlgorithm`: 공개 DLL·Core·Worker·모델·runtime·라이선스·SHA-256 목록을 포함합니다.
-- `dist/FingerprintEvaluator`: install.exe·GUI·Worker와 windeployqt로 수집한 Qt·TIFF·runtime·라이선스·SHA-256 목록을 포함합니다.
+- `dist/FingerprintEvaluator`: GUI·Worker와 windeployqt로 수집한 Qt·TIFF·runtime·라이선스·SHA-256 목록을 포함합니다.
 
 DLL과 모델은 같은 배포 폴더에 둡니다. 필수 파일이 빠지면 기존 배포 폴더를 교체하지 않습니다. [출처·라이선스](THIRD_PARTY.md)
 
@@ -89,3 +88,5 @@ DLL과 모델은 같은 배포 폴더에 둡니다. 필수 파일이 빠지면 �
 SDK에 고지가 없으면 저장소에 보관한 공식 고지를 사용합니다. Qt 6.8.3은 Qt Base·SVG·Image Formats 소스의 고지를 Algorithm·Evaluator 두 폴더에 포함하며, Windows CPU LibTorch 2.15.0은 동일 build의 고지를 포함합니다. 별도 설치·다운로드는 필요하지 않습니다. Qt 버전, LibTorch 버전·build, 고지 SHA-256이 맞지 않으면 패키징을 중단하고 기존 배포 폴더를 보존합니다. CMake 4.3+에서는 [CMP0207](https://cmake.org/cmake/help/latest/policy/CMP0207.html)의 경로 정규화 동작을 명시해 반복 정책 경고를 방지합니다.
 
 배포 갱신은 검증된 관리 파일만 교체합니다. 기존 사용자 데이터·보고서는 보존하고, 파일 교체 실패 시 이미 변경한 파일을 복원합니다. 실행 중인 `install.exe`는 교체하지 않습니다. 변경되는 기존 배포 모델은 별도 `.preserved-models` 폴더에 보관합니다.
+
+설치 마법사는 Inno Setup이 있는 Windows 빌드 환경에서 `setup_windows.ps1 -DistributedModelsOnly -BuildInstaller`로 생성합니다. 이 모드는 기존 가중치를 검증·재사용하고 학습을 하지 않습니다. 자세한 내용은 [Installer](installer.md)를 참고합니다.

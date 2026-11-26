@@ -1,0 +1,76 @@
+name: Windows installation wizard
+on:
+  push:
+    branches: ['installer-wizard-*']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Optional Preview release tag; leave empty to validate only'
+        required: false
+        default: ''
+permissions:
+  contents: write
+jobs:
+  build-and-test:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    env:
+      GIT_LFS_SKIP_SMUDGE: '1'
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - name: Check out the requested source and upstream license
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git init .
+          git remote add origin "https://github.com/$env:GITHUB_REPOSITORY.git"
+          git fetch --depth 1 origin $env:GITHUB_SHA
+          if ($LASTEXITCODE) { throw 'Source fetch failed' }
+          git checkout --detach FETCH_HEAD
+          if ($LASTEXITCODE) { throw 'Source checkout failed' }
+          git submodule update --init --recursive --depth 1
+          if ($LASTEXITCODE) { throw 'Submodule checkout failed' }
+      - name: Select the existing Python 3.11 toolchain
+        run: |
+          $python = Get-ChildItem "$env:RUNNER_TOOL_CACHE\Python\3.11*\x64\python.exe" | Select-Object -Last 1
+          if (-not $python) { throw 'Python 3.11 is absent from the Windows runner' }
+          (Split-Path -Parent $python.FullName) | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Build Release runtimes and the offline installation wizard
+        run: |
+          .\tools\setup_windows.ps1 -DistributedModelsOnly -BuildInstaller -Jobs 2 -DependenciesPath "$env:RUNNER_TEMP\FingerprintDeps"
+          cmake --build build --config Release --target FingerprintDeploymentCheck --parallel 2
+          if ($LASTEXITCODE) { throw 'Deployment check build failed' }
+      - name: Test the installation wizard and installed application
+        run: |
+          .\src\Installer\verify_install.ps1 -Installer dist\FingerprintSetup\install.exe -Checker build\src\Installer\Release\FingerprintDeploymentCheck.exe -Results build\installer-verification
+      - name: Preserve small verification logs and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer-verification
+          path: |
+            build/installer-verification/
+            build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7
+      - name: Publish the verified Preview installer
+        if: ${{ inputs.release_tag != '' || startsWith(github.ref, 'refs/heads/installer-wizard-') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag || 'windows-ui-installer-20261126-preview' }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:RELEASE_TAG -notmatch '^windows-ui-installer-[A-Za-z0-9._-]+$') { throw 'Invalid installer release tag' }
+          @"
+          Windows 설치 마법사 Preview입니다. install.exe를 다운로드하고 더블클릭하세요.
+
+          설치 위치 선택, 파일 설치 진행률, 바로가기, 완료 후 GUI 실행 및 Windows 앱 목록에서 제거를 지원합니다.
+          Git, Python, CMake, MSVC, Qt SDK, LibTorch SDK 설치나 소스 빌드는 사용자 PC에서 수행하지 않습니다.
+          프로그램의 runtime DLL, 기존 가중치 4개와 원본 예제 이미지를 포함합니다.
+
+          Windows hosted runner에서 실제 설치·공개 KISA 함수·GUI 시작·복구·제거 검사를 수행했습니다.
+          새 개인 PC의 모든 보안 정책·환경을 검증한 것은 아니며, 코드 서명되지 않은 Preview입니다.
+          Source: $env:GITHUB_SHA
+          "@ | Set-Content -LiteralPath build\installer-release-notes.md -Encoding UTF8
+          gh release create $env:RELEASE_TAG dist/FingerprintSetup/install.exe dist/FingerprintSetup/SHA256SUMS.txt --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease --title 'Fingerprint Evaluator Windows 설치 마법사' --notes-file build/installer-release-notes.md
+          if ($LASTEXITCODE) { throw 'Installer release upload failed' }

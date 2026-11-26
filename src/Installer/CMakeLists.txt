@@ -1,36 +1,29 @@
 cmake_minimum_required(VERSION 3.21)
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    project(FingerprintBootstrapper LANGUAGES CXX RC)
+    project(FingerprintInstallerPackaging LANGUAGES NONE)
 endif()
 if(NOT WIN32)
-    message(FATAL_ERROR "FingerprintInstaller targets Windows x64.")
+    message(FATAL_ERROR "The installation wizard must be packaged on Windows with Inno Setup 6.3+.")
 endif()
-if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(FATAL_ERROR "FingerprintInstaller requires a 64-bit toolchain.")
+get_filename_component(installer_source_root "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
+set(FINGERPRINT_INSTALLER_PAYLOAD "${CMAKE_BINARY_DIR}/installer-payload" CACHE PATH "Clean runtime payload produced by the package targets")
+set(FINGERPRINT_INSTALLER_OUTPUT "${installer_source_root}/dist/FingerprintSetup" CACHE PATH "Installation wizard output folder")
+find_program(FINGERPRINT_ISCC NAMES ISCC.exe ISCC
+    HINTS "$ENV{ProgramFiles}/Inno Setup 6" "$ENV{ProgramFiles\(x86\)}/Inno Setup 6")
+set(installer_dependencies "")
+if(TARGET FingerprintAlgorithmPackage AND TARGET FingerprintEvaluatorPackage)
+    list(APPEND installer_dependencies FingerprintAlgorithmPackage FingerprintEvaluatorPackage)
 endif()
-enable_language(RC)
-set(BOOTSTRAP_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/bootstrap_windows.ps1")
-set(INSTALLER_MANIFEST "${CMAKE_CURRENT_SOURCE_DIR}/install.manifest")
-file(TO_CMAKE_PATH "${BOOTSTRAP_SCRIPT}" BOOTSTRAP_SCRIPT)
-file(TO_CMAKE_PATH "${INSTALLER_MANIFEST}" INSTALLER_MANIFEST)
-set(INSTALLER_NOTICES "${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/installer-notices/llvm-mingw-20261117/LICENSES.txt")
-set(INSTALLER_NOTICE_RESOURCE "")
-if(MINGW)
-    file(TO_CMAKE_PATH "${INSTALLER_NOTICES}" INSTALLER_NOTICES)
-    set(INSTALLER_NOTICE_RESOURCE "102 RCDATA \"${INSTALLER_NOTICES}\"")
-endif()
-configure_file(bootstrap.rc.in "${CMAKE_CURRENT_BINARY_DIR}/bootstrap.rc" @ONLY)
-add_executable(FingerprintInstaller bootstrap.cpp "${CMAKE_CURRENT_BINARY_DIR}/bootstrap.rc")
-set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/bootstrap.rc" APPEND PROPERTY OBJECT_DEPENDS
-    "${BOOTSTRAP_SCRIPT};${INSTALLER_MANIFEST};${INSTALLER_NOTICES}")
-set_target_properties(FingerprintInstaller PROPERTIES OUTPUT_NAME install CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-target_compile_definitions(FingerprintInstaller PRIVATE UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN)
-target_link_libraries(FingerprintInstaller PRIVATE shell32 ole32)
-if(MSVC)
-    target_compile_options(FingerprintInstaller PRIVATE /utf-8 /W4)
-    target_link_options(FingerprintInstaller PRIVATE /MANIFEST:NO)
-elseif(MINGW)
-    target_compile_options(FingerprintInstaller PRIVATE -Wall -Wextra)
-    target_link_options(FingerprintInstaller PRIVATE -municode -static -static-libgcc -static-libstdc++)
+add_custom_target(FingerprintInstaller
+    COMMAND "${CMAKE_COMMAND}"
+        "-DSOURCE=${installer_source_root}"
+        "-DPAYLOAD=${FINGERPRINT_INSTALLER_PAYLOAD}"
+        "-DOUTPUT=${FINGERPRINT_INSTALLER_OUTPUT}"
+        "-DISCC=${FINGERPRINT_ISCC}"
+        "-DRUNNING_INSTALLER=$ENV{FINGERPRINT_RUNNING_INSTALLER}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/PackageInstaller.cmake"
+    DEPENDS ${installer_dependencies} VERBATIM)
+if(TARGET Algorithm)
+    add_executable(FingerprintDeploymentCheck EXCLUDE_FROM_ALL deployment_check.cpp)
+    target_link_libraries(FingerprintDeploymentCheck PRIVATE Qt${QT_VERSION_MAJOR}::Gui psapi)
 endif()

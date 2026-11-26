@@ -27,11 +27,13 @@ StartupPlan PlanStartup(const QString& executableFolder) {
     StartupPlan plan;
     const QDir executable(executableFolder);
     plan.source_folder = SourceFolder(executableFolder);
+    const QString repair = executable.filePath("install.exe");
+    if (Present(repair)) plan.repair_installer = repair;
     plan.algorithm_folder = QDir::cleanPath(executable.filePath("../FingerprintAlgorithm"));
     if (!QDir(plan.algorithm_folder).exists() && !plan.source_folder.isEmpty())
         plan.algorithm_folder = QDir(plan.source_folder).filePath("dist/FingerprintAlgorithm");
     // A standalone external-DLL evaluator has no bundled algorithm to prepare.
-    if (plan.source_folder.isEmpty() && !QDir(plan.algorithm_folder).exists()) return plan;
+    if (plan.source_folder.isEmpty() && !QDir(plan.algorithm_folder).exists() && plan.repair_installer.isEmpty()) return plan;
     if (!plan.source_folder.isEmpty())
         plan.setup_script = QDir(plan.source_folder).filePath("tools/setup_windows.ps1");
 
@@ -46,6 +48,14 @@ StartupPlan PlanStartup(const QString& executableFolder) {
 }
 
 bool StartPreparation(const StartupPlan& plan, qint64 previousProcess, QString& error) {
+    if (plan.setup_script.isEmpty() && !plan.repair_installer.isEmpty()) {
+        QProcess installer;
+        installer.setProgram(plan.repair_installer);
+        installer.setArguments({"/DIR=" + QDir(QFileInfo(plan.repair_installer).absolutePath()).absoluteFilePath(".."), "/NORESTART"});
+        if (installer.startDetached()) return true;
+        error = "Could not open the repair installer: " + installer.errorString();
+        return false;
+    }
     if (plan.setup_script.isEmpty()) {
         error = "The algorithm deployment is incomplete. Restore the complete FingerprintAlgorithm folder, "
                 "or run the GUI from the source checkout so missing weights can be downloaded or trained.";

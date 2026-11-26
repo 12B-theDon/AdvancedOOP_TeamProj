@@ -1,7 +1,7 @@
 {
-  "CMakeLists.txt": "b123af8fbe62d9860bc30f4e2cd00009d68e0dc38c4a6e4869c1a4a8e12b41dd",
-  "cmake/PackageCommon.cmake": "54ecb26099bcae7b689df458255a1311912b49bc18ff2cdb81e4f43dc9daa4a2",
-  "cmake/PackageEvaluator.cmake": "1c87fabdff3f481909dce71227c57ab925474f4e13a63e252dcd5a24d8031fc1",
+  "CMakeLists.txt": "0dcf6770144b1afbf10d110cf5c310adb91f2a9f3275754c41de89ea948f4c0e",
+  "cmake/PackageCommon.cmake": "0b67baa911664096e79b8685d71b75c9e5668d5f2f87fa166dd2756a0474efed",
+  "cmake/PackageEvaluator.cmake": "278106bf2bd7150ca84c37c079bb898de26403a2658d1aeab4b6f5f8ac3dac58",
   "src/Algorithm/Algorithm.h": "652fb4bd5da8b99178012bd0ef72cc2f651232150949d53e18f8937f095df45e",
   "src/Algorithm/archive.cpp": "e18ee1b6bbeb1c20fad4decc9e107f9f1371785d814a395bbdb46b2d9a2f9a65",
   "src/Algorithm/archive.h": "bec28c63fd6fd524c19a479211d708d6564c4483d6dfeea9af411fb328597631",
@@ -20,10 +20,11 @@
   "src/GUI/guiConfig.h": "e1853f3467ece4010d25a3f6bf3eb7bc0e77ac811d4242137343e8b073308f11",
   "src/GUI/report.cpp": "88631b89d5ead00de0fbe96b5107d8c1f4577170fb0b1e00a76f7fb19e261e68",
   "src/GUI/report.h": "045f07dfc9be1122c24ccfe309f3b7110a9f4f7270a2732d9d5aacf3b5db1550",
-  "src/GUI/startup.cpp": "8635153527780eedb1264a58147c6b473cdf24f199ecda04022fa80c4e454e64",
-  "src/GUI/startup.h": "b480da6f6998ecd77f0c2af0a490e054d7c39d305c1929f8fbf69d3cbafbf0af",
-  "src/Installer/CMakeLists.txt": "63ed30a8f1aa4caed9666391898b40ead9378eacef5f845f00a59def132d09b6",
-  "src/Installer/bootstrap.cpp": "480f6447410e7b9ba31b7aef626f19530ebbad97eef9177636e6322ca563fe70",
+  "src/GUI/startup.cpp": "d9b6bf3067a8e47ad06d1dca7965066d0fcf848ef942375352e1f8a9e3a18c89",
+  "src/GUI/startup.h": "cea10b8fcbd7b279fc0f157cb903bf8f624a3e5159cdeffad117c38e1886d4f4",
+  "src/Installer/CMakeLists.txt": "b8094094f2d7e3037d408c36d4b796b345b2295c84b6eae46df59b910162683c",
+  "src/Installer/FingerprintSetup.iss": "8307ec7198e990efe6c010540e1199b29e79025fe50cd35e3506067f967088ca",
+  "src/Installer/PackageInstaller.cmake": "5ae7feb74b54a3e7ea16a950b7ff5da3f484a48b0b5979dc1e599bfd32ed3714",
   "src/Kisa/BioApi.cpp": "8ab63925f3dedf13fc6b1bad3a222262ef55113b2ba85bebc5049726b7bb36eb",
   "src/Kisa/FingerprintAlgorithm.def": "c87769f8df2a004bcf1537b1df86d0aa381d030782e4c0d61008f6be9571c850",
   "src/Kisa/core.cpp": "8d03d8f7a9b55cf0099f62db0a3ca75f26fa72147d314cfc5052b8085529d058",
@@ -43,6 +44,6 @@
   "src/main.cpp": "ba434c0b4acc01286a93140fd2b8d955bb7462d00f0863a6d062dab5640761d0",
   "third_party/deepprint/flx/models/InceptionV4.py": "1710c5f122cb7f4a4173fb34c57b32abdb6276ef9285e1922b67fef229e8cf73",
   "third_party/deepprint/flx/models/deep_print_arch.py": "b2bfaa2806cdd68c3d7c42e61d3ebdfd4cef356f73e400932c3037705d7c71f1",
-  "tools/bootstrap_windows.ps1": "be0fcf7dfae08dbbd98848fff39b75bffe87012c53d148648dab867f2cd56637",
-  "tools/setup_windows.ps1": "cedee35f79e9b60a8e4360a8cb9f36a642c457a2ebcfe5ac8e63b4bfee19d457"
+  "tools/bootstrap_windows.ps1": "6ec6dd9e2ff48815d63a78a1b1f869d1ce82fbe7e2f576431f31b6c9fce15030",
+  "tools/setup_windows.ps1": "cea2f524d5342974b2454ae4a89abb1021dd9f92912ee65f173db1d030035f8d"
 }

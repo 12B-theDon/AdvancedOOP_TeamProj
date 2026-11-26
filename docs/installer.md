@@ -1,63 +1,47 @@
-# Windows 설치기
+# Windows 설치 마법사
 
-[install.exe 다운로드 (Windows x64 Preview)](https://github.com/12B-theDon/AdvancedOOP_TeamProj/releases/download/windows-installer-20261126/install.exe)
+[install.exe 다운로드 — Windows x64 Preview](https://github.com/12B-theDon/AdvancedOOP_TeamProj/releases/download/windows-ui-installer-20261126-preview/install.exe)
 
-다운로드한 `install.exe` 하나로 설치를 시작합니다. 사용자에게 수동 Git clone이나 빌드 명령 입력을 요구하지 않습니다. Qt·LibTorch·Git·CMake·MSVC를 미리 설치할 필요가 없습니다. Windows 기본 64-bit PowerShell 5.1과 초기 다운로드를 위한 인터넷을 사용합니다.
+다운로드한 파일을 더블클릭하고 **설치 위치 → 바로가기 → 설치 → 완료**를 진행합니다. 마지막 화면의 실행 항목으로 GUI를 엽니다. 설치 과정에 Terminal·PowerShell 창을 띄우지 않으며, Git·Python·CMake·MSVC·Qt SDK·LibTorch SDK를 사용자 PC에 설치하지 않습니다. 프로그램과 필요한 runtime DLL, 기존 학습 모델 4개, 원본 예제 240장을 설치 파일에 포함합니다. 다운로드 이후 설치 중 별도 인터넷 연결은 사용하지 않습니다.
 
-실행하면 Git·Git LFS를 확인하고, 적절한 기존 checkout을 찾아 재사용하거나 저장소를 복제합니다. 기존 checkout에서 `git pull`·reset·파일 삭제를 자동 실행하지 않습니다. 이어 `tools/setup_windows.ps1`을 실행해 기존 도구·모델을 확인하고 부족한 항목만 준비한 뒤 Release 빌드·패키징과 GUI 실행을 마칩니다. 정상 모델 4개는 재학습하지 않습니다.
-
-Git·Git LFS·CMake·Python 3.11·MSVC 2022는 기존 WinGet package ID를 사용합니다. Qt 6.8.3·aqtinstall 3.3.0과 pretrained metadata의 LibTorch CPU 버전도 기존 설치 스크립트를 따릅니다. WinGet이 없으면 Microsoft의 `Microsoft.WinGet.Client`를 현재 사용자 범위에 준비합니다. 설치기 자체는 `asInvoker`로 실행하고, 필요한 의존성 설치 프로그램만 Windows 권한 승인을 요청합니다. [Microsoft WinGet 안내](https://learn.microsoft.com/en-us/windows/package-manager/winget/)
-
-기존 소스 위치를 직접 지정할 수도 있습니다.
-
-```powershell
-.\install.exe --source "C:\Users\사용자\FinalProject"
-```
-
-소스를 찾지 못하면 `%LOCALAPPDATA%\FingerprintInstaller\source\FinalProject`에 복제합니다. 그 위치에 다른 파일이나 불완전한 checkout이 있으면 이를 보존하고 경로 지정 방법을 표시합니다. 프로젝트 경로의 공백·한글을 허용하며, Qt·LibTorch 설치 경로는 기존처럼 ASCII 경로를 사용합니다.
-
-## 로그와 재실행
-
-실행별 기록은 `%LOCALAPPDATA%\FingerprintInstaller\runs\<날짜_시각_PID>\`에 남습니다.
-
-- `installation.log`: bootstrap·기존 setup의 진행과 오류.
-- `result.json`: 완료 여부, checkout·GUI 경로 또는 실패 단계.
-- `bootstrap_windows.ps1`: 해당 EXE에 포함된 초기 설치 논리.
-
-PowerShell을 시작하기 전 native 단계에서 실패한 경우에도 가능한 경우 이 로그에 실패 단계를 기록합니다. 실행별 폴더를 만들기 전 오류는 `%LOCALAPPDATA%\FingerprintInstaller\logs\native_installation.log`에 남습니다.
-
-설치기는 자신을 이 작업 폴더로 복사한 뒤 원래 EXE를 종료하므로, 빌드·패키징 때 실행 파일을 덮어쓰지 않습니다. 원래 명령의 종료를 설치 완료로 해석하지 말고, 자동화에서는 `result.json`을 확인합니다. 오류가 나면 실패 단계와 로그 위치를 표시하고 Enter를 누를 때까지 창을 유지합니다. 자동 검사는 `--no-pause`를 사용할 수 있습니다.
-
-재실행 시 기존 의존성·정상 모델을 재사용합니다. 배포 갱신은 사용자 데이터·보고서를 지우지 않으며, 실패한 교체는 이전 파일로 복원합니다. 실행 중인 원래 `install.exe`가 배포 대상에 있으면 그 파일도 보존합니다. GUI·Worker 등이 사용 중인 파일을 교체할 수 없으면 프로그램을 닫은 뒤 다시 실행합니다.
-
-## Qt·LibTorch 없는 독립 빌드
-
-MSVC x64와 CMake가 준비된 개발용 PowerShell에서 실행합니다. 이 빌드는 애플리케이션의 Qt·LibTorch를 검색하지 않습니다.
-
-```powershell
-cmake -S src\Installer -B build-installer -G "Visual Studio 17 2022" -A x64
-if ($LASTEXITCODE -ne 0) { throw "설치기 구성 실패" }
-cmake --build build-installer --config Release --target FingerprintInstaller
-if ($LASTEXITCODE -ne 0) { throw "설치기 빌드 실패" }
-```
-
-결과는 `build-installer\Release\install.exe`입니다. root 구성의 `-DFINGERPRINT_INSTALLER_ONLY=ON`도 같은 독립 target을 제공합니다. `FingerprintInstaller`는 `OUTPUT_NAME install`과 static C++ runtime을 사용하고, 초기 PowerShell script와 실행 권한 manifest를 Windows resource에 포함합니다.
-
-전체 프로그램의 `FingerprintEvaluatorPackage` target은 아래 배치를 생성합니다. 알고리즘 DLL·모델의 기존 별도 배포 위치는 유지합니다.
+기본 위치는 `%LOCALAPPDATA%\Programs\FingerprintEvaluator`입니다. 사용자별 설치이며 기본 경로에서는 관리자 권한을 요구하지 않습니다. Windows x64·Windows 10 이상을 대상으로 합니다. 파일은 코드 서명되지 않은 Preview이므로 검증 범위는 Release의 기록을 참고합니다.
 
 ```text
- dist/
- ├─ FingerprintEvaluator/
- │  ├─ install.exe
- │  ├─ FingerprintGUI.exe
- │  ├─ FingerprintWorker.exe
- │  └─ Qt runtime·plugins·licenses·SHA256SUMS.txt
- └─ FingerprintAlgorithm/
-    └─ 기존 DLL·모델·runtime 구성
+FingerprintEvaluator/
+├─ FingerprintEvaluator/ # GUI·Worker·Qt runtime·복구용 install.exe
+├─ FingerprintAlgorithm/ # 공개 DLL·Core·모델 4개·필수 runtime
+├─ data/original/        # 원본 예제 이미지
+└─ unins000.exe          # Windows에 등록되는 제거 프로그램
 ```
 
-## 현재 검증 범위
+## 복구·업데이트·제거
 
-2026-11-26 macOS 환경에서 LLVM-MinGW로 Windows x64 Release PE를 cross-build했고, 초기 script·`asInvoker` resource와 system DLL import를 확인했습니다. PowerShell 제어 검사에서는 checkout 재사용·복제 분기, 공백·한글 경로, 기존 파일 보존, 실패 단계·로그, 성공 후 GUI 실행 분기를 확인했습니다. 외부 의존성 설치와 GUI 실행은 이 검사에서 대체했습니다.
+Start 메뉴의 **Fingerprint Evaluator 복구 설치** 또는 설치 폴더의 `FingerprintEvaluator/install.exe`를 실행하면 같은 마법사에서 다시 설치합니다. 기존 사용자 보고서·추가 파일은 삭제하지 않습니다. 교체하거나 제거하는 모델이 배포 모델과 다르면 `%LOCALAPPDATA%\FingerprintEvaluator\backups`에 먼저 보관합니다. 원본 예제 경로에 이미 있는 이미지는 덮어쓰지 않습니다.
 
-실제 Windows에서 MSVC로 만든 설치기의 실행, 새 PC의 WinGet 복구·UAC·재부팅·전체 다운로드·GUI 기동, Windows 파일 잠금 조건은 아직 실행 검증하지 못했습니다. 현재 제공된 standalone EXE는 unsigned cross-build이며 포함된 고지는 `install.exe --licenses`로 확인합니다. 애플리케이션의 Windows GUI 배포본은 Windows에서 전체 패키징 target으로 생성해야 합니다.
+GUI가 설치 파일·모델 누락을 발견하면 복구 마법사를 열고 종료합니다. 소스 저장소에서 실행한 개발용 GUI의 경우에는 기존 개발용 준비 스크립트를 사용합니다. 복구용 EXE 자체는 현재 실행 중인 파일과 같으면 덮어쓰지 않습니다.
+
+Windows **설정 → 앱 → 설치된 앱 → Fingerprint Evaluator → 제거**에서 삭제합니다. 직접 작성한 보고서와 보관한 모델은 유지합니다. 설치·제거 로그는 `%LOCALAPPDATA%\FingerprintEvaluator\logs`에 보관합니다. Windows Temp에도 `Setup Log ...txt`·`Uninstall Log ...txt`에 남으며 `/LOG="경로"`로 위치를 지정할 수 있습니다.
+
+## 개발자 빌드
+
+Windows에서 애플리케이션을 Release로 빌드하고 별도 payload를 만든 뒤 Inno Setup으로 하나의 EXE를 만듭니다. 사용자 데이터가 섞일 수 있는 기존 `dist` 폴더 대신 새 패키징 stage에서 만든 파일만 포함합니다.
+
+Inno Setup 6.3+가 있는 개발용 PowerShell에서 프로젝트 루트 기준으로 실행합니다.
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\tools\setup_windows.ps1 -DistributedModelsOnly -BuildInstaller
+```
+
+`-DistributedModelsOnly`는 기존 배포 가중치만 사용하고 Training 프로그램·pretrained 모델 다운로드·새 학습을 생략합니다. 결과는 `dist/FingerprintSetup/install.exe`와 `SHA256SUMS.txt`이며 portable Evaluator 폴더에도 설치기를 복사합니다. Inno Setup은 패키지를 만드는 개발자에게만 필요합니다.
+
+이미 만들어진 `build/installer-payload`만 있다면 Qt·LibTorch·C++ compiler 없이 별도로 패키징할 수도 있습니다.
+
+```powershell
+cmake -S src/Installer -B build-installer "-DFINGERPRINT_INSTALLER_PAYLOAD=$((Resolve-Path build/installer-payload).Path)"
+cmake --build build-installer --target FingerprintInstaller
+```
+
+`.github/workflows/windows-installer.yml`은 Windows에서 빌드하고 설치 마법사·한글/공백 경로·공개 KISA API·TIFF plugin·GUI 실행·복구·제거를 검사합니다. 성공한 파일만 Preview Release에 공개합니다. 실제 개인 PC의 모든 정책·보안 제품·사용자 상태를 대신하는 검사는 아닙니다.
+
+[Inno Setup 문서](https://jrsoftware.org/ishelp/) · [소스 빌드 안내](build.md)

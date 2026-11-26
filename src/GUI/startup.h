@@ -8,6 +8,7 @@ struct StartupPlan {
     QString source_folder;
     QString algorithm_folder;
     QString setup_script;
+    QString repair_installer;
     bool needs_preparation = false;
 };
 

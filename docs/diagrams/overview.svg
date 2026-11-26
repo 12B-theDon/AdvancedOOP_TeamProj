@@ -88,7 +88,7 @@
 <text x="800" y="752" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">encode / compare</text>
 <text x="535" y="652" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">load once</text>
 <text x="300" y="823" font-family="Arial" font-size="12" font-weight="400" text-anchor="middle" fill="#52606d">export</text>
-<text x="40" y="585" font-family="Arial" font-size="14" font-weight="400" text-anchor="start" fill="#111111">Setup: install.exe / source script -&gt; LFS / train -&gt; package -&gt; GUI.</text>
+<text x="40" y="585" font-family="Arial" font-size="14" font-weight="400" text-anchor="start" fill="#111111">Installer: install.exe -&gt; runtime + models -&gt; shortcuts -&gt; GUI.</text>
 <text x="40" y="612" font-family="Arial" font-size="14" font-weight="400" text-anchor="start" fill="#111111">Evaluator: original gray8 + opaque template bytes.</text>
 <text x="40" y="638" font-family="Arial" font-size="14" font-weight="400" text-anchor="start" fill="#111111">Windows runtime; DLLs and weights share one folder.</text>
 </svg>

@@ -1,0 +1,149 @@
+﻿#Requires -Version 5.1
+[CmdletBinding()]
+param([Parameter(Mandatory)][string]$Installer, [Parameter(Mandatory)][string]$Checker,
+      [Parameter(Mandatory)][string]$Results)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$Installer = (Resolve-Path -LiteralPath $Installer).Path
+$Checker = (Resolve-Path -LiteralPath $Checker).Path
+$Results = [IO.Path]::GetFullPath($Results)
+New-Item -ItemType Directory -Path $Results -Force | Out-Null
+$target = Join-Path $env:TEMP ('Fingerprint wizard 한글 space_' + [guid]::NewGuid().ToString('N'))
+$oldPath = $env:Path
+$oldPlugin = $env:QT_PLUGIN_PATH
+$oldPlatform = $env:QT_QPA_PLATFORM
+Start-Transcript -LiteralPath (Join-Path $Results 'verification.log') -Force | Out-Null
+Add-Type -ReferencedAssemblies System.Drawing -TypeDefinition @'
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Drawing;
+using System.Drawing.Imaging;
+public class WizardWindow { public IntPtr Handle; public string Text; public string Class; }
+public static class WizardUI {
+    public delegate bool Callback(IntPtr h, IntPtr p);
+    [DllImport("user32.dll")] static extern bool EnumWindows(Callback c, IntPtr p);
+    [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr h, Callback c, IntPtr p);
+    [DllImport("user32.dll", CharSet=CharSet.Unicode)] static extern int GetWindowText(IntPtr h, StringBuilder b, int n);
+    [DllImport("user32.dll", CharSet=CharSet.Unicode)] static extern int GetClassName(IntPtr h, StringBuilder b, int n);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+    [DllImport("user32.dll")] static extern bool IsWindowEnabled(IntPtr h);
+    [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr h, out Rect r);
+    [DllImport("user32.dll")] static extern bool PrintWindow(IntPtr h, IntPtr dc, uint flags);
+    [DllImport("user32.dll")] static extern bool PostMessage(IntPtr h, uint m, IntPtr w, IntPtr l);
+    [StructLayout(LayoutKind.Sequential)] public struct Rect { public int L,T,R,B; }
+    public static WizardWindow[] Find(IntPtr parent) {
+        List<WizardWindow> list = new List<WizardWindow>();
+        Callback callback = delegate(IntPtr h, IntPtr unused) {
+            if (!IsWindowVisible(h) || !IsWindowEnabled(h)) return true;
+            StringBuilder text = new StringBuilder(1024), cls = new StringBuilder(128);
+            GetWindowText(h,text,text.Capacity); GetClassName(h,cls,cls.Capacity);
+            list.Add(new WizardWindow { Handle=h,Text=text.ToString(),Class=cls.ToString() }); return true;
+        };
+        if (parent==IntPtr.Zero) EnumWindows(callback,IntPtr.Zero); else EnumChildWindows(parent,callback,IntPtr.Zero);
+        return list.ToArray();
+    }
+    public static void Click(IntPtr h) { if(!PostMessage(h,0x00F5,IntPtr.Zero,IntPtr.Zero)) throw new Exception("Button click failed"); }
+    public static void Capture(IntPtr h,string path) {
+        Rect r; if(!GetWindowRect(h,out r)) throw new Exception("Window rectangle missing");
+        using(Bitmap bitmap=new Bitmap(r.R-r.L,r.B-r.T)) {
+            using(Graphics graphics=Graphics.FromImage(bitmap)) {
+                IntPtr dc=graphics.GetHdc(); bool ok=PrintWindow(h,dc,2); graphics.ReleaseHdc(dc);
+                if(!ok) throw new Exception("Window capture failed");
+            }
+            bitmap.Save(path,ImageFormat.Png);
+        }
+    }
+}
+'@
+function Check([bool]$Ok, [string]$Message) { if (-not $Ok) { throw $Message } }
+function Wait-For([scriptblock]$Action, [int]$Seconds=60) {
+    $timer=[Diagnostics.Stopwatch]::StartNew()
+    do { $value=& $Action; if($value){return $value}; Start-Sleep -Milliseconds 200 } while($timer.Elapsed.TotalSeconds -lt $Seconds)
+    throw 'Timed out waiting for installer/application state'
+}
+function Wizard { return [WizardUI]::Find([IntPtr]::Zero) | Where-Object { $_.Class -eq 'TWizardForm' -and $_.Text -like '*Fingerprint Evaluator*' } | Select-Object -First 1 }
+function Button([IntPtr]$Window,[string]$Pattern) {
+    return [WizardUI]::Find($Window) | Where-Object { $_.Class -like '*Button*' -and $_.Text -match $Pattern } | Select-Object -First 1
+}
+function Verify-Files([string]$Folder) {
+    $base=[IO.Path]::GetFullPath($Folder).TrimEnd('\')+'\'
+    foreach($line in Get-Content -LiteralPath (Join-Path $Folder 'SHA256SUMS.txt')) {
+        Check ($line -match '^([0-9a-f]{64})  (.+)$') 'Malformed package file list'
+        $expected=$Matches[1]; $relative=$Matches[2]; $file=[IO.Path]::GetFullPath((Join-Path $Folder $relative))
+        Check ($file.StartsWith($base,[StringComparison]::OrdinalIgnoreCase)) 'Unsafe package file path'
+        Check (Test-Path -LiteralPath $file -PathType Leaf) "Missing installed file: $relative"
+        Check ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -eq $expected) "Installed file hash differs: $relative"
+    }
+}
+try {
+    $env:Path="$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
+    $env:QT_PLUGIN_PATH=$null; $env:QT_QPA_PLATFORM=$null
+    $installLog=Join-Path $Results 'install.log'
+    $process=Start-Process -FilePath $Installer -ArgumentList @('/SP-','/LANG=korean',('/DIR="'+$target+'"'),('/LOG="'+$installLog+'"'),'/TASKS=desktopicon','/NORESTART') -PassThru
+    $wizard=Wait-For { Wizard }
+    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results '01-welcome.png'))
+    for($page=0;$page -lt 6;$page++) {
+        $installButton=Button $wizard.Handle '^설치|^Install'
+        if($installButton){break}
+        $next=Wait-For { Button $wizard.Handle '^다음|^Next' }
+        [WizardUI]::Click($next.Handle); Start-Sleep -Milliseconds 400
+        [WizardUI]::Capture($wizard.Handle,(Join-Path $Results ("02-page${page}.png")))
+    }
+    Check ($null -ne $installButton) 'Install button was not reached'
+    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results '03-ready.png'))
+    [WizardUI]::Click($installButton.Handle); Start-Sleep -Milliseconds 750
+    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results '04-progress.png'))
+    $finish=Wait-For { Button $wizard.Handle '^마침|^Finish' } 600
+    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results '05-finished.png'))
+    [WizardUI]::Click($finish.Handle)
+    Check ($process.WaitForExit(60000) -and $process.ExitCode -eq 0) 'Interactive installer failed'
+    $gui=Wait-For { Get-Process FingerprintGUI -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe') } | Select-Object -First 1 }
+    $window=Wait-For { $gui.Refresh(); if($gui.MainWindowHandle -ne [IntPtr]::Zero){$gui.MainWindowHandle} }
+    [WizardUI]::Capture($window,(Join-Path $Results '06-application.png'))
+    $gui.CloseMainWindow() | Out-Null
+    if(-not $gui.WaitForExit(10000)){$gui.Kill()}
+    Verify-Files (Join-Path $target 'FingerprintAlgorithm')
+    Verify-Files (Join-Path $target 'FingerprintEvaluator')
+    Check (@(Get-ChildItem -LiteralPath (Join-Path $target 'data\original') -Filter '*.tif' -Recurse).Count -eq 240) 'Original examples missing'
+    $key='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{B21A42C6-0BCE-4C73-A734-1566AB3CD911}_is1'
+    Check (Test-Path $key) 'Windows Apps uninstall registration missing'
+    Check ((Get-ItemProperty $key).DisplayName -like 'Fingerprint Evaluator*') 'Wrong installed application entry'
+    $env:Path=(Join-Path $target 'FingerprintEvaluator')+';'+$env:Path
+    $env:QT_PLUGIN_PATH=Join-Path $target 'FingerprintEvaluator'
+    & $Checker $target (Join-Path $Results 'public-kisa.json')
+    Check ($LASTEXITCODE -eq 0) 'Installed public KISA API test failed'
+    $probe=Get-Content -LiteralPath (Join-Path $Results 'public-kisa.json') -Raw | ConvertFrom-Json
+    foreach($module in $probe.loaded_modules) {
+        if($module -match '\\(Qt6.*|torch.*|c10|libiomp5md)\.dll$') {
+            Check ($module.StartsWith($target,[StringComparison]::OrdinalIgnoreCase)) "Runtime escaped installed package: $module"
+        }
+    }
+    $report=Join-Path $target 'my-report.txt'; [IO.File]::WriteAllText($report,'preserve user report')
+    $cached=Join-Path $target 'FingerprintEvaluator\install.exe'
+    Check ((Get-FileHash -LiteralPath $cached).Hash -eq (Get-FileHash -LiteralPath $Installer).Hash) 'Repair installer differs'
+    Remove-Item -LiteralPath (Join-Path $target 'FingerprintAlgorithm\combined.bin') -Force
+    $repair=Start-Process -FilePath $cached -ArgumentList @('/VERYSILENT','/SP-','/NORESTART',('/DIR="'+$target+'"'),('/LOG="'+(Join-Path $Results 'repair.log')+'"')) -Wait -PassThru
+    Check ($repair.ExitCode -eq 0) 'Cached installer repair failed'
+    Verify-Files (Join-Path $target 'FingerprintAlgorithm')
+    Verify-Files (Join-Path $target 'FingerprintEvaluator')
+    Check ((Get-Content -LiteralPath $report -Raw) -eq 'preserve user report') 'Repair changed user data'
+    $changedModel=Join-Path $target 'FingerprintAlgorithm\fvc2000_db3.bin'
+    [IO.File]::WriteAllText($changedModel,'controlled modified model')
+    $changedHash=(Get-FileHash -LiteralPath $changedModel).Hash
+    $uninstall=Start-Process -FilePath (Join-Path $target 'unins000.exe') -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="'+(Join-Path $Results 'uninstall.log')+'"')) -Wait -PassThru
+    Check ($uninstall.ExitCode -eq 0) 'Standard uninstaller failed'
+    Check (-not (Test-Path $key)) 'Windows Apps entry survived uninstall'
+    Check (-not (Test-Path (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe'))) 'GUI survived uninstall'
+    Check ((Get-Content -LiteralPath $report -Raw) -eq 'preserve user report') 'Uninstall removed user report'
+    $saved=@(Get-ChildItem -LiteralPath (Join-Path $env:LOCALAPPDATA 'FingerprintEvaluator\backups') -Filter 'fvc2000_db3.bin' -Recurse | Where-Object { (Get-FileHash -LiteralPath $_.FullName).Hash -eq $changedHash })
+    Check ($saved.Count -gt 0) 'Uninstall did not preserve the modified model'
+    @{ wizard_pages=$true; korean_space_path=$true; original_examples=240; public_api_databases=3;
+       installed_runtime_only=$true; finish_launch=$true; cached_repair=$true; uninstall_registration=$true;
+       user_report_preserved=$true; modified_model_preserved=$true; installer_sha256=(Get-FileHash -LiteralPath $Installer).Hash } |
+       ConvertTo-Json | Set-Content -LiteralPath (Join-Path $Results 'result.json') -Encoding UTF8
+} finally {
+    $env:Path=$oldPath; $env:QT_PLUGIN_PATH=$oldPlugin; $env:QT_QPA_PLATFORM=$oldPlatform
+    Stop-Transcript | Out-Null
+}

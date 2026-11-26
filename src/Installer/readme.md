@@ -1,7 +1,7 @@
 # Installer 모듈
 
-`bootstrap.cpp`는 Windows 기본 API와 static C++ runtime으로 실행하는 `install.exe`입니다. 초기 PowerShell 논리를 resource에 포함하며 Qt·LibTorch를 링크하지 않습니다. 원래 EXE를 점유하지 않도록 작업용 복사본에서 설치를 계속합니다.
+`FingerprintSetup.iss`는 설치 위치·바로가기·진행률·완료 후 실행·Windows 앱 제거 기능을 제공하는 Inno Setup 마법사입니다. 완성된 프로그램·runtime DLL·학습 모델을 포함하므로 사용자 PC에서 개발 도구를 설치하거나 빌드하지 않습니다.
 
-`CMakeLists.txt`는 애플리케이션과 독립적으로 `FingerprintInstaller`를 빌드합니다. `bootstrap.rc.in`·`install.manifest`는 초기 script와 `asInvoker` 설정을 포함합니다. 실제 의존성·모델 준비는 기존 `tools/setup_windows.ps1`을 재사용합니다.
+`CMakeLists.txt`의 `FingerprintInstaller` target과 `PackageInstaller.cmake`가 깨끗한 배포 payload로 `install.exe`를 만듭니다. `deployment_check.cpp`·`verify_install.ps1`은 설치된 파일만으로 세 DB의 공개 KISA 함수와 실제 GUI·복구·제거 동작을 검사하는 개발용 도구입니다. 일반 배포본에 검사 프로그램을 넣지 않습니다.
 
-[실행·로그·독립 빌드·검증 범위](../../docs/installer.md)
+[설치·로그·개발자 빌드](../../docs/installer.md)
