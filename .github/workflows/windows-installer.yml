@@ -78,6 +78,15 @@ jobs:
       - name: Test the installation wizard and installed application
         run: |
           .\src\Installer\verify_install.ps1 -Installer dist\FingerprintSetup\install.exe -Checker build\src\Installer\Release\FingerprintDeploymentCheck.exe -Results build\installer-verification
+      - name: Preserve the verified runtime before publishing
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer-runtime
+          path: |
+            dist/FingerprintSetup/
+            build/src/Installer/Release/FingerprintDeploymentCheck.exe
+          compression-level: 0
+          retention-days: 7
       - name: Retain an unverified build for diagnosing failed checks
         if: failure()
         uses: actions/upload-artifact@v4
@@ -98,6 +107,7 @@ jobs:
             build/CMakeFiles/CMakeConfigureLog.yaml
           retention-days: 7
       - name: Publish the verified Preview installer
+        shell: pwsh
         if: ${{ inputs.release_tag != '' || startsWith(github.ref, 'refs/heads/installer-wizard-') }}
         env:
           GH_TOKEN: ${{ github.token }}
