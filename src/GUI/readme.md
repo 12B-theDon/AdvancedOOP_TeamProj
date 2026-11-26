@@ -62,4 +62,4 @@ Results에서 Genuine·Impostor 임계값(초기 모두 `0.30`)을 바꾸면 저
 
 변경된 그래프는 수정본을 빌드한 뒤 Save로 새 `run_N` 보고서를 만들 때 적용됩니다. 기존 보고서 파일은 자동으로 변경하지 않습니다. 실제 점수가 좁은 구간에 몰려 있으면 그래프에도 급격한 변화와 높은 봉우리가 남습니다.
 
-[구조도 SVG 원본](../../docs/diagrams/gui.svg) · [사용 순서](../../readme.md#2-gui)
+[구조도 SVG 원본](../../docs/diagrams/gui.svg) · [사용 순서](../../readme.md#2-gui-사용)

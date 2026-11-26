@@ -41,6 +41,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 korean.DesktopShortcut=바탕 화면에 바로가기 만들기
 korean.RunApplication=Fingerprint Evaluator 실행
 korean.RepairShortcut=Fingerprint Evaluator 복구 설치
+korean.UninstallShortcut=Fingerprint Evaluator 제거
 korean.Welcome=Fingerprint Evaluator를 설치합니다.%n%n프로그램, 실행에 필요한 파일, 학습된 모델과 예제 지문 이미지를 함께 설치합니다.%nGit 설치나 직접 빌드할 필요가 없습니다.
 korean.Verify=설치한 파일을 확인하는 중입니다...
 korean.BackupError=기존 모델을 보관하지 못했습니다. 사용 중인 프로그램을 닫고 다시 시도하세요.
@@ -49,6 +50,7 @@ korean.InvalidFile=설치 파일을 확인하지 못했습니다: %1
 english.DesktopShortcut=Create a desktop shortcut
 english.RunApplication=Launch Fingerprint Evaluator
 english.RepairShortcut=Repair Fingerprint Evaluator
+english.UninstallShortcut=Uninstall Fingerprint Evaluator
 english.Welcome=Setup will install Fingerprint Evaluator.%n%nThe application, required runtime files, trained models and example fingerprint images are included.%nNo Git installation or manual build is required.
 english.Verify=Verifying installed files...
 english.BackupError=Could not preserve an existing model. Close applications using it and try again.
@@ -59,6 +61,7 @@ english.InvalidFile=Installed file verification failed: %1
 Name: "desktopicon"; Description: "{cm:DesktopShortcut}"; Flags: unchecked
 
 [Files]
+Source: "{#Payload}\Uninstall.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Payload}\FingerprintEvaluator\*"; DestDir: "{app}\FingerprintEvaluator"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Payload}\FingerprintAlgorithm\*"; DestDir: "{app}\FingerprintAlgorithm"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Payload}\data\original\*"; DestDir: "{app}\data\original"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
@@ -66,6 +69,7 @@ Source: "{#Payload}\data\original\*"; DestDir: "{app}\data\original"; Flags: onl
 [Icons]
 Name: "{autoprograms}\Fingerprint Evaluator"; Filename: "{app}\FingerprintEvaluator\FingerprintGUI.exe"; WorkingDir: "{app}"
 Name: "{autoprograms}\{cm:RepairShortcut}"; Filename: "{app}\FingerprintEvaluator\install.exe"; Parameters: "/DIR=""{app}"""; WorkingDir: "{app}"
+Name: "{autoprograms}\{cm:UninstallShortcut}"; Filename: "{app}\Uninstall.exe"; WorkingDir: "{app}"
 Name: "{autodesktop}\Fingerprint Evaluator"; Filename: "{app}\FingerprintEvaluator\FingerprintGUI.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]

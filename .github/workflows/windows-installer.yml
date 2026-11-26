@@ -1,7 +1,8 @@
 name: Windows installation wizard
 on:
   push:
-    branches: ['installer-wizard-*']
+    branches: [main]
+    paths: ['src/Installer/**', '.github/workflows/windows-installer.yml']
   workflow_dispatch:
     inputs:
       release_tag:
@@ -71,9 +72,13 @@ jobs:
           $changed = @(git diff --name-only $run.head_sha $env:GITHUB_SHA -- CMakeLists.txt cmake src tools)
           if ($LASTEXITCODE) { throw 'Runtime source comparison failed' }
           if (@($changed | Where-Object { $_ -ne 'src/Installer/verify_install.ps1' }).Count) { throw 'Runtime implementation changed; build a new installer instead' }
-          $line = (Get-Content -LiteralPath dist/FingerprintSetup/SHA256SUMS.txt -Raw).Trim()
-          if ($line -notmatch '^([a-f0-9]{64})  install.exe$') { throw 'Invalid installer hash list' }
-          if ((Get-FileHash -LiteralPath dist/FingerprintSetup/install.exe).Hash -ne $Matches[1]) { throw 'Reused installer hash differs' }
+          $names=@()
+          foreach($line in Get-Content -LiteralPath dist/FingerprintSetup/SHA256SUMS.txt) {
+            if ($line -notmatch '^([a-f0-9]{64})  (install.exe|Uninstall.exe)$') { throw 'Invalid installer hash list' }
+            $expected=$Matches[1]; $name=$Matches[2]; $names+=$name
+            if ((Get-FileHash -LiteralPath (Join-Path dist/FingerprintSetup $name)).Hash -ne $expected) { throw 'Reused executable hash differs' }
+          }
+          if ($names.Count -ne 2 -or 'install.exe' -notin $names -or 'Uninstall.exe' -notin $names) { throw 'Expected both installer and uninstaller' }
           "RUNTIME_SOURCE_SHA=$($run.head_sha)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Test the installation wizard and installed application
         run: |
@@ -106,26 +111,27 @@ jobs:
             build/installer-verification/
             build/CMakeFiles/CMakeConfigureLog.yaml
           retention-days: 7
-      - name: Publish the verified Preview installer
+      - name: Publish the verified Preview installer and uninstaller
         shell: pwsh
-        if: ${{ inputs.release_tag != '' || startsWith(github.ref, 'refs/heads/installer-wizard-') }}
+        if: ${{ inputs.release_tag != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ inputs.release_tag || 'windows-ui-installer-20261126-preview' }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           $ErrorActionPreference = 'Stop'
           if ($env:RELEASE_TAG -notmatch '^windows-ui-installer-[A-Za-z0-9._-]+$') { throw 'Invalid installer release tag' }
           @"
           Windows 설치 마법사 Preview입니다. install.exe를 다운로드하고 더블클릭하세요.
+          제거할 때는 Uninstall.exe를 실행하세요. 설치된 프로그램의 제거 확인 창을 엽니다.
 
           설치 위치 선택, 파일 설치 진행률, 바로가기, 완료 후 GUI 실행 및 Windows 앱 목록에서 제거를 지원합니다.
           Git, Python, CMake, MSVC, Qt SDK, LibTorch SDK 설치나 소스 빌드는 사용자 PC에서 수행하지 않습니다.
           프로그램의 runtime DLL, 기존 가중치 4개와 원본 예제 이미지를 포함합니다.
 
-          Windows hosted runner에서 실제 설치·공개 KISA 함수·GUI 시작·복구·제거 검사를 수행했습니다.
+          Windows hosted runner에서 실제 설치·공개 KISA 함수·GUI 시작·복구·제거와 Uninstall.exe의 미설치·취소 처리를 검사했습니다.
           새 개인 PC의 모든 보안 정책·환경을 검증한 것은 아니며, 코드 서명되지 않은 Preview입니다.
           Source and verification: $env:GITHUB_SHA
           Runtime build source (when reused): $env:RUNTIME_SOURCE_SHA
           "@ | Set-Content -LiteralPath build\installer-release-notes.md -Encoding UTF8
-          gh release create $env:RELEASE_TAG dist/FingerprintSetup/install.exe dist/FingerprintSetup/SHA256SUMS.txt --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease --title 'Fingerprint Evaluator Windows 설치 마법사' --notes-file build/installer-release-notes.md
+          gh release create $env:RELEASE_TAG dist/FingerprintSetup/install.exe dist/FingerprintSetup/Uninstall.exe dist/FingerprintSetup/SHA256SUMS.txt --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease --title 'Fingerprint Evaluator Windows 설치·제거' --notes-file build/installer-release-notes.md
           if ($LASTEXITCODE) { throw 'Installer release upload failed' }

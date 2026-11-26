@@ -4,7 +4,7 @@
 
 ## Windows 자동 설치·빌드·패키징
 
-[저장소 복제](../readme.md#1-install)를 마친 Windows x64 PowerShell에서 실행합니다.
+[저장소 복제](../readme.md#1-설치)를 마친 Windows x64 PowerShell에서 실행합니다.
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -17,7 +17,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 `models/trained_result`의 모델 4개는 Git LFS로 배포합니다. 정상 다운로드된 모델은 metadata·SHA-256 확인 후 재사용합니다. 파일이 없거나 호환되지 않으면 기존 폴더를 `trained_result_incomplete_*`로 보관하고, 원래 학습 설정으로 모델 4개를 학습한 뒤 `trained_result`에 저장합니다. 패키징한 두 폴더의 SHA-256 검사까지 통과해야 완료됩니다.
 
-완료 후 [GUI 실행](../readme.md#2-gui)으로 진행합니다. `-LaunchGui`를 붙이면 준비 완료 후 GUI도 엽니다. 소스 저장소에서 GUI가 누락 파일을 발견하면 이 스크립트를 자동 실행하며, 실행 중인 EXE를 교체하지 않도록 이전 GUI가 종료된 뒤 준비하고 다시 엽니다. 소스가 없는 독립 배포본은 두 배포 폴더를 완전하게 함께 복사합니다.
+완료 후 [GUI 실행](../readme.md#2-gui-사용)으로 진행합니다. `-LaunchGui`를 붙이면 준비 완료 후 GUI도 엽니다. 소스 저장소에서 GUI가 누락 파일을 발견하면 이 스크립트를 자동 실행하며, 실행 중인 EXE를 교체하지 않도록 이전 GUI가 종료된 뒤 준비하고 다시 엽니다. 소스가 없는 독립 배포본은 두 배포 폴더를 완전하게 함께 복사합니다.
 
 참고: [WinGet](https://learn.microsoft.com/en-us/windows/package-manager/winget/install) · [MSVC](https://learn.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio) · [aqtinstall](https://aqtinstall.readthedocs.io/en/stable/getting_started.html) · [LibTorch](https://download.pytorch.org/libtorch/cpu/)
 

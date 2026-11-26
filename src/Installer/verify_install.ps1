@@ -5,6 +5,7 @@ param([Parameter(Mandatory)][string]$Installer, [Parameter(Mandatory)][string]$C
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $Installer = (Resolve-Path -LiteralPath $Installer).Path
+$Uninstaller = (Resolve-Path -LiteralPath (Join-Path (Split-Path -Parent $Installer) 'Uninstall.exe')).Path
 $Checker = (Resolve-Path -LiteralPath $Checker).Path
 $Results = [IO.Path]::GetFullPath($Results)
 New-Item -ItemType Directory -Path $Results -Force | Out-Null
@@ -114,9 +115,27 @@ function Complete-Wizard([string]$Prefix) {
     [WizardUI]::Capture($wizard.Handle,(Join-Path $Results "$Prefix-finished.png"))
     [WizardUI]::Click($finish.Handle)
 }
+function Start-UninstallConfirmation {
+    $launcher=Start-Process -FilePath $Uninstaller -PassThru
+    $confirmation=Wait-For {
+        foreach($window in [WizardUI]::Find([IntPtr]::Zero)) {
+            if($window.Text -like '*Fingerprint Evaluator*' -and
+                (Button $window.Handle '예|Yes') -and (Button $window.Handle '아니요|No')) { return $window }
+        }
+    }
+    Check ($launcher.WaitForExit(10000) -and $launcher.ExitCode -eq 0) 'Uninstall launcher failed'
+    return $confirmation
+}
 try {
     $env:Path="$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
     $env:QT_PLUGIN_PATH=$null; $env:QT_QPA_PLATFORM=$null
+    $absent=Start-Process -FilePath $Uninstaller -PassThru
+    $notice=Wait-For { [WizardUI]::Find([IntPtr]::Zero) | Where-Object { $_.Text -eq 'Fingerprint Evaluator Uninstall' } | Select-Object -First 1 }
+    [WizardUI]::Capture($notice.Handle,(Join-Path $Results '00-not-installed.png'))
+    $ok=Button $notice.Handle '확인|OK'
+    Check ($null -ne $ok) 'Not-installed message missing'
+    [WizardUI]::Click($ok.Handle)
+    Check ($absent.WaitForExit(10000) -and $absent.ExitCode -eq 1168) 'Not-installed launcher result differs'
     $installLog=Join-Path $Results 'install.log'
     $process=Start-Process -FilePath $Installer -ArgumentList @('/SP-','/LANG=korean',('/DIR="'+$target+'"'),('/LOG="'+$installLog+'"'),'/TASKS=desktopicon','/NORESTART') -PassThru
     Complete-Wizard '01-install'
@@ -132,6 +151,12 @@ try {
     $key='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{B21A42C6-0BCE-4C73-A734-1566AB3CD911}_is1'
     Check (Test-Path $key) 'Windows Apps uninstall registration missing'
     Check ((Get-ItemProperty $key).DisplayName -like 'Fingerprint Evaluator*') 'Wrong installed application entry'
+    Check ((Get-FileHash -LiteralPath (Join-Path $target 'Uninstall.exe')).Hash -eq (Get-FileHash -LiteralPath $Uninstaller).Hash) 'Installed Uninstall.exe differs'
+    $cancel=Start-UninstallConfirmation
+    [WizardUI]::Capture($cancel.Handle,(Join-Path $Results '06-uninstall-cancel.png'))
+    [WizardUI]::Click((Button $cancel.Handle '아니요|No').Handle)
+    Wait-For { -not (Button $cancel.Handle '예|Yes') } | Out-Null
+    Check ((Test-Path $key) -and (Test-Path -LiteralPath (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe'))) 'Cancel removed the installation'
     $env:Path=(Join-Path $target 'FingerprintEvaluator')+';'+$env:Path
     $env:QT_PLUGIN_PATH=Join-Path $target 'FingerprintEvaluator'
     & $Checker $target (Join-Path $Results 'public-kisa.json')
@@ -161,12 +186,26 @@ try {
     Verify-Files (Join-Path $target 'FingerprintAlgorithm')
     Verify-Files (Join-Path $target 'FingerprintEvaluator')
     Check ((Get-Content -LiteralPath $report -Raw) -eq 'preserve user report') 'Repair changed user data'
-    Write-Host 'Repair passed; testing standard uninstall and user file preservation'
+    Write-Host 'Repair passed; testing the downloaded Uninstall.exe and user file preservation'
     $changedModel=Join-Path $target 'FingerprintAlgorithm\fvc2000_db3.bin'
     [IO.File]::WriteAllText($changedModel,'controlled modified model')
     $changedHash=(Get-FileHash -LiteralPath $changedModel).Hash
-    $uninstall=Start-Process -FilePath (Join-Path $target 'unins000.exe') -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="'+(Join-Path $Results 'uninstall.log')+'"')) -Wait -PassThru
-    Check ($uninstall.ExitCode -eq 0) 'Standard uninstaller failed'
+    $confirmation=Start-UninstallConfirmation
+    [WizardUI]::Capture($confirmation.Handle,(Join-Path $Results '09-uninstall-confirm.png'))
+    [WizardUI]::Click((Button $confirmation.Handle '예|Yes').Handle)
+    Wait-For {
+        foreach($window in [WizardUI]::Find([IntPtr]::Zero)) {
+            if($window.Text -like '*Fingerprint Evaluator*') {
+                $done=Button $window.Handle '확인|OK'
+                if($done) {
+                    [WizardUI]::Capture($window.Handle,(Join-Path $Results '10-uninstall-complete.png'))
+                    [WizardUI]::Click($done.Handle)
+                    return $null
+                }
+            }
+        }
+        (-not (Test-Path $key)) -and (-not (Test-Path -LiteralPath (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe')))
+    } 120 | Out-Null
     Check (-not (Test-Path $key)) 'Windows Apps entry survived uninstall'
     Check (-not (Test-Path (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe'))) 'GUI survived uninstall'
     Check ((Get-Content -LiteralPath $report -Raw) -eq 'preserve user report') 'Uninstall removed user report'
@@ -174,6 +213,7 @@ try {
     Check ($saved.Count -gt 0) 'Uninstall did not preserve the modified model'
     @{ wizard_pages=$true; korean_space_path=$true; original_examples=240; public_api_databases=3;
        installed_runtime_only=$true; finish_launch=$true; cached_repair=$true; gui_triggered_repair=$true; uninstall_registration=$true;
+       uninstall_launcher=$true; uninstall_not_installed=$true; uninstall_cancel=$true;
        user_report_preserved=$true; modified_model_preserved=$true; installer_sha256=(Get-FileHash -LiteralPath $Installer).Hash } |
        ConvertTo-Json | Set-Content -LiteralPath (Join-Path $Results 'result.json') -Encoding UTF8
 } catch {
