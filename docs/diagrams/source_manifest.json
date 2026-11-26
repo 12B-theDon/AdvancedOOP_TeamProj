@@ -25,7 +25,7 @@
   "src/Installer/CMakeLists.txt": "eb68aaa622a7839d338a80873071e036b82cb6c2a91fc2640a1321b8cc29a367",
   "src/Installer/FingerprintSetup.iss": "14c1cf4cb9147b54a686c5d2796ca74234680ce2b0210f0d9536cef2aced96d2",
   "src/Installer/PackageInstaller.cmake": "2f7f1441a7b3f1ed8a8d978942c974e8c4b8c0cd24336a2b2b2e42815e228961",
-  "src/Installer/uninstall.cpp": "f3cd9474290c925a879174e3130d547c26c134046914017d77bf1555035b0700",
+  "src/Installer/uninstall.cpp": "b0b4c8368f66080bf8266123029135fbb52a51d1864e60d569539c51222114bc",
   "src/Kisa/BioApi.cpp": "8ab63925f3dedf13fc6b1bad3a222262ef55113b2ba85bebc5049726b7bb36eb",
   "src/Kisa/FingerprintAlgorithm.def": "c87769f8df2a004bcf1537b1df86d0aa381d030782e4c0d61008f6be9571c850",
   "src/Kisa/core.cpp": "8d03d8f7a9b55cf0099f62db0a3ca75f26fa72147d314cfc5052b8085529d058",

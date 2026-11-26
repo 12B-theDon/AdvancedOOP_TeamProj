@@ -119,6 +119,10 @@ function Start-UninstallConfirmation {
     $launcher=Start-Process -FilePath $Uninstaller -PassThru
     $confirmation=Wait-For {
         foreach($window in [WizardUI]::Find([IntPtr]::Zero)) {
+            if($window.Text -eq 'Fingerprint Evaluator Uninstall' -and (Button $window.Handle '확인|OK')) {
+                $details=([WizardUI]::Find($window.Handle) | ForEach-Object { $_.Text }) -join ' '
+                throw "Uninstall launcher could not locate/start the registered uninstaller: $details"
+            }
             if($window.Text -like '*Fingerprint Evaluator*' -and
                 (Button $window.Handle '예|Yes') -and (Button $window.Handle '아니요|No')) { return $window }
         }
@@ -151,6 +155,8 @@ try {
     $key='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{B21A42C6-0BCE-4C73-A734-1566AB3CD911}_is1'
     Check (Test-Path $key) 'Windows Apps uninstall registration missing'
     Check ((Get-ItemProperty $key).DisplayName -like 'Fingerprint Evaluator*') 'Wrong installed application entry'
+    Get-ItemProperty $key | Select-Object DisplayName,UninstallString,InstallLocation |
+        ConvertTo-Json | Set-Content -LiteralPath (Join-Path $Results 'installed-registration.json') -Encoding UTF8
     Check ((Get-FileHash -LiteralPath (Join-Path $target 'Uninstall.exe')).Hash -eq (Get-FileHash -LiteralPath $Uninstaller).Hash) 'Installed Uninstall.exe differs'
     $cancel=Start-UninstallConfirmation
     [WizardUI]::Capture($cancel.Handle,(Join-Path $Results '06-uninstall-cancel.png'))

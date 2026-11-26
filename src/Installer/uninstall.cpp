@@ -40,9 +40,9 @@ bool FindUninstaller(std::wstring& executable, bool& registered) {
         int count = 0;
         wchar_t** arguments = CommandLineToArgvW(command.c_str(), &count);
         if (!arguments) continue;
-        if (count == 1) executable.assign(arguments[0]);
+        if (count >= 1) executable.assign(arguments[0]);
         LocalFree(arguments);
-        if (count != 1 || executable.size() < 4 ||
+        if (count < 1 || executable.size() < 4 ||
             executable[1] != L':' || executable[2] != L'\\') {
             continue;
         }
@@ -83,6 +83,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
     request.fMask = SEE_MASK_NOASYNC | SEE_MASK_FLAG_NO_UI;
     request.lpVerb = L"open";
     request.lpFile = executable.c_str();
+    request.lpParameters = L"/LOG";
     request.nShow = SW_SHOWNORMAL;
     const BOOL launched = ShellExecuteExW(&request);
     const DWORD error = launched ? ERROR_SUCCESS : GetLastError();
