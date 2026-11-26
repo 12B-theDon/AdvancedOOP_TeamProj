@@ -11,7 +11,7 @@
 namespace gui {
 
 static QString Value(double value) {
-    return QString::number(value, 'g', MetricPrecision);
+    return QString::number(value, 'f', MetricPrecision);
 }
 
 struct ScoreGroups {
@@ -273,7 +273,7 @@ static QString ErrorRateCurves(const ScoreGroups& groups, bool showFmr, bool sho
                 "<circle class=\"eer-threshold-marker\" data-threshold=\"" + raw(eer.threshold)
                 + "\" data-eer=\"" + raw(estimate) + "\" cx=\"" + x(eer.threshold) + "\" cy=\""
                 + Number(Bottom - PlotHeight * estimate) + "\" r=\"4.5\" fill=\"#111\"/>";
-            eerLabel = "Estimated EER = " + Number(100 * estimate) + "% @ t = " + Number(eer.threshold);
+            eerLabel = "Estimated EER = " + Value(100 * estimate) + "% @ t = " + Value(eer.threshold);
         }
     }
     svg += "</g><g font-size=\"12\">";
@@ -397,7 +397,7 @@ static QString DetCurve(const ScoreGroups& groups, const std::vector<bool>& sele
     if (selected.size() > 5 && selected[5]) {
         const OperatingPoint point = EerPoint(groups, false, thresholds, control);
         const double estimate = (point.fmr + point.fnmr) / 2;
-        marker({point.threshold, estimate, estimate, point.available}, "EER est. = " + Number(100 * estimate) + "%", true);
+        marker({point.threshold, estimate, estimate, point.available}, "EER est. = " + Value(100 * estimate) + "%", true);
     }
     for (int denominator : {10000, 1000, 100}) {
         const double target = 1.0 / denominator;
@@ -406,7 +406,7 @@ static QString DetCurve(const ScoreGroups& groups, const std::vector<bool>& sele
             control.Check();
             if (point.fmr <= target + engine::MetricTolerance && (!best.available || point.fnmr < best.fnmr)) best = point;
         }
-        marker(best, "FMR" + QString::number(denominator) + ": FNMR = " + Number(100 * best.fnmr) + "%");
+        marker(best, "FMR" + QString::number(denominator) + ": FNMR = " + Value(100 * best.fnmr) + "%");
     }
     return svg;
 }
