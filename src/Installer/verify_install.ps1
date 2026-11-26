@@ -78,7 +78,18 @@ function Verify-Files([string]$Folder) {
     }
 }
 function Complete-Wizard([string]$Prefix) {
-    $wizard=Wait-For { Wizard }
+    Write-Host "Opening wizard: $Prefix"
+    $wizard=Wait-For {
+        $language=[WizardUI]::Find([IntPtr]::Zero) | Where-Object { $_.Class -eq 'TSelectLanguageForm' } | Select-Object -First 1
+        if($language) {
+            [WizardUI]::Capture($language.Handle,(Join-Path $Results "$Prefix-language.png"))
+            $ok=Button $language.Handle '^확인|^OK|^&OK'
+            Check ($null -ne $ok) 'Language selection OK button missing'
+            [WizardUI]::Click($ok.Handle)
+            return $null
+        }
+        Wizard
+    }
     [WizardUI]::Capture($wizard.Handle,(Join-Path $Results "$Prefix-welcome.png"))
     for($page=0;$page -lt 6;$page++) {
         $installButton=Button $wizard.Handle '^설치|^Install'
@@ -117,6 +128,7 @@ try {
     $env:QT_PLUGIN_PATH=Join-Path $target 'FingerprintEvaluator'
     & $Checker $target (Join-Path $Results 'public-kisa.json')
     Check ($LASTEXITCODE -eq 0) 'Installed public KISA API test failed'
+    Write-Host 'Installed public KISA API checks passed'
     $probe=Get-Content -LiteralPath (Join-Path $Results 'public-kisa.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     foreach($module in $probe.loaded_modules) {
         if($module -match '\\(Qt6.*|torch.*|c10|libiomp5md)\.dll$') {
@@ -126,6 +138,7 @@ try {
     $report=Join-Path $target 'my-report.txt'; [IO.File]::WriteAllText($report,'preserve user report')
     $cached=Join-Path $target 'FingerprintEvaluator\install.exe'
     Check ((Get-FileHash -LiteralPath $cached).Hash -eq (Get-FileHash -LiteralPath $Installer).Hash) 'Repair installer differs'
+    Write-Host 'Testing GUI-triggered repair'
     Remove-Item -LiteralPath (Join-Path $target 'FingerprintAlgorithm\combined.bin') -Force
     # Start the installed GUI with a missing model: it must open the graphical repair wizard.
     $recoveringGui=Start-Process -FilePath (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe') -PassThru
@@ -140,6 +153,7 @@ try {
     Verify-Files (Join-Path $target 'FingerprintAlgorithm')
     Verify-Files (Join-Path $target 'FingerprintEvaluator')
     Check ((Get-Content -LiteralPath $report -Raw) -eq 'preserve user report') 'Repair changed user data'
+    Write-Host 'Repair passed; testing standard uninstall and user file preservation'
     $changedModel=Join-Path $target 'FingerprintAlgorithm\fvc2000_db3.bin'
     [IO.File]::WriteAllText($changedModel,'controlled modified model')
     $changedHash=(Get-FileHash -LiteralPath $changedModel).Hash
@@ -154,6 +168,19 @@ try {
        installed_runtime_only=$true; finish_launch=$true; cached_repair=$true; gui_triggered_repair=$true; uninstall_registration=$true;
        user_report_preserved=$true; modified_model_preserved=$true; installer_sha256=(Get-FileHash -LiteralPath $Installer).Hash } |
        ConvertTo-Json | Set-Content -LiteralPath (Join-Path $Results 'result.json') -Encoding UTF8
+} catch {
+    Write-Host $_.ScriptStackTrace
+    try {
+        $windows=@([WizardUI]::Find([IntPtr]::Zero))
+        $windows | Select-Object Text,Class | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $Results 'failure-windows.json') -Encoding UTF8
+        for($i=0;$i -lt $windows.Count;$i++) {
+            [WizardUI]::Capture($windows[$i].Handle,(Join-Path $Results "failure-window-$i.png"))
+        }
+        $logs=Join-Path $env:LOCALAPPDATA 'FingerprintEvaluator\logs'
+        if(Test-Path -LiteralPath $logs) { Copy-Item -LiteralPath $logs -Destination (Join-Path $Results 'saved-setup-logs') -Recurse -Force }
+        Get-ChildItem -LiteralPath $env:TEMP -Filter 'Setup Log *.txt' | Copy-Item -Destination $Results -Force
+    } catch { Write-Host "Additional failure diagnostics: $($_.Exception.Message)" }
+    throw
 } finally {
     $env:Path=$oldPath; $env:QT_PLUGIN_PATH=$oldPlugin; $env:QT_QPA_PLATFORM=$oldPlatform
     Stop-Transcript | Out-Null

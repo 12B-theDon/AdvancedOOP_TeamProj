@@ -8,8 +8,13 @@ on:
         description: 'Optional Preview release tag; leave empty to validate only'
         required: false
         default: ''
+      reuse_run:
+        description: 'Optional failed run whose unchanged runtime artifact should be revalidated'
+        required: false
+        default: ''
 permissions:
   contents: write
+  actions: read
 jobs:
   build-and-test:
     runs-on: windows-2022
@@ -32,16 +37,44 @@ jobs:
           git submodule update --init --recursive --depth 1
           if ($LASTEXITCODE) { throw 'Submodule checkout failed' }
       - name: Select the existing Python 3.11 toolchain
+        if: ${{ inputs.reuse_run == '' }}
         run: |
           $python = Get-ChildItem "$env:RUNNER_TOOL_CACHE\Python\3.11*\x64\python.exe" | Select-Object -Last 1
           if (-not $python) { throw 'Python 3.11 is absent from the Windows runner' }
           (Split-Path -Parent $python.FullName) | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Build Release runtimes and the offline installation wizard
+        if: ${{ inputs.reuse_run == '' }}
         run: |
           $ProgressPreference = 'SilentlyContinue'
           .\tools\setup_windows.ps1 -DistributedModelsOnly -BuildInstaller -Jobs 2 -DependenciesPath "$env:RUNNER_TEMP\FingerprintDeps"
           cmake --build build --config Release --target FingerprintDeploymentCheck --parallel 2
           if ($LASTEXITCODE) { throw 'Deployment check build failed' }
+      - name: Download an unchanged runtime for revalidation
+        if: ${{ inputs.reuse_run != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-installer-unverified-debug
+          run-id: ${{ inputs.reuse_run }}
+          github-token: ${{ github.token }}
+          path: .
+      - name: Verify the reused runtime matches this source
+        if: ${{ inputs.reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REUSE_RUN: ${{ inputs.reuse_run }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:REUSE_RUN -notmatch '^[0-9]+$') { throw 'Invalid runtime source run' }
+          $run = Invoke-RestMethod -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/actions/runs/$env:REUSE_RUN" -Headers @{ Authorization="Bearer $env:GH_TOKEN" }
+          git fetch --depth 1 origin $run.head_sha
+          if ($LASTEXITCODE) { throw 'Runtime source fetch failed' }
+          $changed = @(git diff --name-only $run.head_sha $env:GITHUB_SHA -- CMakeLists.txt cmake src tools)
+          if ($LASTEXITCODE) { throw 'Runtime source comparison failed' }
+          if (@($changed | Where-Object { $_ -ne 'src/Installer/verify_install.ps1' }).Count) { throw 'Runtime implementation changed; build a new installer instead' }
+          $line = (Get-Content -LiteralPath dist/FingerprintSetup/SHA256SUMS.txt -Raw).Trim()
+          if ($line -notmatch '^([a-f0-9]{64})  install.exe$') { throw 'Invalid installer hash list' }
+          if ((Get-FileHash -LiteralPath dist/FingerprintSetup/install.exe).Hash -ne $Matches[1]) { throw 'Reused installer hash differs' }
+          "RUNTIME_SOURCE_SHA=$($run.head_sha)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Test the installation wizard and installed application
         run: |
           .\src\Installer\verify_install.ps1 -Installer dist\FingerprintSetup\install.exe -Checker build\src\Installer\Release\FingerprintDeploymentCheck.exe -Results build\installer-verification
@@ -81,7 +114,8 @@ jobs:
 
           Windows hosted runner에서 실제 설치·공개 KISA 함수·GUI 시작·복구·제거 검사를 수행했습니다.
           새 개인 PC의 모든 보안 정책·환경을 검증한 것은 아니며, 코드 서명되지 않은 Preview입니다.
-          Source: $env:GITHUB_SHA
+          Source and verification: $env:GITHUB_SHA
+          Runtime build source (when reused): $env:RUNTIME_SOURCE_SHA
           "@ | Set-Content -LiteralPath build\installer-release-notes.md -Encoding UTF8
           gh release create $env:RELEASE_TAG dist/FingerprintSetup/install.exe dist/FingerprintSetup/SHA256SUMS.txt --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease --title 'Fingerprint Evaluator Windows 설치 마법사' --notes-file build/installer-release-notes.md
           if ($LASTEXITCODE) { throw 'Installer release upload failed' }
