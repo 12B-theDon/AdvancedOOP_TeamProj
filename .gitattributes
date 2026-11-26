@@ -16,3 +16,4 @@ data/original/** -text
 # Preserve upstream notice bytes and their recorded SHA-256 across checkouts.
 third_party/libtorch-notices/** -text -whitespace
 third_party/qt-notices/** -text -whitespace
+third_party/installer-notices/** -text -whitespace

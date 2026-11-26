@@ -1,6 +1,8 @@
 # Windows 설치기
 
-`install.exe` 하나로 Windows x64에서 설치를 시작합니다. Qt·LibTorch·Git·CMake·MSVC를 미리 설치할 필요가 없습니다. Windows 기본 64-bit PowerShell 5.1과 초기 다운로드를 위한 인터넷을 사용합니다.
+[install.exe 다운로드 (Windows x64 Preview)](https://github.com/12B-theDon/AdvancedOOP_TeamProj/releases/download/windows-installer-20261126/install.exe)
+
+다운로드한 `install.exe` 하나로 설치를 시작합니다. 사용자에게 수동 Git clone이나 빌드 명령 입력을 요구하지 않습니다. Qt·LibTorch·Git·CMake·MSVC를 미리 설치할 필요가 없습니다. Windows 기본 64-bit PowerShell 5.1과 초기 다운로드를 위한 인터넷을 사용합니다.
 
 실행하면 Git·Git LFS를 확인하고, 적절한 기존 checkout을 찾아 재사용하거나 저장소를 복제합니다. 기존 checkout에서 `git pull`·reset·파일 삭제를 자동 실행하지 않습니다. 이어 `tools/setup_windows.ps1`을 실행해 기존 도구·모델을 확인하고 부족한 항목만 준비한 뒤 Release 빌드·패키징과 GUI 실행을 마칩니다. 정상 모델 4개는 재학습하지 않습니다.
 

@@ -4,7 +4,9 @@ DeepPrint 기반 지문 알고리즘을 학습하고, K-NBTC 규격 DLL의 유�
 
 ## 1. Install
 
-배포받은 **`install.exe`를 더블클릭**하면 저장소·필요 도구·가중치를 준비하고 Release 빌드·패키징 후 GUI를 실행합니다. `install.exe` 하나만 있어도 시작할 수 있고, 기존 checkout과 정상 가중치는 재사용합니다. [설치기·로그 안내](docs/installer.md)
+**[install.exe 다운로드 — Windows x64 Preview](https://github.com/12B-theDon/AdvancedOOP_TeamProj/releases/download/windows-installer-20261126/install.exe)** 후 더블클릭하면 저장소·필요 도구·가중치를 준비하고 Release 빌드·패키징 후 GUI를 실행합니다. `install.exe` 하나만 있어도 시작할 수 있고, 기존 checkout과 정상 가중치는 재사용합니다. [설치기·로그 안내](docs/installer.md)
+
+새 PC에서는 위 EXE만 받으면 됩니다. Git clone과 빌드는 설치기가 자동으로 처리합니다.
 
 소스에서 직접 설치하려면 아래 명령을 사용합니다.
 
