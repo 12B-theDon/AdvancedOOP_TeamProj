@@ -77,27 +77,30 @@ function Verify-Files([string]$Folder) {
         Check ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -eq $expected) "Installed file hash differs: $relative"
     }
 }
-try {
-    $env:Path="$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
-    $env:QT_PLUGIN_PATH=$null; $env:QT_QPA_PLATFORM=$null
-    $installLog=Join-Path $Results 'install.log'
-    $process=Start-Process -FilePath $Installer -ArgumentList @('/SP-','/LANG=korean',('/DIR="'+$target+'"'),('/LOG="'+$installLog+'"'),'/TASKS=desktopicon','/NORESTART') -PassThru
+function Complete-Wizard([string]$Prefix) {
     $wizard=Wait-For { Wizard }
-    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results '01-welcome.png'))
+    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results "$Prefix-welcome.png"))
     for($page=0;$page -lt 6;$page++) {
         $installButton=Button $wizard.Handle '^설치|^Install'
         if($installButton){break}
         $next=Wait-For { Button $wizard.Handle '^다음|^Next' }
         [WizardUI]::Click($next.Handle); Start-Sleep -Milliseconds 400
-        [WizardUI]::Capture($wizard.Handle,(Join-Path $Results ("02-page${page}.png")))
+        [WizardUI]::Capture($wizard.Handle,(Join-Path $Results ("$Prefix-page${page}.png")))
     }
     Check ($null -ne $installButton) 'Install button was not reached'
-    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results '03-ready.png'))
+    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results "$Prefix-ready.png"))
     [WizardUI]::Click($installButton.Handle); Start-Sleep -Milliseconds 750
-    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results '04-progress.png'))
+    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results "$Prefix-progress.png"))
     $finish=Wait-For { Button $wizard.Handle '^마침|^Finish' } 600
-    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results '05-finished.png'))
+    [WizardUI]::Capture($wizard.Handle,(Join-Path $Results "$Prefix-finished.png"))
     [WizardUI]::Click($finish.Handle)
+}
+try {
+    $env:Path="$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
+    $env:QT_PLUGIN_PATH=$null; $env:QT_QPA_PLATFORM=$null
+    $installLog=Join-Path $Results 'install.log'
+    $process=Start-Process -FilePath $Installer -ArgumentList @('/SP-','/LANG=korean',('/DIR="'+$target+'"'),('/LOG="'+$installLog+'"'),'/TASKS=desktopicon','/NORESTART') -PassThru
+    Complete-Wizard '01-install'
     Check ($process.WaitForExit(60000) -and $process.ExitCode -eq 0) 'Interactive installer failed'
     $gui=Wait-For { Get-Process FingerprintGUI -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe') } | Select-Object -First 1 }
     $window=Wait-For { $gui.Refresh(); if($gui.MainWindowHandle -ne [IntPtr]::Zero){$gui.MainWindowHandle} }
@@ -114,7 +117,7 @@ try {
     $env:QT_PLUGIN_PATH=Join-Path $target 'FingerprintEvaluator'
     & $Checker $target (Join-Path $Results 'public-kisa.json')
     Check ($LASTEXITCODE -eq 0) 'Installed public KISA API test failed'
-    $probe=Get-Content -LiteralPath (Join-Path $Results 'public-kisa.json') -Raw | ConvertFrom-Json
+    $probe=Get-Content -LiteralPath (Join-Path $Results 'public-kisa.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     foreach($module in $probe.loaded_modules) {
         if($module -match '\\(Qt6.*|torch.*|c10|libiomp5md)\.dll$') {
             Check ($module.StartsWith($target,[StringComparison]::OrdinalIgnoreCase)) "Runtime escaped installed package: $module"
@@ -124,8 +127,16 @@ try {
     $cached=Join-Path $target 'FingerprintEvaluator\install.exe'
     Check ((Get-FileHash -LiteralPath $cached).Hash -eq (Get-FileHash -LiteralPath $Installer).Hash) 'Repair installer differs'
     Remove-Item -LiteralPath (Join-Path $target 'FingerprintAlgorithm\combined.bin') -Force
-    $repair=Start-Process -FilePath $cached -ArgumentList @('/VERYSILENT','/SP-','/NORESTART',('/DIR="'+$target+'"'),('/LOG="'+(Join-Path $Results 'repair.log')+'"')) -Wait -PassThru
-    Check ($repair.ExitCode -eq 0) 'Cached installer repair failed'
+    # Start the installed GUI with a missing model: it must open the graphical repair wizard.
+    $recoveringGui=Start-Process -FilePath (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe') -PassThru
+    Check ($recoveringGui.WaitForExit(60000) -and $recoveringGui.ExitCode -eq 0) 'GUI did not hand off to the repair wizard'
+    Complete-Wizard '07-repair'
+    Wait-For { -not (Wizard) } | Out-Null
+    $repairedGui=Wait-For { Get-Process FingerprintGUI -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $target 'FingerprintEvaluator\FingerprintGUI.exe') } | Select-Object -First 1 }
+    $repairedWindow=Wait-For { $repairedGui.Refresh(); if($repairedGui.MainWindowHandle -ne [IntPtr]::Zero){$repairedGui.MainWindowHandle} }
+    [WizardUI]::Capture($repairedWindow,(Join-Path $Results '08-repaired-application.png'))
+    $repairedGui.CloseMainWindow() | Out-Null
+    if(-not $repairedGui.WaitForExit(10000)){$repairedGui.Kill()}
     Verify-Files (Join-Path $target 'FingerprintAlgorithm')
     Verify-Files (Join-Path $target 'FingerprintEvaluator')
     Check ((Get-Content -LiteralPath $report -Raw) -eq 'preserve user report') 'Repair changed user data'
@@ -140,7 +151,7 @@ try {
     $saved=@(Get-ChildItem -LiteralPath (Join-Path $env:LOCALAPPDATA 'FingerprintEvaluator\backups') -Filter 'fvc2000_db3.bin' -Recurse | Where-Object { (Get-FileHash -LiteralPath $_.FullName).Hash -eq $changedHash })
     Check ($saved.Count -gt 0) 'Uninstall did not preserve the modified model'
     @{ wizard_pages=$true; korean_space_path=$true; original_examples=240; public_api_databases=3;
-       installed_runtime_only=$true; finish_launch=$true; cached_repair=$true; uninstall_registration=$true;
+       installed_runtime_only=$true; finish_launch=$true; cached_repair=$true; gui_triggered_repair=$true; uninstall_registration=$true;
        user_report_preserved=$true; modified_model_preserved=$true; installer_sha256=(Get-FileHash -LiteralPath $Installer).Hash } |
        ConvertTo-Json | Set-Content -LiteralPath (Join-Path $Results 'result.json') -Encoding UTF8
 } finally {

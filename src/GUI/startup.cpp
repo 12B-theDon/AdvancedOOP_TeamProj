@@ -51,7 +51,7 @@ bool StartPreparation(const StartupPlan& plan, qint64 previousProcess, QString& 
     if (plan.setup_script.isEmpty() && !plan.repair_installer.isEmpty()) {
         QProcess installer;
         installer.setProgram(plan.repair_installer);
-        installer.setArguments({"/DIR=" + QDir(QFileInfo(plan.repair_installer).absolutePath()).absoluteFilePath(".."), "/NORESTART"});
+        installer.setArguments({"/DIR=" + QDir::cleanPath(QDir(QFileInfo(plan.repair_installer).absolutePath()).absoluteFilePath("..")), "/NORESTART"});
         if (installer.startDetached()) return true;
         error = "Could not open the repair installer: " + installer.errorString();
         return false;

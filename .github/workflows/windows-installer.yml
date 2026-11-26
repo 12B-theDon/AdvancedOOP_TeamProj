@@ -38,12 +38,23 @@ jobs:
           (Split-Path -Parent $python.FullName) | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Build Release runtimes and the offline installation wizard
         run: |
+          $ProgressPreference = 'SilentlyContinue'
           .\tools\setup_windows.ps1 -DistributedModelsOnly -BuildInstaller -Jobs 2 -DependenciesPath "$env:RUNNER_TEMP\FingerprintDeps"
           cmake --build build --config Release --target FingerprintDeploymentCheck --parallel 2
           if ($LASTEXITCODE) { throw 'Deployment check build failed' }
       - name: Test the installation wizard and installed application
         run: |
           .\src\Installer\verify_install.ps1 -Installer dist\FingerprintSetup\install.exe -Checker build\src\Installer\Release\FingerprintDeploymentCheck.exe -Results build\installer-verification
+      - name: Retain an unverified build for diagnosing failed checks
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer-unverified-debug
+          path: |
+            dist/FingerprintSetup/
+            build/src/Installer/Release/FingerprintDeploymentCheck.exe
+          compression-level: 0
+          retention-days: 1
       - name: Preserve small verification logs and screenshots
         if: always()
         uses: actions/upload-artifact@v4

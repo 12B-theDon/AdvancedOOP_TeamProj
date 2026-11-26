@@ -33,7 +33,9 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 ## 2. GUI
 
-설치가 완료되면 프로젝트 루트에서 아래 명령을 실행하거나, `dist/FingerprintEvaluator/FingerprintGUI.exe`를 더블클릭합니다.
+설치 마법사를 사용했다면 Start 메뉴 또는 바탕 화면의 **Fingerprint Evaluator**를 실행합니다.
+
+소스에서 빌드했다면 프로젝트 루트에서 아래 명령을 실행하거나, `dist/FingerprintEvaluator/FingerprintGUI.exe`를 더블클릭합니다.
 
 ```powershell
 .\dist\FingerprintEvaluator\FingerprintGUI.exe
@@ -80,7 +82,7 @@ FinalProject/
 └─ CMakeLists.txt    # 빌드 대상·의존성·패키징 명령 정의
 ```
 
-패키징을 마치면 `dist/` 아래에 두 배포 폴더가 생성됩니다. 외부 DLL은 GUI Step 3에서 선택합니다. 이 프로젝트의 알고리즘을 배포할 때는 `dist/FingerprintAlgorithm/` 전체를 함께 배포합니다. DLL·모델을 교체한 뒤에는 GUI를 다시 실행하고 템플릿을 재생성합니다.
+패키징을 마치면 `dist/` 아래에 Algorithm·Evaluator 배포 폴더가 생성되고, 설치기 빌드 시 Setup 폴더가 추가됩니다. 외부 DLL은 GUI Step 3에서 선택합니다. 이 프로젝트의 알고리즘을 배포할 때는 `dist/FingerprintAlgorithm/` 전체를 함께 배포합니다. DLL·모델을 교체한 뒤에는 GUI를 다시 실행하고 템플릿을 재생성합니다.
 
 주요 설정은 각 모듈의 `*Config.h`에 있습니다. `encoderConfig.h`는 전처리·모델 차원, `trainConfig.h`·`augmentConfig.h`는 학습·증강, `evaluationConfig.h`는 학습 검증, `engineConfig.h`·`guiConfig.h`는 평가·화면 기본값을 정의합니다. 파일별 설명은 [소스 안내](src/readme.md)에서 확인할 수 있습니다.
 
@@ -97,7 +99,7 @@ FinalProject/
 | Qt Core | `<QFile>`, `<QSaveFile>`, `<QJsonDocument>`, `<QProcess>`, `<QCryptographicHash>` | 파일·JSON·Process·지문 ID 목록 검사 |
 | LibTorch·ATen | `<torch/torch.h>`, `<torch/script.h>`, `<ATen/core/Tensor.h>` | 학습·inference·Tensor |
 | C++ Standard Library | `<vector>`, `<thread>`, `<future>`, `<mutex>`, `<condition_variable>`, `<random>` | 자료구조·병렬·동기화·sampling |
-| Windows API | `<windows.h>`, `<bcrypt.h>` | DLL·Process·IPC·파일 검사·설치 |
+| Windows API | `<windows.h>`, `<bcrypt.h>` | DLL·Process·IPC·파일 검사 |
 
 SHA-256은 파일 내용을 64자리 16진수 검사값으로 요약하는 방법입니다. 모델 파일이 바뀌었는지, Template이 현재 모델로 만들어졌는지 확인하는 데 사용하며, 파일 검사값은 Windows 기본 기능인 BCrypt로 계산합니다.
 
