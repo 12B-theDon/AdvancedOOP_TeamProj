@@ -1,5 +1,10 @@
 #include "encoder.h"
 #include "encoderConfig.h"
+#include "verified_pairs.h"
+#include <ATen/Version.h>
+#include <ATen/Context.h>
+#include <ATen/Parallel.h>
+#include <torch/version.h>
 #include <torch/script.h>
 #include <torch/utils.h>
 #include <QCryptographicHash>
@@ -76,6 +81,23 @@ bool Probabilities(const torch::Tensor& value, int batch) {
         && (value >= 0).all().item<bool>() && (value <= 1).all().item<bool>()
         && ((value.sum(1) - 1).abs() <= ProbabilityTolerance).all().item<bool>();
 }
+std::string VerificationRuntime() {
+#if defined(_M_X64) && !defined(_DEBUG) && defined(FINGERPRINT_VERIFICATION_IMPLEMENTATION)
+    // These are queried from the loaded runtime, rather than archive metadata.
+    const std::string description = std::string("windows-x64-release-v1;")
+        + std::to_string(_MSC_FULL_VER) + ";" + TORCH_VERSION + ";" + qVersion() + ";"
+        + at::show_config() + ";" + at::get_cpu_capability() + ";"
+        + std::string(FINGERPRINT_VERIFICATION_CONFIGURATION) + ";" + std::to_string(at::get_num_threads()) + ";" + std::to_string(at::get_num_interop_threads())
+        + ";mkldnn=" + std::to_string(at::globalContext().userEnabledMkldnn());
+    std::string assumptions = description;
+    for (const char* variable : {"ATEN_CPU_CAPABILITY", "MKL_CBWR", "MKL_DEBUG_CPU_TYPE", "MKL_ENABLE_INSTRUCTIONS",
+                                 "ONEDNN_MAX_CPU_ISA", "DNNL_MAX_CPU_ISA", "MKL_NUM_THREADS", "OMP_NUM_THREADS"})
+        assumptions += std::string(";") + variable + "=" + qgetenv(variable).toStdString();
+    return QCryptographicHash::hash(QByteArray::fromStdString(assumptions), QCryptographicHash::Sha256).toHex().toStdString();
+#else
+    return {}; // No certification applies to other platforms/builds.
+#endif
+}
 // LibTorch compiles this wrapper directly. No Python exporter at runtime.
 torch::jit::Module RetainClassifier(torch::jit::Module& encoder, const torch::Tensor& weight, double scale) {
     torch::jit::Module result("FingerprintProbabilities");
@@ -106,7 +128,29 @@ torch::jit::Module RetainClassifier(torch::jit::Module& encoder, const torch::Te
     return result;
 }
 
+
 namespace {
+bool ApprovedRecord(const VerifiedPairRecord& record) {
+#ifdef FINGERPRINT_VERIFICATION_IMPLEMENTATION
+    return std::string(record.implementation_sha256) == FINGERPRINT_VERIFICATION_IMPLEMENTATION
+        && !VerificationRuntime().empty() && record.runtime_sha256 == VerificationRuntime();
+#else
+    return false;
+#endif
+}
+bool ApprovedMember(const std::string& hash, const EncoderOptions& options) {
+    if (!options.reuse_verified_pairs || !options.shared_features || options.representative_initialization) return false;
+    for (const VerifiedPairRecord& record : VerifiedPairs)
+        if ((hash == record.first_sha256 || hash == record.second_sha256) && ApprovedRecord(record)) return true;
+    return false;
+}
+bool ApprovedPair(const std::string& first, const std::string& second, const EncoderOptions& options) {
+    if (!options.reuse_verified_pairs || !options.shared_features || options.representative_initialization) return false;
+    for (const VerifiedPairRecord& record : VerifiedPairs)
+        if (((first == record.first_sha256 && second == record.second_sha256)
+            || (second == record.first_sha256 && first == record.second_sha256)) && ApprovedRecord(record)) return true;
+    return false;
+}
 constexpr quint32 TemplateMagic = 0x46505432;
 QJsonArray Labels(const AlgorithmModelInfo& info) {
     QJsonArray labels;
@@ -355,6 +399,7 @@ struct FingerprintEncoder::State {
     struct Model {
         std::string id; torch::jit::Module module; AlgorithmModelInfo info;
         torch::Tensor validation_input, validation_output; EncoderProfile profile;
+        bool validation_deferred = false;
     };
     struct Built { std::unique_ptr<Model> model; std::string error; };
     EncoderOptions options; EncoderProfile profile;
@@ -423,26 +468,39 @@ struct FingerprintEncoder::State {
                 return Reject(result, "Expected 30 unique labels in the recorded label order.");
         }
         module.eval();
+        result->module = std::move(module); result->info = std::move(info);
+        result->validation_deferred = !pretrained && ApprovedMember(result->info.weight_sha256, options);
+        if (!result->validation_deferred) Validate(*result, options, initialization);
+        return {std::move(result), {}};
+        } catch (const std::exception& exception) { return Reject(result, exception.what()); }
+    }
+    static void Validate(Model& model, const EncoderOptions& options, const AlgorithmImage* initialization) {
         torch::NoGradGuard guard;
         const Clock::time_point validationStart = Clock::now();
         torch::Tensor input = torch::zeros({1, 1, InputSize, InputSize});
-        if (options.representative_initialization && initialization) input = PrepareTensor(module, *initialization);
-        torch::Tensor sample = module.forward({input}).toTensor();
-        result->profile.validation_ms = Elapsed(validationStart);
-        result->validation_input = input.clone(); result->validation_output = sample.clone();
-        if (pretrained ? (sample.sizes() != torch::IntArrayRef({1, EmbeddingSize}) || !torch::isfinite(sample).all().item<bool>())
-                       : !Probabilities(sample, 1))
-            return Reject(result, "Invalid model output.");
-        result->module = std::move(module); result->info = std::move(info);
-        return {std::move(result), {}};
-        } catch (const std::exception& exception) { return Reject(result, exception.what()); }
+        if (options.representative_initialization && initialization) input = PrepareTensor(model.module, *initialization);
+        torch::Tensor sample = model.module.forward({input}).toTensor();
+        model.profile.validation_ms += Elapsed(validationStart);
+        model.validation_input = input.clone(); model.validation_output = sample.clone();
+        const bool pretrained = model.id == "pretrained";
+        Require(pretrained ? (sample.sizes() == torch::IntArrayRef({1, EmbeddingSize}) && torch::isfinite(sample).all().item<bool>())
+                           : Probabilities(sample, 1), "Invalid model output.");
+        model.validation_deferred = false;
     }
     bool CanShare(Model& a, Model& b) {
         const std::pair<std::string, std::string> key(a.id, b.id);
         const std::map<std::pair<std::string, std::string>, bool>::iterator found = compatible.find(key);
         if (found != compatible.end()) return found->second;
+        if (ApprovedPair(a.info.weight_sha256, b.info.weight_sha256, options)) {
+            profile.sharing_status = "approved content pair and implementation/runtime";
+            compatible[key] = true;
+            return true;
+        }
         const Clock::time_point start = Clock::now(); bool ok = false;
         try {
+            // A previously approved model may later be paired with an unknown reload.
+            if (a.validation_deferred) Validate(a, options, nullptr);
+            if (b.validation_deferred) Validate(b, options, nullptr);
             torch::NoGradGuard guard;
             ok = a.info.preprocessing == b.info.preprocessing && a.info.output_size == TemplateSize
                 && b.info.output_size == TemplateSize && a.module.find_method("features")
@@ -494,6 +552,24 @@ std::vector<bool> FingerprintEncoder::LoadModels(const std::vector<std::string>&
             state_->profile.hash_ms += result.model->profile.hash_ms;
             state_->profile.validation_ms += result.model->profile.validation_ms;
             state_->models.push_back(std::move(*result.model)); loaded[i] = true;
+        }
+    }
+    // Deferral is allowed only with both actual, leased file digests present.
+    // Single-model and uncertified/mixed pairs retain the original dummy validation.
+    for (std::size_t i = 0; i < ids.size(); ++i) {
+        State::Model* model = state_->Find(ids[i]);
+        if (!model || !model->validation_deferred) continue;
+        bool approved = false;
+        for (const State::Model& other : state_->models)
+            if (other.id != model->id && ApprovedPair(model->info.weight_sha256, other.info.weight_sha256, state_->options)) approved = true;
+        if (approved) continue;
+        try {
+            State::Validate(*model, state_->options, initialization);
+            state_->profile.validation_ms += model->profile.validation_ms;
+        } catch (const std::exception& exception) {
+            errors[i] = exception.what(); loaded[i] = false;
+            for (std::vector<State::Model>::iterator it = state_->models.begin(); it != state_->models.end(); ++it)
+                if (it->id == ids[i]) { state_->models.erase(it); break; }
         }
     }
     return loaded;

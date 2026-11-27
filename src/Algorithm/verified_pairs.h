@@ -1,0 +1,28 @@
+#pragma once
+#include <array>
+namespace algorithm {
+struct VerifiedPairRecord {
+    const char* first_sha256;
+    const char* second_sha256;
+    const char* implementation_sha256;
+    const char* runtime_sha256;
+};
+// Native full structural/frozen-Tensor/exact-output verification, 2026-11-27.
+// Three production pairs, independently verified in two runtime contexts.
+// Evidence: Windows runs 45865578140 and 45872367324 (local docs/verification.md).
+// Any content, implementation or runtime mismatch retains the original checks.
+inline constexpr std::array<VerifiedPairRecord, 6> VerifiedPairs = {{
+    {"1b9aa8ae95bb766f45976ec3720998ba74a0839eaa9ba1fa9d41689ae0487b65", "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12",
+     "dca51d435c1abb111f48750d4ffd34408fc923ab18142ff778972bd0d817c882", "05d15a2130160f0354e9590e80a8e5950a7f970f96cbc16435259fc8afa4db3c"},
+    {"fbd6bcde95221b5b0b36ee2c6419d5d85f98379b3455b3c05bfa3059ab24e9c6", "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12",
+     "dca51d435c1abb111f48750d4ffd34408fc923ab18142ff778972bd0d817c882", "05d15a2130160f0354e9590e80a8e5950a7f970f96cbc16435259fc8afa4db3c"},
+    {"95f3bad4332f477b42d6b6e5667e06566263bc805e03cc84bb1e547f983b2919", "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12",
+     "dca51d435c1abb111f48750d4ffd34408fc923ab18142ff778972bd0d817c882", "05d15a2130160f0354e9590e80a8e5950a7f970f96cbc16435259fc8afa4db3c"},
+    {"1b9aa8ae95bb766f45976ec3720998ba74a0839eaa9ba1fa9d41689ae0487b65", "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12",
+     "dca51d435c1abb111f48750d4ffd34408fc923ab18142ff778972bd0d817c882", "66e21c80a92c9a0ad2f170ef6265b1bf3e1ab46da914f8da988773847718fd6f"},
+    {"fbd6bcde95221b5b0b36ee2c6419d5d85f98379b3455b3c05bfa3059ab24e9c6", "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12",
+     "dca51d435c1abb111f48750d4ffd34408fc923ab18142ff778972bd0d817c882", "66e21c80a92c9a0ad2f170ef6265b1bf3e1ab46da914f8da988773847718fd6f"},
+    {"95f3bad4332f477b42d6b6e5667e06566263bc805e03cc84bb1e547f983b2919", "34d57da787f680fe23a525c5bb1330734a825778a9c9c77d697a6d774370de12",
+     "dca51d435c1abb111f48750d4ffd34408fc923ab18142ff778972bd0d817c882", "66e21c80a92c9a0ad2f170ef6265b1bf3e1ab46da914f8da988773847718fd6f"},
+}};
+}

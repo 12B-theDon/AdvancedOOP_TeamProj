@@ -49,6 +49,20 @@ if(FINGERPRINT_BUILD_ALGORITHM OR FINGERPRINT_BUILD_TRAINING)
     target_include_directories(Algorithm PUBLIC src/Algorithm)
     target_link_libraries(Algorithm PUBLIC ${TORCH_LIBRARIES} Qt${QT_VERSION_MAJOR}::Core PRIVATE bcrypt)
     target_compile_options(Algorithm PUBLIC ${TORCH_FLAGS})
+    # Changing inference/validation code automatically invalidates approved pairs.
+    set(verification_inputs CMakeLists.txt src/Algorithm/encoder.cpp src/Algorithm/encoder.h
+        src/Algorithm/encoderConfig.h src/Algorithm/archive.cpp src/Algorithm/archive.h)
+    set(verification_hashes "")
+    foreach(input IN LISTS verification_inputs)
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/${input}")
+        file(SHA256 "${CMAKE_SOURCE_DIR}/${input}" input_hash)
+        string(APPEND verification_hashes "${input_hash}")
+    endforeach()
+    string(SHA256 verification_digest "${verification_hashes};${CMAKE_CXX_COMPILER_VERSION};${CMAKE_CXX_FLAGS};${CMAKE_CXX_FLAGS_RELEASE};${CMAKE_CXX_FLAGS_RELWITHDEBINFO};${CMAKE_CXX_FLAGS_MINSIZEREL};${TORCH_CXX_FLAGS}")
+    file(WRITE "${CMAKE_BINARY_DIR}/verification_implementation.txt" "${verification_digest}")
+    target_compile_definitions(Algorithm PRIVATE FINGERPRINT_VERIFICATION_IMPLEMENTATION="${verification_digest}"
+        FINGERPRINT_VERIFICATION_CONFIGURATION="$<CONFIG>")
+
 endif()
 if(FINGERPRINT_BUILD_TRAINING)
     add_executable(FingerprintTrain src/Training/train.cpp src/Training/validation.cpp

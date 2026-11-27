@@ -15,6 +15,7 @@ namespace algorithm {
 
 struct EncoderOptions {
     bool shared_features = true;
+    bool reuse_verified_pairs = true; // Internal validation tooling can force the original checks.
     bool overlap_hash = false;
     bool parallel_loading = false;
     bool representative_initialization = false;
@@ -58,6 +59,9 @@ private:
     struct State; // Loaded modules, hidden from Engine and GUI headers.
     std::unique_ptr<State> state_; // Sole owner; destroyed with this encoder.
 };
+
+// Fingerprint of the actual inference runtime; approved records also bind the source implementation.
+std::string VerificationRuntime();
 
 // Archive operations shared by the encoder and trainer. Implemented in encoder.cpp.
 void Require(bool ok, const QString& message);
